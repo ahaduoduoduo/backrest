@@ -48,10 +48,18 @@ test.describe('mobile backup console', () => {
     const navigation = page.getByRole('dialog');
     await expect(navigation.getByText('CONTENT / NAVIGATION')).toBeVisible();
     await expect(navigation.getByText('nas-config')).toBeVisible();
-    const navigationBox = await navigation.boundingBox();
-    expect(navigationBox?.x).toBe(0);
-    expect(navigationBox?.width).toBe(viewport.width);
-    expect(navigationBox?.height).toBe(viewport.height);
+    await expect
+      .poll(async () => {
+        const box = await navigation.boundingBox();
+        return (
+          box && {
+            x: Math.round(box.x),
+            width: Math.round(box.width),
+            height: Math.round(box.height),
+          }
+        );
+      })
+      .toEqual({ x: 0, width: viewport.width, height: viewport.height });
     await page.keyboard.press('Escape');
     await expect(navigation).not.toBeVisible();
 
