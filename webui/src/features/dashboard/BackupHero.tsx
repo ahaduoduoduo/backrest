@@ -54,15 +54,16 @@ export const BackupHero = ({
         bg="radial-gradient(circle at 54% 58%, rgba(111, 76, 255, 0.30), transparent 28%), radial-gradient(circle at 25% 78%, rgba(75, 165, 255, 0.24), transparent 30%)"
         filter="blur(8px)"
       />
-      <Box
-        as="svg"
+      <svg
         viewBox="0 0 1200 430"
         preserveAspectRatio="none"
-        position="absolute"
-        inset="0"
-        width="100%"
-        height="100%"
-        opacity="0.86"
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          opacity: 0.86,
+        }}
       >
         <defs>
           <linearGradient id="hero-line" x1="0" x2="1">
@@ -96,7 +97,7 @@ export const BackupHero = ({
           stroke="url(#hero-line)"
           strokeWidth="1.5"
         />
-      </Box>
+      </svg>
 
       <Flex
         position="relative"
