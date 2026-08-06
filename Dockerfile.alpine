@@ -1,6 +1,6 @@
 FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/ahaduoduoduo/backrest"
-RUN apk --no-cache add tini ca-certificates curl bash openssh tzdata docker-cli
+RUN apk --no-cache add tini ca-certificates curl bash openssh sqlite tzdata docker-cli
 RUN mkdir -p /tmp
 
 ARG TARGETPLATFORM

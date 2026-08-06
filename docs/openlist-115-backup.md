@@ -5,6 +5,8 @@ Updated: 2026-08-06
 The fork image is published by manually running `.github/workflows/custom-image.yml`.
 It builds only `linux/amd64`, bundles Restic inside the container, and publishes
 both `restic-backup-console` and an immutable commit SHA tag.
+The image also includes SQLite so a plan hook can create consistent logical
+copies of live SQLite databases before Restic reads the staging directory.
 
 ## Runtime configuration
 
