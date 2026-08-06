@@ -1,0 +1,80 @@
+name: Custom Docker image
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: custom-docker-image-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release_amd64:
+    name: Release linux/amd64 image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install web dependencies
+        run: pnpm --prefix webui install --frozen-lockfile
+
+      - name: Build web interface
+        run: go generate ./...
+        env:
+          GOOS: linux
+          BACKREST_BUILD_VERSION: 0.0.0-sha-${{ github.sha }}
+
+      - name: Build amd64 binaries
+        shell: bash
+        run: |
+          mkdir -p linux/amd64
+          go build -tags tray \
+            -ldflags "-s -w -X main.version=0.0.0-sha-${GITHUB_SHA::12} -X main.commit=${GITHUB_SHA}" \
+            -o linux/amd64/backrest ./cmd/backrest
+          go build -ldflags "-s -w" \
+            -o linux/amd64/docker-entrypoint ./cmd/docker-entrypoint
+        env:
+          CGO_ENABLED: '0'
+          GOOS: linux
+          GOARCH: amd64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.alpine
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          tags: |
+            ghcr.io/ahaduoduoduo/backrest:restic-backup-console
+            ghcr.io/ahaduoduoduo/backrest:sha-${{ github.sha }}

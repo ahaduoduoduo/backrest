@@ -4,6 +4,8 @@ Updated: 2026-08-06
 
 ## Completed
 
+- [x] 2026-08-06: Add a manual GitHub Actions build that publishes one
+  linux/amd64 Backrest image with bundled Restic and immutable commit tags.
 - [x] 2026-08-06: Fork Backrest under `ahaduoduoduo` and isolate the work on
   `agent/restic-backup-console`.
 - [x] 2026-08-06: Add an authenticated backend proxy for OpenList Restic upload
