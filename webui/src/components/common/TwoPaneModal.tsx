@@ -127,6 +127,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
             width={{ base: "100vw", md: "calc(100vw - 32px)" }}
             height={{ base: "100dvh", md: "86vh" }}
             maxH={{ base: "100dvh", md: "820px" }}
+            my={{ base: 0, md: "auto" }}
             borderRadius={{ base: 0, md: "lg" }}
             bg="#090a0e"
             borderColor="whiteAlpha.100"
