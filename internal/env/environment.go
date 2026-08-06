@@ -18,6 +18,9 @@ var (
 	EnvVarBindAddress                = "BACKREST_PORT"                         // port to bind to (default 9898)
 	EnvVarBinPath                    = "BACKREST_RESTIC_COMMAND"               // path to restic binary (default restic)
 	EnvVarMultihostHeartbeatInterval = "BACKREST_MULTIHOST_HEARTBEAT_INTERVAL" // interval for multihost heartbeat messages
+	EnvVarOpenListURL                = "BACKREST_OPENLIST_URL"                 // OpenList base URL for Restic traffic status
+	EnvVarOpenListUsername           = "BACKREST_OPENLIST_USERNAME"            // OpenList Restic HTTP username
+	EnvVarOpenListPassword           = "BACKREST_OPENLIST_PASSWORD"            // OpenList Restic HTTP password
 )
 
 var flagDataDir = flag.String("data-dir", "", "path to data directory, defaults to XDG_DATA_HOME/.local/backrest. Overrides BACKREST_DATA environment variable.")
@@ -77,6 +80,18 @@ func ResticBinPath() string {
 		return val
 	}
 	return ""
+}
+
+func OpenListURL() string {
+	return strings.TrimRight(os.Getenv(EnvVarOpenListURL), "/")
+}
+
+func OpenListUsername() string {
+	return os.Getenv(EnvVarOpenListUsername)
+}
+
+func OpenListPassword() string {
+	return os.Getenv(EnvVarOpenListPassword)
 }
 
 func MultihostHeartbeatInterval() time.Duration {

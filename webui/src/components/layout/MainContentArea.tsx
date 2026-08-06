@@ -1,4 +1,4 @@
-import { Box, Container } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import {
   BreadcrumbRoot,
   BreadcrumbLink,
@@ -19,8 +19,8 @@ export const MainContentAreaTemplate = ({
   children: React.ReactNode;
 }) => {
   return (
-    <Box px={6} pb={6}>
-      <BreadcrumbRoot my={4}>
+    <Box px={{ base: 4, md: 7, xl: 10 }} pb={10} maxW="1540px" mx="auto">
+      <BreadcrumbRoot my={5} color="fg.muted" fontSize="11px" letterSpacing="0.08em">
         {breadcrumbs.map((b, i) => {
           const isLast = i === breadcrumbs.length - 1;
           if (isLast) {
@@ -41,12 +41,10 @@ export const MainContentAreaTemplate = ({
         })}
       </BreadcrumbRoot>
       <Box
-        p={6}
+        p={0}
         m={0}
         minH={280}
-        bg="bg.panel" // Using semantic token for generic background
-        borderRadius="md"
-        boxShadow="none" // Antd usually has no shadow on content bg, but Chakra Cards do. Keeping simple for now.
+        bg="transparent"
       >
         {children}
       </Box>

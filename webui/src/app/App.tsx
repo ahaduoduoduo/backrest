@@ -86,7 +86,6 @@ import { useSyncStates } from "../state/peerStates";
 import * as m from "../paraglide/messages";
 import { Link } from "../components/ui/link";
 import { EmptyState } from "../components/ui/empty-state";
-import { ColorModeButton } from "../components/ui/color-mode";
 
 const spin = keyframes`
   from { transform: rotate(0deg); }
@@ -619,11 +618,12 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
 
   return (
     <Box
-      minW="300px"
-      maxW="400px"
-      bg="bg.panel"
+      className="console-sidebar"
+      minW="252px"
+      maxW="252px"
+      bg="#090a0e"
       borderRightWidth="1px"
-      borderColor="border"
+      borderColor="whiteAlpha.100"
       h="full"
       overflowY="auto"
       flexShrink={0}
@@ -868,11 +868,12 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
 const Sidebar = () => {
   return (
     <Box
-      minW="300px"
-      maxW="400px"
-      bg="bg.panel"
+      className="console-sidebar"
+      minW="252px"
+      maxW="252px"
+      bg="#090a0e"
       borderRightWidth="1px"
-      borderColor="border"
+      borderColor="whiteAlpha.100"
       h="full"
       overflowY="auto"
       flexShrink={0}
@@ -888,23 +889,27 @@ export const App: React.FC = () => {
   const [config, setConfig] = useConfig();
 
   return (
-    <Flex direction="column" h="100vh">
+    <Flex className="backup-console" direction="column" h="100vh">
       {/* HEADER */}
       <Flex
         as="header"
         align="center"
-        px={4}
-        h="60px"
-        bg="#1b232c" // Maintain original brand color
+        px={{ base: 4, lg: 6 }}
+        h="68px"
+        bg="rgba(7, 8, 11, 0.86)"
+        borderBottom="1px solid"
+        borderColor="whiteAlpha.100"
+        backdropFilter="blur(18px)"
         color="white"
         flexShrink={0}
       >
         <Box display={{ base: "block", lg: "none" }} mr={2}>
           <MobileNavTrigger />
         </Box>
-        <Box as="a" cursor="pointer" onClick={() => navigate("/")} mr={4}>
-          <img src={LogoSvg} style={{ height: "30px", marginBottom: "-4px" }} />
-        </Box>
+        <Flex as="a" cursor="pointer" onClick={() => navigate("/")} mr={6} align="center" gap={3}>
+          <img src={LogoSvg} style={{ height: "25px" }} />
+          <Text className="console-wordmark">BACKREST</Text>
+        </Flex>
 
         <Flex align="baseline" gap={4}>
           <Link
@@ -929,7 +934,6 @@ export const App: React.FC = () => {
           >
             {config && config.instance ? config.instance : undefined}
           </Text>
-          <ColorModeButton color="white" />
           {config && !config.auth?.disabled && (
             <Button
               variant="ghost"
@@ -953,7 +957,7 @@ export const App: React.FC = () => {
         <Sidebar />
 
         {/* CONTENT AREA */}
-        <Box flex="1" overflowY="auto" bg="bg.canvas">
+        <Box className="console-main" flex="1" overflowY="auto" bg="#07080b">
           <AuthenticationBoundary>
             <Suspense
               fallback={

@@ -11,8 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useEffect, useMemo, useState } from "react";
-import { FiCheck, FiDatabase, FiRefreshCw, FiServer } from "react-icons/fi";
-import { LuTriangle, LuX } from "react-icons/lu";
+import { FiDatabase, FiServer } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { toJsonString } from "@bufbuild/protobuf";
 import { ConfigSchema, Multihost } from "../../../gen/ts/v1/config_pb";
@@ -26,6 +25,8 @@ import {
 import { PeerState } from "../../../gen/ts/v1sync/syncservice_pb";
 import { create } from "@bufbuild/protobuf";
 import { backrestService } from "../../api/client";
+import { getOpenListUsage } from "../../api/openlist";
+import type { OpenListUsage } from "../../api/openlist";
 import { getOperations, operationsStream } from "../../api/oplog";
 import { matchSelector } from "../../api/logState";
 import { alerts } from "../../components/common/Alerts";
@@ -43,6 +44,8 @@ import { useConfig } from "../../app/provider";
 import { useSyncStates } from "../../state/peerStates";
 import * as m from "../../paraglide/messages";
 import { HistoryStrip } from "./HistoryStrip";
+import { BackupHero } from "./BackupHero";
+import { GatewayUsageCard } from "./GatewayUsageCard";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -142,14 +145,6 @@ const STATE_COLORS: Record<PlanState, string> = {
   idle: "gray.400",
 };
 
-const STATE_BG: Record<PlanState, string> = {
-  ok: "green.50",
-  warn: "orange.50",
-  err: "red.50",
-  run: "blue.50",
-  idle: "gray.100",
-};
-
 // Worst-wins ordering used to derive the hero state across all plans.
 const STATE_SEVERITY: Record<PlanState, number> = {
   err: 3,
@@ -209,14 +204,6 @@ const ProgressBar = ({ pct }: { pct: number }) => (
 
 // ─── Hero banner ──────────────────────────────────────────────────────────────
 
-const HERO_ICON: Record<PlanState, React.ReactNode> = {
-  ok: <FiCheck strokeWidth={2.4} />,
-  run: <FiRefreshCw strokeWidth={2.4} />,
-  warn: <LuTriangle strokeWidth={2.4} />,
-  err: <LuX strokeWidth={2.4} />,
-  idle: <FiDatabase strokeWidth={2.4} />,
-};
-
 const HERO_TITLE: Record<PlanState, () => string> = {
   ok: m.dashboard_hero_ok,
   run: m.dashboard_hero_run,
@@ -253,52 +240,6 @@ function heroStats(plans: SummaryDashboardResponse_Summary[]): HeroStats {
   if (anyRunning) state = "run";
   return { state, newestMs, nextMs };
 }
-
-const HeroBanner = ({ state, newestMs, nextMs }: HeroStats) => {
-  const nextIn = nextMs ? untilText(nextMs) : null;
-
-  return (
-    <Card.Root borderRadius="2xl" shadow="sm" mb={6}>
-      <Card.Body py={6} px={7}>
-        <Flex align="center" gap={5}>
-          <Flex
-            flexShrink={0}
-            w="60px"
-            h="60px"
-            borderRadius="full"
-            bg={STATE_BG[state]}
-            color={STATE_COLORS[state]}
-            align="center"
-            justify="center"
-            fontSize="2xl"
-          >
-            {HERO_ICON[state]}
-          </Flex>
-          <Box>
-            <Text
-              fontSize="23px"
-              fontWeight="650"
-              letterSpacing="-0.02em"
-              lineHeight={1.2}
-            >
-              {HERO_TITLE[state]()}
-            </Text>
-            <Text fontSize="14.5px" color="fg.muted" mt="3px">
-              {newestMs ? (
-                <Text as="span" fontWeight="semibold" color="fg.default">
-                  {m.dashboard_hero_last_backup({ ago: agoText(newestMs) })}
-                </Text>
-              ) : (
-                m.dashboard_hero_no_backups()
-              )}
-              {nextIn && ` · ${m.dashboard_hero_next({ when: nextIn })}`}
-            </Text>
-          </Box>
-        </Flex>
-      </Card.Body>
-    </Card.Root>
-  );
-};
 
 // ─── Live progress hook ───────────────────────────────────────────────────────
 
@@ -782,6 +723,7 @@ export const SummaryDashboard = () => {
   const navigate = useNavigate();
   const [summaryData, setSummaryData] =
     useState<SummaryDashboardResponse | null>(null);
+  const [openListUsage, setOpenListUsage] = useState<OpenListUsage | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -792,6 +734,7 @@ export const SummaryDashboard = () => {
       } catch (e: unknown) {
         alerts.error(m.dashboard_error_fetch() + e);
       }
+      getOpenListUsage().then(setOpenListUsage).catch(() => setOpenListUsage(null));
     };
 
     fetchData();
@@ -825,14 +768,42 @@ export const SummaryDashboard = () => {
 
   const plans = summaryData.planSummaries;
   const hero = heroStats(plans);
+  const protectedBytes = summaryData.repoSummaries.reduce(
+    (total, summary) => total + Number(summary.protectedBytes),
+    0,
+  );
+  const bytesAdded30Days = plans.reduce(
+    (total, summary) => total + Number(summary.bytesAddedLast30days),
+    0,
+  );
+  const nextBackup = hero.nextMs ? untilText(hero.nextMs) : null;
 
   return (
-    <Stack gap={8} width="full">
-      {/* Multihost summary */}
-      <MultihostSummary multihostConfig={config?.multihost ?? null} />
+    <Stack gap={10} width="full">
+      {plans.length > 0 && (
+        <BackupHero
+          title={HERO_TITLE[hero.state]()}
+          state={hero.state}
+          protectedBytes={protectedBytes}
+          bytesAdded30Days={bytesAdded30Days}
+          planCount={plans.length}
+          lastBackup={
+            hero.newestMs
+              ? m.dashboard_hero_last_backup({ ago: agoText(hero.newestMs) })
+              : m.dashboard_hero_no_backups()
+          }
+          nextBackup={
+            nextBackup ? m.dashboard_hero_next({ when: nextBackup }) : null
+          }
+          protectedLabel={m.dashboard_card_protected()}
+          addedLabel={m.dashboard_repo_added()}
+          plansLabel={m.app_menu_plans()}
+        />
+      )}
 
-      {/* Hero */}
-      {plans.length > 0 && <HeroBanner {...hero} />}
+      <GatewayUsageCard usage={openListUsage} />
+
+      <MultihostSummary multihostConfig={config?.multihost ?? null} />
 
       {/* Plan cards */}
       {plans.length > 0 && (
