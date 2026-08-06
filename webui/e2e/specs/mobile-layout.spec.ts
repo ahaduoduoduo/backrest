@@ -30,7 +30,7 @@ test.describe('mobile backup console', () => {
     ).toBe(true);
 
     await page.getByRole('button', { name: 'Menu' }).click();
-    await page.getByTestId('sidebar-add-plan').click();
+    await page.getByTestId('sidebar-add-plan').filter({ visible: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog.getByText('What is backed up')).toBeVisible();
