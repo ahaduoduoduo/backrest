@@ -32,11 +32,13 @@ export default async function globalSetup() {
  */
 async function buildWebuiDist(): Promise<void> {
   const distIndex = path.join(WEBUI_DIR, 'dist', 'index.html');
+  const distIndexGzip = `${distIndex}.gz`;
+  const hasDistEntry = async () => (await exists(distIndex)) || (await exists(distIndexGzip));
 
   if (process.env.E2E_SKIP_WEBUI_BUILD === '1') {
-    if (!(await exists(distIndex))) {
+    if (!(await hasDistEntry())) {
       throw new Error(
-        'E2E_SKIP_WEBUI_BUILD=1 but webui/dist does not exist; run `pnpm run build` once first',
+        'E2E_SKIP_WEBUI_BUILD=1 but the webui/dist entry point does not exist; run `pnpm run build` once first',
       );
     }
     console.log('[e2e setup] E2E_SKIP_WEBUI_BUILD=1, skipping webui build');
@@ -45,7 +47,7 @@ async function buildWebuiDist(): Promise<void> {
 
   const newestMtimeMs = await newestSourceMtime();
   const marker = await readJson<{ newestMtimeMs: number }>(DIST_MARKER);
-  if (marker?.newestMtimeMs === newestMtimeMs && (await exists(distIndex))) {
+  if (marker?.newestMtimeMs === newestMtimeMs && (await hasDistEntry())) {
     console.log('[e2e setup] webui dist is fresh, skipping build');
     return;
   }

@@ -30,11 +30,11 @@ pnpm run e2e          # headless
 
 ### Env knobs
 
-| Variable                  | Effect                                                 |
-| ------------------------- | ------------------------------------------------------ |
-| `E2E_SKIP_WEBUI_BUILD=1`  | Never rebuild `webui/dist` (it must already exist)     |
-| `E2E_BACKREST_BIN=<path>` | Use this backrest binary instead of running `go build` |
-| `BACKREST_RESTIC_COMMAND` | Use this restic binary instead of provisioning one     |
+| Variable                  | Effect                                                               |
+| ------------------------- | -------------------------------------------------------------------- |
+| `E2E_SKIP_WEBUI_BUILD=1`  | Never rebuild `webui/dist` (its HTML or gzip entry point must exist) |
+| `E2E_BACKREST_BIN=<path>` | Use this backrest binary instead of running `go build`               |
+| `BACKREST_RESTIC_COMMAND` | Use this restic binary instead of provisioning one                   |
 
 ## Writing specs (conventions)
 
