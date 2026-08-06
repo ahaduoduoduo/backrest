@@ -12,9 +12,9 @@ Updated: 2026-08-06
   dark backup console using live Backrest summary and OpenList usage data.
 - [x] 2026-08-06: Document Restic REST repository setup, source groups,
   excludes, live-data snapshots, and portable recovery.
-- [x] 2026-08-06: Keep upstream release automation disabled in the fork and
-  grant the snapshot workflow only the permissions required to build release
-  artifacts on GitHub Actions.
+- [x] 2026-08-06: Keep upstream release and Pages deployment automation
+  disabled in the fork, while granting the snapshot workflow only the
+  permissions required to build release artifacts on GitHub Actions.
 
 ## Planned
 
