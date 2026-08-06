@@ -784,7 +784,9 @@ export const SummaryDashboard = () => {
   const nextBackup = hero.nextMs ? untilText(hero.nextMs) : null;
 
   return (
-    <Stack gap={{ base: 6, md: 10 }} width="full">
+    <Stack gap={{ base: 4, md: 8 }} width="full">
+      <BackupScopeOverview plans={config?.plans ?? []} />
+
       {plans.length > 0 && (
         <BackupHero
           title={HERO_TITLE[hero.state]()}
@@ -807,8 +809,6 @@ export const SummaryDashboard = () => {
       )}
 
       <GatewayUsageCard usage={openListUsage} />
-
-      <BackupScopeOverview plans={config?.plans ?? []} />
 
       <MultihostSummary multihostConfig={config?.multihost ?? null} />
 

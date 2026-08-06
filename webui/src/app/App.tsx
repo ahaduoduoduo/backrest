@@ -894,8 +894,8 @@ export const App: React.FC = () => {
       <Flex
         as="header"
         align="center"
-        px={{ base: 4, lg: 6 }}
-        h="68px"
+        px={{ base: 3, lg: 6 }}
+        h={{ base: "56px", md: "68px" }}
         bg="rgba(7, 8, 11, 0.86)"
         borderBottom="1px solid"
         borderColor="whiteAlpha.100"
@@ -915,7 +915,12 @@ export const App: React.FC = () => {
           gap={{ base: 2, md: 3 }}
         >
           <img src={LogoSvg} style={{ height: "25px" }} />
-          <Text className="console-wordmark">BACKREST</Text>
+          <Text
+            className="console-wordmark"
+            display={{ base: "none", md: "block" }}
+          >
+            BACKREST
+          </Text>
         </Flex>
 
         <Flex
@@ -949,7 +954,7 @@ export const App: React.FC = () => {
           {config && !config.auth?.disabled && (
             <Button
               variant="ghost"
-              size="sm"
+              size={{ base: "xs", md: "sm" }}
               color="white"
               _hover={{ bg: "whiteAlpha.200" }}
               onClick={() => {
