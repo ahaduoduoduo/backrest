@@ -21,12 +21,14 @@ export const MainContentAreaTemplate = ({
   return (
     <Box
       px={{ base: 3, sm: 4, md: 7, xl: 10 }}
+      pt={{ base: 3, md: 0 }}
       pb={{ base: 6, md: 10 }}
       maxW="1540px"
       minW={0}
       mx="auto"
     >
       <BreadcrumbRoot
+        display={{ base: "none", md: "flex" }}
         my={{ base: 3.5, md: 5 }}
         color="fg.muted"
         fontSize="11px"

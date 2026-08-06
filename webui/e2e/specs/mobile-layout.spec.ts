@@ -2,7 +2,7 @@ import { test, expect } from '../harness/fixtures';
 import { backrestClient, seedInstance, seedPlan, seedRepo } from '../harness/seed';
 
 test.describe('mobile backup console', () => {
-  test('shows readable scope cards and a full-width plan editor without horizontal overflow', async ({
+  test('prioritizes backup content and opens a true full-screen editor', async ({
     page,
     backrest,
   }) => {
@@ -22,22 +22,29 @@ test.describe('mobile backup console', () => {
 
     await page.goto(backrest.url);
 
-    await expect(page.getByText('Backup scope')).toBeVisible();
+    const contentCard = page.getByTestId('backup-content-card');
+    await expect(contentCard).toBeVisible();
+    await expect(page.getByText('Backup content')).toBeVisible();
     await expect(page.getByText('Docker services')).toBeVisible();
     await expect(page.getByText('Git history')).toBeVisible();
+    const contentBox = await contentCard.boundingBox();
+    expect(contentBox?.y).toBeLessThan(80);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
 
-    await page.getByRole('button', { name: 'Menu' }).click();
-    await page.getByTestId('sidebar-add-plan').filter({ visible: true }).click();
+    await page.getByTestId('edit-backup-content-nas-config').click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText('What is backed up')).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Content' })).toBeVisible();
+    await dialog.getByRole('button', { name: 'Content' }).click();
+    await expect(dialog.getByText('Backed up')).toBeVisible();
 
     const dialogBox = await dialog.boundingBox();
-    expect(dialogBox?.width).toBeLessThanOrEqual(390);
-    expect(dialogBox?.x).toBeGreaterThanOrEqual(0);
+    expect(dialogBox?.x).toBe(0);
+    expect(dialogBox?.y).toBe(0);
+    expect(dialogBox?.width).toBe(390);
+    expect(dialogBox?.height).toBe(844);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);

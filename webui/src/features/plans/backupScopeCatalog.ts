@@ -146,14 +146,14 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
 export const scopeText = (locale = getLocale()) => {
   const zh = locale.toLowerCase().startsWith("zh");
   return {
-    backupTitle: zh ? "备份什么" : "What is backed up",
+    backupTitle: zh ? "将备份" : "Backed up",
     backupDescription: zh
-      ? "打开的项目会写入新的 Restic 快照。"
-      : "Enabled sources are written to new Restic snapshots.",
-    excludeTitle: zh ? "不备份什么" : "What is excluded",
+      ? "打开需要保存到 115 的内容。"
+      : "Enable the content that should be stored offsite.",
+    excludeTitle: zh ? "将跳过" : "Skipped",
     excludeDescription: zh
-      ? "打开的规则不会上传到 115。"
-      : "Enabled rules are omitted from 115 uploads.",
+      ? "打开无需上传的内容，例如日志、缓存和临时文件。"
+      : "Enable content that does not need to be uploaded, such as logs and caches.",
     enabled: zh ? "已备份" : "Included",
     disabled: zh ? "未备份" : "Not included",
     excluded: zh ? "已排除" : "Excluded",
@@ -165,13 +165,21 @@ export const scopeText = (locale = getLocale()) => {
     advancedDescription: zh
       ? "添加非标准目录或精确规则时使用。"
       : "Use this for custom paths or exact Restic patterns.",
-    overviewTitle: zh ? "备份范围" : "Backup scope",
+    overviewTitle: zh ? "备份内容" : "Backup content",
     overviewDescription: zh
-      ? "这里显示每个计划实际会上传和跳过的内容。"
-      : "The actual included and skipped content for every plan.",
+      ? "每个计划会上传哪些内容、跳过哪些内容。"
+      : "What each plan uploads and skips.",
     editorDescription: zh
-      ? "按内容选择；精确路径保留在高级规则中。"
-      : "Choose by content; exact paths remain available under advanced rules.",
+      ? "选择需要上传的内容和可以跳过的内容。"
+      : "Choose what to upload and what can be skipped.",
+    editPlan: zh ? "编辑内容" : "Edit content",
+    planCount: (count: number) =>
+      zh ? `${count} 个备份计划` : `${count} backup plans`,
+    detailsNav: zh ? "基本信息" : "Details",
+    scopeNav: zh ? "备份内容" : "Content",
+    scheduleNav: zh ? "运行时间" : "Schedule",
+    retentionNav: zh ? "版本保留" : "Retention",
+    advancedNav: zh ? "高级设置" : "Advanced",
     noExcludes: zh ? "没有设置排除项" : "No exclusions configured",
     noSources: zh ? "没有设置备份目录" : "No backup paths configured",
     rules: (enabled: number, total: number) =>

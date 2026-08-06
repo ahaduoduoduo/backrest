@@ -114,14 +114,22 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
       size="xl"
     >
       <Portal>
-        <DialogBackdrop />
-        <DialogPositioner p={{ base: 0, md: 4 }}>
+        <DialogBackdrop bg="rgba(0, 0, 0, 0.82)" />
+        <DialogPositioner
+          position="fixed"
+          inset="0"
+          width="100vw"
+          height="100dvh"
+          p={{ base: 0, md: 4 }}
+        >
           <DialogContent
             maxW={width}
             width={{ base: "100vw", md: "calc(100vw - 32px)" }}
             height={{ base: "100dvh", md: "86vh" }}
             maxH={{ base: "100dvh", md: "820px" }}
             borderRadius={{ base: 0, md: "lg" }}
+            bg="#090a0e"
+            borderColor="whiteAlpha.100"
             p={0}
             overflow="hidden"
             display="flex"
@@ -199,7 +207,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                 py={{ base: 2, md: 3 }}
                 px={2}
                 flexShrink={0}
-                bg="bg.subtle"
+                bg={{ base: "#0d0f14", md: "bg.subtle" }}
                 overflowX={{ base: "auto", md: "hidden" }}
                 overflowY={{ base: "hidden", md: "auto" }}
                 display={{ base: "flex", md: "block" }}
@@ -255,7 +263,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                 minW={0}
                 overflowY="auto"
                 overflowX="hidden"
-                bg="bg.subtle"
+                bg={{ base: "#090a0e", md: "bg.subtle" }}
                 p={{ base: 3, md: 5 }}
               >
                 <TwoPaneContext.Provider value={{ registerRef }}>

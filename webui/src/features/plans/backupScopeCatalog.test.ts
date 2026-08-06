@@ -31,7 +31,8 @@ describe("backupScopeCatalog", () => {
 
   it("provides concise Chinese labels", () => {
     const copy = scopeText("zh");
-    expect(copy.backupTitle).toBe("备份什么");
-    expect(copy.excludeTitle).toBe("不备份什么");
+    expect(copy.overviewTitle).toBe("备份内容");
+    expect(copy.backupTitle).toBe("将备份");
+    expect(copy.excludeTitle).toBe("将跳过");
   });
 });

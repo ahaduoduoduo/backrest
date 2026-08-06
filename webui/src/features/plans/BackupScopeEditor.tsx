@@ -29,10 +29,16 @@ interface BackupScopeEditorProps {
   onIexcludesChange: (iexcludes: string[]) => void;
 }
 
-const PathBadge = ({ children }: { children: ReactNode }) => (
+const PathBadge = ({
+  children,
+  compact = false,
+}: {
+  children: ReactNode;
+  compact?: boolean;
+}) => (
   <Text
     as="code"
-    display="block"
+    display={compact ? { base: "none", md: "block" } : "block"}
     mt={2}
     color="fg.muted"
     fontSize="11px"
@@ -103,7 +109,7 @@ export const BackupScopeEditor = ({
                   label={localizeScopeText(source.title)}
                   hint={localizeScopeText(source.description)}
                 />
-                <PathBadge>{source.path}</PathBadge>
+                <PathBadge compact>{source.path}</PathBadge>
               </Box>
             );
           })}
@@ -165,6 +171,7 @@ export const BackupScopeEditor = ({
                     color={matchCount > 0 ? "purple.300" : "fg.muted"}
                     fontSize="11px"
                     flexShrink={0}
+                    display={{ base: "none", sm: "flex" }}
                   >
                     {matchCount > 0 && <FiCheck />}
                     {checked

@@ -4,6 +4,9 @@ Updated: 2026-08-06
 
 ## Completed
 
+- [x] 2026-08-06: Put backup content first on phone dashboards, add direct plan
+  editing, reduce decorative card height, and make the plan editor cover the
+  complete mobile viewport with localized navigation.
 - [x] 2026-08-06: Add a mobile application shell and full-screen single-column
   configuration dialogs for narrow phone viewports.
 - [x] 2026-08-06: Replace raw Synology source paths and common Restic glob

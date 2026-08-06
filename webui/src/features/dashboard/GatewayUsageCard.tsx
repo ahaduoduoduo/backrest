@@ -11,14 +11,18 @@ export const GatewayUsageCard = ({
   if (!usage) return null;
 
   return (
-    <Card.Root borderRadius="20px">
-      <Card.Body p={{ base: 5, md: 6 }}>
-        <Flex align="center" justify="space-between" mb={{ base: 4, md: 5 }}>
+    <Card.Root borderRadius={{ base: "18px", md: "20px" }}>
+      <Card.Body p={{ base: 4, md: 6 }}>
+        <Flex align="center" justify="space-between" mb={{ base: 3, md: 5 }}>
           <Box>
             <Text fontSize="11px" color="whiteAlpha.500" letterSpacing="0.14em">
               OPENLIST
             </Text>
-            <Text mt={1} fontSize="18px" fontWeight="580">
+            <Text
+              mt={1}
+              fontSize={{ base: "16px", md: "18px" }}
+              fontWeight="580"
+            >
               {m.dashboard_gateway_title()}
             </Text>
           </Box>
@@ -30,7 +34,7 @@ export const GatewayUsageCard = ({
             boxShadow="0 0 18px #72d7b1"
           />
         </Flex>
-        <SimpleGrid columns={{ base: 1, md: 3 }} gap={{ base: 6, md: 8 }}>
+        <SimpleGrid columns={{ base: 2, md: 3 }} gap={{ base: 4, md: 8 }}>
           <UsageMetric
             label={m.dashboard_gateway_today()}
             used={usage.day_bytes}
@@ -41,13 +45,13 @@ export const GatewayUsageCard = ({
             used={usage.month_bytes}
             limit={usage.month_limit}
           />
-          <Box>
+          <Box gridColumn={{ base: "1 / -1", md: "auto" }}>
             <Text color="whiteAlpha.500" fontSize="11px" letterSpacing="0.1em">
               {m.dashboard_gateway_rate()}
             </Text>
             <Text
               mt={2}
-              fontSize="24px"
+              fontSize={{ base: "19px", md: "24px" }}
               fontWeight="450"
               fontVariantNumeric="tabular-nums"
             >
@@ -79,7 +83,7 @@ const UsageMetric = ({
       </Text>
       <Text
         mt={2}
-        fontSize="24px"
+        fontSize={{ base: "19px", md: "24px" }}
         fontWeight="450"
         fontVariantNumeric="tabular-nums"
       >
@@ -103,7 +107,7 @@ const UsageMetric = ({
         <Text
           color="whiteAlpha.400"
           fontSize="10px"
-          minW="72px"
+          minW={{ base: "58px", md: "72px" }}
           textAlign="right"
         >
           {limit > 0 ? formatBytes(limit) : m.dashboard_gateway_unlimited()}

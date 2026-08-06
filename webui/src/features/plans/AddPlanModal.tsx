@@ -260,27 +260,27 @@ export const AddPlanModal = ({
   const sections: SectionDef[] = [
     {
       id: "details",
-      label: m.op_row_details(),
+      label: scopeCopy.detailsNav,
       icon: <FiFileText size={14} />,
     },
     {
       id: "scope",
-      label: m.add_plan_modal_scope(),
+      label: scopeCopy.scopeNav,
       icon: <FiFolder size={14} />,
     },
     {
       id: "schedule",
-      label: m.add_plan_modal_schedule(),
+      label: scopeCopy.scheduleNav,
       icon: <FiClock size={14} />,
     },
     {
       id: "retention",
-      label: m.add_plan_modal_retention(),
+      label: scopeCopy.retentionNav,
       icon: <FiArchive size={14} />,
     },
     {
       id: "advanced",
-      label: m.add_plan_modal_advanced(),
+      label: scopeCopy.advancedNav,
       icon: <FiSliders size={14} />,
     },
   ];
