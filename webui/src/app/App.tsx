@@ -75,6 +75,7 @@ import {
   useLocation,
 } from "react-router";
 import { MainContentAreaTemplate } from "../components/layout/MainContentArea";
+import { MobileNavigation } from "../components/layout/MobileNavigation";
 import { create } from "@bufbuild/protobuf";
 import {
   PeerState,
@@ -893,6 +894,7 @@ export const App: React.FC = () => {
       {/* HEADER */}
       <Flex
         as="header"
+        className="console-header"
         align="center"
         px={{ base: 3, lg: 6 }}
         h={{ base: "56px", md: "68px" }}
@@ -1048,6 +1050,7 @@ const MobileNavTrigger = () => {
   return (
     <DrawerRoot
       placement="start"
+      size="full"
       open={open}
       onOpenChange={(e) => setOpen(e.open)}
     >
@@ -1061,13 +1064,39 @@ const MobileNavTrigger = () => {
           <FiMenu />
         </IconButton>
       </DrawerTrigger>
-      <DrawerContent maxW="min(88vw, 320px)">
-        <DrawerHeader>
-          <DrawerTitle>{m.app_menu()}</DrawerTitle>
-          <DrawerCloseTrigger />
+      <DrawerContent
+        className="console-mobile-nav"
+        maxW="100vw"
+        width="100vw"
+        height="100dvh"
+        bg="#07080b"
+      >
+        <DrawerHeader
+          px={5}
+          pt="max(20px, env(safe-area-inset-top))"
+          pb={3}
+          borderBottomWidth="1px"
+          borderColor="whiteAlpha.100"
+        >
+          <DrawerTitle>
+            <Flex align="center" gap={3}>
+              <img src={LogoSvg} style={{ height: "24px" }} />
+              <Text
+                fontSize="10px"
+                color="whiteAlpha.500"
+                letterSpacing="0.18em"
+              >
+                115 OFFSITE
+              </Text>
+            </Flex>
+          </DrawerTitle>
+          <DrawerCloseTrigger
+            top="max(18px, env(safe-area-inset-top))"
+            right={4}
+          />
         </DrawerHeader>
-        <DrawerBody p={0}>
-          <SidebarContent onClose={() => setOpen(false)} />
+        <DrawerBody p={0} overflowY="auto">
+          <MobileNavigation onClose={() => setOpen(false)} />
         </DrawerBody>
       </DrawerContent>
     </DrawerRoot>

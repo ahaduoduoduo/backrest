@@ -40,10 +40,10 @@ export const BackupHero = ({
   return (
     <Box
       position="relative"
-      minH={{ base: "204px", md: "300px", lg: "360px" }}
+      minH={{ base: "320px", md: "390px", lg: "430px" }}
       border="1px solid"
       borderColor="whiteAlpha.100"
-      borderRadius={{ base: "20px", lg: "28px" }}
+      borderRadius={{ base: "24px", lg: "30px" }}
       bg="#090a0e"
       overflow="hidden"
       isolation="isolate"
@@ -54,11 +54,7 @@ export const BackupHero = ({
         bg="radial-gradient(circle at 54% 58%, rgba(111, 76, 255, 0.30), transparent 28%), radial-gradient(circle at 25% 78%, rgba(75, 165, 255, 0.24), transparent 30%)"
         filter="blur(8px)"
       />
-      <Box
-        position="absolute"
-        inset="0"
-        display={{ base: "none", md: "block" }}
-      >
+      <Box position="absolute" inset="0" display="block">
         <svg
           viewBox="0 0 1200 430"
           preserveAspectRatio="none"
@@ -108,10 +104,9 @@ export const BackupHero = ({
         zIndex={1}
         minH="inherit"
         direction="column"
-        justify="space-between"
-        p={{ base: 4, md: 7, lg: 8 }}
+        p={0}
       >
-        <Box>
+        <Box p={{ base: 5, md: 8, lg: 9 }}>
           <Flex align="center" gap={2.5} mb={{ base: 3, md: 5 }}>
             <motion.div
               animate={state === "run" ? { opacity: [1, 0.35, 1] } : {}}
@@ -143,13 +138,13 @@ export const BackupHero = ({
           </Text>
           <Text
             mt={1}
-            fontSize={{ base: "36px", md: "62px", xl: "72px" }}
-            fontWeight="400"
+            fontSize={{ base: "62px", md: "88px", xl: "106px" }}
+            fontWeight="300"
             lineHeight="0.98"
             letterSpacing="-0.065em"
             fontVariantNumeric="tabular-nums"
           >
-            {protectedBytes > 0 ? formatBytes(protectedBytes) : "—"}
+            {protectedBytes > 0 ? formatBytes(protectedBytes) : "0 B"}
           </Text>
           <Text
             mt={{ base: 2, md: 4 }}
@@ -162,12 +157,32 @@ export const BackupHero = ({
           </Text>
         </Box>
 
-        <Flex gap={{ base: 6, md: 12 }} mt={{ base: 4, md: 8 }} flexWrap="wrap">
-          <Metric label={plansLabel} value={String(planCount)} />
-          <Metric
-            label={addedLabel}
-            value={bytesAdded30Days > 0 ? formatBytes(bytesAdded30Days) : "0 B"}
-          />
+        <Flex
+          mt="auto"
+          borderTopWidth="1px"
+          borderColor="whiteAlpha.100"
+          bg="rgba(7, 8, 11, 0.52)"
+          backdropFilter="blur(12px)"
+        >
+          <Box flex={1} p={{ base: 4, md: 5 }}>
+            <Metric
+              label={plansLabel}
+              value={String(planCount).padStart(2, "0")}
+            />
+          </Box>
+          <Box
+            flex={1}
+            p={{ base: 4, md: 5 }}
+            borderLeftWidth="1px"
+            borderColor="whiteAlpha.100"
+          >
+            <Metric
+              label={addedLabel}
+              value={
+                bytesAdded30Days > 0 ? formatBytes(bytesAdded30Days) : "0 B"
+              }
+            />
+          </Box>
         </Flex>
       </Flex>
     </Box>
@@ -186,8 +201,8 @@ const Metric = ({ label, value }: { label: string; value: string }) => (
     </Text>
     <Text
       mt={1}
-      fontSize="18px"
-      fontWeight="520"
+      fontSize={{ base: "17px", md: "20px" }}
+      fontWeight="450"
       fontVariantNumeric="tabular-nums"
     >
       {value}

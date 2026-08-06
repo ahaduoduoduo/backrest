@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  Flex,
-  SimpleGrid,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { FiCheck, FiEdit2, FiMinusCircle } from "react-icons/fi";
 import type { Plan } from "../../../gen/ts/v1/config_pb";
 import { useShowModal } from "../../components/common/ModalManager";
@@ -27,23 +19,11 @@ const ScopeRow = ({
   title: string;
   excluded?: boolean;
 }) => (
-  <Flex
-    align="center"
-    gap={2}
-    minW={0}
-    px={2.5}
-    py={2}
-    borderRadius="lg"
-    bg={excluded ? "rgba(139, 108, 255, 0.09)" : "rgba(97, 184, 255, 0.09)"}
-    borderWidth="1px"
-    borderColor={
-      excluded ? "rgba(139, 108, 255, 0.18)" : "rgba(97, 184, 255, 0.18)"
-    }
-  >
+  <Flex align="center" gap={2} minW={0} py={1.5}>
     <Box color={excluded ? "purple.300" : "blue.300"} flexShrink={0}>
       {excluded ? <FiMinusCircle /> : <FiCheck />}
     </Box>
-    <Text fontSize="12px" fontWeight="medium" lineHeight="1.35">
+    <Text fontSize="12px" fontWeight="450" lineHeight="1.35">
       {title}
     </Text>
   </Flex>
@@ -61,41 +41,73 @@ export const BackupScopeOverview = ({ plans }: { plans: Plan[] }) => {
   };
 
   return (
-    <Card.Root
-      borderRadius={{ base: "18px", md: "20px" }}
+    <Box
+      position="relative"
+      overflow="hidden"
+      borderRadius={{ base: "24px", md: "30px" }}
+      borderWidth="1px"
+      borderColor="whiteAlpha.100"
+      bg="#0a0b0f"
       data-testid="backup-content-card"
     >
-      <Card.Body p={{ base: 4, md: 6 }}>
+      <Box
+        position="absolute"
+        top="-45%"
+        right="-12%"
+        width={{ base: "320px", md: "560px" }}
+        height={{ base: "320px", md: "560px" }}
+        borderRadius="full"
+        bg="radial-gradient(circle, rgba(75, 126, 255, 0.16), rgba(95, 72, 255, 0.07) 38%, transparent 68%)"
+        filter="blur(4px)"
+        pointerEvents="none"
+      />
+      <Box position="relative" p={{ base: 5, md: 8 }}>
         <Flex
-          align="flex-start"
+          align="flex-end"
           justify="space-between"
           gap={4}
-          mb={{ base: 4, md: 5 }}
+          pb={{ base: 5, md: 7 }}
         >
           <Box>
-            <Text fontSize={{ base: "19px", md: "22px" }} fontWeight="580">
+            <Text
+              color="blue.300"
+              fontSize="10px"
+              fontFamily="mono"
+              letterSpacing="0.16em"
+            >
+              CONTENT / OFFSITE
+            </Text>
+            <Text
+              mt={2}
+              fontSize={{ base: "36px", md: "52px" }}
+              fontWeight="400"
+              lineHeight="1"
+              letterSpacing="-0.055em"
+            >
               {copy.overviewTitle}
             </Text>
-            <Text mt={1} fontSize="12px" color="fg.muted">
+            <Text mt={2} fontSize="12px" color="fg.muted">
               {copy.overviewDescription}
             </Text>
           </Box>
-          <Text
-            fontSize="11px"
-            color="fg.muted"
-            borderWidth="1px"
-            borderColor="border"
-            borderRadius="full"
-            px={2.5}
-            py={1}
-            flexShrink={0}
-          >
-            {copy.planCount(plans.length)}
-          </Text>
+          <Box textAlign="right" flexShrink={0}>
+            <Text
+              fontSize={{ base: "42px", md: "58px" }}
+              fontWeight="300"
+              lineHeight="0.85"
+              letterSpacing="-0.06em"
+              fontVariantNumeric="tabular-nums"
+            >
+              {String(plans.length).padStart(2, "0")}
+            </Text>
+            <Text mt={2} fontSize="9px" color="fg.muted" letterSpacing="0.12em">
+              PLANS
+            </Text>
+          </Box>
         </Flex>
 
-        <Stack gap={4}>
-          {plans.map((plan) => {
+        <Stack gap={0} borderTopWidth="1px" borderColor="whiteAlpha.150">
+          {plans.map((plan, planIndex) => {
             const sources = getKnownSources(plan.paths);
             const customPaths = getCustomPaths(plan.paths);
             const activePresets = EXCLUDE_PRESETS.filter(
@@ -109,30 +121,42 @@ export const BackupScopeOverview = ({ plans }: { plans: Plan[] }) => {
             return (
               <Box
                 key={plan.id}
-                borderWidth="1px"
-                borderColor="border"
-                borderRadius="xl"
-                overflow="hidden"
+                py={{ base: 5, md: 6 }}
+                borderBottomWidth="1px"
+                borderColor="whiteAlpha.150"
               >
                 <Flex
-                  px={{ base: 3.5, md: 4 }}
-                  py={3}
-                  bg="bg.subtle"
                   align="center"
                   justify="space-between"
                   gap={3}
+                  mb={{ base: 4, md: 5 }}
                 >
-                  <Box minW={0}>
-                    <Text fontSize="14px" fontWeight="semibold" truncate>
-                      {plan.id}
+                  <Flex align="center" gap={3} minW={0}>
+                    <Text
+                      color="whiteAlpha.350"
+                      fontSize="10px"
+                      fontFamily="mono"
+                      flexShrink={0}
+                    >
+                      {String(planIndex + 1).padStart(2, "0")}
                     </Text>
-                    <Text fontSize="10px" color="fg.muted" truncate>
-                      {plan.repo}
-                    </Text>
-                  </Box>
+                    <Box minW={0}>
+                      <Text
+                        fontSize={{ base: "18px", md: "20px" }}
+                        fontWeight="500"
+                        letterSpacing="-0.025em"
+                        truncate
+                      >
+                        {plan.id}
+                      </Text>
+                      <Text fontSize="10px" color="fg.muted" truncate>
+                        {plan.repo}
+                      </Text>
+                    </Box>
+                  </Flex>
                   <Button
                     size="xs"
-                    variant="outline"
+                    variant="ghost"
                     flexShrink={0}
                     onClick={() => editPlan(plan)}
                     data-testid={`edit-backup-content-${plan.id}`}
@@ -140,12 +164,14 @@ export const BackupScopeOverview = ({ plans }: { plans: Plan[] }) => {
                     <FiEdit2 /> {copy.editPlan}
                   </Button>
                 </Flex>
-                <SimpleGrid columns={{ base: 1, md: 2 }}>
+                <SimpleGrid
+                  columns={{ base: 1, md: 2 }}
+                  gap={{ base: 5, md: 8 }}
+                >
                   <Box
-                    p={{ base: 3.5, md: 4 }}
-                    borderRightWidth={{ base: "0", md: "1px" }}
-                    borderBottomWidth={{ base: "1px", md: "0" }}
-                    borderColor="border"
+                    pl={{ base: 0, md: 8 }}
+                    borderLeftWidth={{ base: "0", md: "1px" }}
+                    borderColor="whiteAlpha.100"
                   >
                     <Text
                       fontSize="11px"
@@ -155,10 +181,7 @@ export const BackupScopeOverview = ({ plans }: { plans: Plan[] }) => {
                     >
                       {copy.backupTitle}
                     </Text>
-                    <SimpleGrid
-                      columns={{ base: 2, sm: 3, md: 2, xl: 3 }}
-                      gap={2}
-                    >
+                    <SimpleGrid columns={{ base: 2, sm: 3 }} columnGap={4}>
                       {sources.map((source) => (
                         <ScopeRow
                           key={source.id}
@@ -175,7 +198,11 @@ export const BackupScopeOverview = ({ plans }: { plans: Plan[] }) => {
                       )}
                     </SimpleGrid>
                   </Box>
-                  <Box p={{ base: 3.5, md: 4 }}>
+                  <Box
+                    pl={{ base: 0, md: 8 }}
+                    borderLeftWidth={{ base: "0", md: "1px" }}
+                    borderColor="whiteAlpha.100"
+                  >
                     <Text
                       fontSize="11px"
                       color="purple.300"
@@ -184,10 +211,7 @@ export const BackupScopeOverview = ({ plans }: { plans: Plan[] }) => {
                     >
                       {copy.excludeTitle}
                     </Text>
-                    <SimpleGrid
-                      columns={{ base: 2, sm: 3, md: 2, xl: 3 }}
-                      gap={2}
-                    >
+                    <SimpleGrid columns={{ base: 2, sm: 3 }} columnGap={4}>
                       {activePresets.map((preset) => {
                         return (
                           <ScopeRow
@@ -217,7 +241,7 @@ export const BackupScopeOverview = ({ plans }: { plans: Plan[] }) => {
             );
           })}
         </Stack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 };

@@ -79,6 +79,14 @@ body::before
   .backup-console
     min-width: 0
 
+  .console-header
+    min-height: calc(56px + env(safe-area-inset-top))
+    padding-top: env(safe-area-inset-top)
+
+  .console-mobile-nav
+    border-radius: 0 !important
+    box-shadow: none !important
+
   .backup-console [data-scope="dialog"][data-part="content"]
     max-width: 100vw
 

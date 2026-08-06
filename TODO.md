@@ -4,6 +4,10 @@ Updated: 2026-08-06
 
 ## Completed
 
+- [x] 2026-08-06: Add the missing mobile viewport declaration and replace the
+  scaled desktop drawer with a full-screen numbered navigation index; rebuild
+  dashboard hierarchy around editorial content, large metrics, and divided
+  statistic strips derived from the supplied visual references.
 - [x] 2026-08-06: Put backup content first on phone dashboards, add direct plan
   editing, reduce decorative card height, and make the plan editor cover the
   complete mobile viewport with localized navigation.

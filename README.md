@@ -34,12 +34,13 @@ credentials are never sent to the browser. Source selection, excludes,
 snapshot browsing, historical versions, single-file restore, retention, check,
 and prune continue to use Backrest's existing plan and repository model.
 
-The dashboard starts with every plan's **Backed up / Skipped** content and a
-direct edit action. The plan editor maps Synology mounts and standard Restic
-exclude patterns to named switches, while retaining exact paths and glob rules
-under an advanced section. At a 390 px viewport the editor occupies the full
-screen, uses localized section tabs, and keeps technical paths out of the
-primary controls.
+The dashboard uses an editorial content index for every plan's **Backed up /
+Skipped** content, a large protected-size visual, and a divided OpenList metric
+strip. The mobile navigation is a full-screen numbered contents page rather
+than a reduced desktop accordion. The plan editor maps Synology mounts and
+standard Restic exclude patterns to named switches while retaining exact paths
+and glob rules under an advanced section. Real mobile browser rendering is
+covered through an iPhone device context and an explicit viewport declaration.
 
 See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
 recovery configuration.
