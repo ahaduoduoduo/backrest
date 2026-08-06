@@ -43,6 +43,7 @@ async function createPlanWithCommandHookViaUI(
   await expect(dialog.getByTestId('add-plan-repo-select')).toContainText(opts.repo);
 
   // Backup path.
+  await dialog.getByTestId('backup-scope-advanced-trigger').click();
   await dialog.getByTestId('add-plan-path-add').click();
   const pathInput = dialog.getByTestId('add-plan-path-input').last();
   await pathInput.fill(opts.dataPath);

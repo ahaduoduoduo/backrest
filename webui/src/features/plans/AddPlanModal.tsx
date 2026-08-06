@@ -58,6 +58,8 @@ import {
   type SectionDef,
 } from "../../components/common/TwoPaneModal";
 import { SectionCard } from "../../components/common/SectionCard";
+import { BackupScopeEditor } from "./BackupScopeEditor";
+import { scopeText } from "./backupScopeCatalog";
 
 // Default Plan
 const planDefaults = create(PlanSchema, {
@@ -104,6 +106,7 @@ export const AddPlanModal = ({
     !!selectedRepo?.forgetPolicy?.schedule &&
     selectedRepo.forgetPolicy.schedule.schedule.case !== undefined &&
     selectedRepo.forgetPolicy.schedule.schedule.case !== "disabled";
+  const scopeCopy = scopeText();
 
   useEffect(() => {
     setFormData(
@@ -194,7 +197,9 @@ export const AddPlanModal = ({
         !(formData.retention.policyTimeBucketed.keepLastN > 1)
       ) {
         throw new Error(
-          m.add_plan_modal_your_schedule_runs_more_than_once_per_hour_please_specify_a({ count: 1 }),
+          m.add_plan_modal_your_schedule_runs_more_than_once_per_hour_please_specify_a(
+            { count: 1 },
+          ),
         );
       }
 
@@ -223,7 +228,8 @@ export const AddPlanModal = ({
 
       if (template) {
         const idx = configCopy.plans.findIndex((r) => r.id === template.id);
-        if (idx === -1) throw new Error(m.add_plan_modal_failed_to_update_plan_not_found());
+        if (idx === -1)
+          throw new Error(m.add_plan_modal_failed_to_update_plan_not_found());
         configCopy.plans[idx] = plan;
       } else {
         configCopy.plans.push(plan);
@@ -232,9 +238,7 @@ export const AddPlanModal = ({
       setConfig(await backrestService.setConfig(configCopy));
       showModal(null);
     } catch (e: any) {
-      alerts.error(
-        formatErrorAlert(e, m.settings_error_operation()),
-      );
+      alerts.error(formatErrorAlert(e, m.settings_error_operation()));
     } finally {
       setConfirmLoading(false);
     }
@@ -254,15 +258,35 @@ export const AddPlanModal = ({
   });
 
   const sections: SectionDef[] = [
-    { id: "details", label: m.op_row_details(), icon: <FiFileText size={14} /> },
-    { id: "scope", label: m.add_plan_modal_scope(), icon: <FiFolder size={14} /> },
-    { id: "schedule", label: m.add_plan_modal_schedule(), icon: <FiClock size={14} /> },
-    { id: "retention", label: m.add_plan_modal_retention(), icon: <FiArchive size={14} /> },
-    { id: "advanced", label: m.add_plan_modal_advanced(), icon: <FiSliders size={14} /> },
+    {
+      id: "details",
+      label: m.op_row_details(),
+      icon: <FiFileText size={14} />,
+    },
+    {
+      id: "scope",
+      label: m.add_plan_modal_scope(),
+      icon: <FiFolder size={14} />,
+    },
+    {
+      id: "schedule",
+      label: m.add_plan_modal_schedule(),
+      icon: <FiClock size={14} />,
+    },
+    {
+      id: "retention",
+      label: m.add_plan_modal_retention(),
+      icon: <FiArchive size={14} />,
+    },
+    {
+      id: "advanced",
+      label: m.add_plan_modal_advanced(),
+      icon: <FiSliders size={14} />,
+    },
   ];
 
   const footer = (
-    <Flex gap={2} justify="flex-end" width="full">
+    <Flex gap={2} justify="flex-end" width="full" wrap="wrap">
       <Button
         variant="outline"
         disabled={confirmLoading}
@@ -293,11 +317,7 @@ export const AddPlanModal = ({
     <TwoPaneModal
       isOpen={true}
       onClose={() => showModal(null)}
-      title={
-        template
-          ? m.add_plan_modal_title_update()
-          : m.app_menu_add_plan()
-      }
+      title={template ? m.add_plan_modal_title_update() : m.app_menu_add_plan()}
       headerIcon={<FiFileText size={14} />}
       sections={sections}
       footer={footer}
@@ -408,61 +428,17 @@ export const AddPlanModal = ({
       <TwoPaneSection id="scope">
         <SectionCard
           icon={<FiFolder size={16} />}
-          title={m.settings_peer_permission_scopes()}
-          description={m.add_plan_modal_directories_and_exclusion_patterns()}
+          title={scopeCopy.overviewTitle}
+          description={scopeCopy.editorDescription}
         >
-          <Stack gap={4}>
-            <DynamicList
-              label={m.add_plan_modal_field_paths()}
-              tooltip={m.add_plan_modal_field_paths_tooltip()}
-              items={getField(["paths"]) || []}
-              onUpdate={(items: string[]) => updateField(["paths"], items)}
-              required
-              autocompleteType="uri"
-              placeholder={m.add_plan_modal_field_paths()}
-              testId="add-plan-path"
-            />
-
-            <DynamicList
-              label={m.add_plan_modal_field_excludes()}
-              items={getField(["excludes"]) || []}
-              onUpdate={(items: string[]) => updateField(["excludes"], items)}
-              tooltip={
-                <>
-                  {m.add_plan_modal_field_excludes_tooltip_prefix()}{" "}
-                  <a
-                    href="https://restic.readthedocs.io/en/latest/040_backup.html#excluding-files"
-                    target="_blank"
-                    style={{ textDecoration: "underline" }}
-                  >
-                    {m.add_plan_modal_field_excludes_tooltip_link()}
-                  </a>{" "}
-                  {m.add_repo_modal_field_uri_tooltip_info()}
-                </>
-              }
-              placeholder={m.add_plan_modal_field_excludes()}
-            />
-
-            <DynamicList
-              label={m.add_plan_modal_field_iexcludes()}
-              items={getField(["iexcludes"]) || []}
-              onUpdate={(items: string[]) => updateField(["iexcludes"], items)}
-              tooltip={
-                <>
-                  {m.add_plan_modal_field_iexcludes_tooltip_prefix()}{" "}
-                  <a
-                    href="https://restic.readthedocs.io/en/latest/040_backup.html#excluding-files"
-                    target="_blank"
-                    style={{ textDecoration: "underline" }}
-                  >
-                    {m.add_plan_modal_field_excludes_tooltip_link()}
-                  </a>{" "}
-                  {m.add_repo_modal_field_uri_tooltip_info()}
-                </>
-              }
-              placeholder={m.add_plan_modal_field_iexcludes()}
-            />
-          </Stack>
+          <BackupScopeEditor
+            paths={getField(["paths"]) || []}
+            excludes={getField(["excludes"]) || []}
+            iexcludes={getField(["iexcludes"]) || []}
+            onPathsChange={(items) => updateField(["paths"], items)}
+            onExcludesChange={(items) => updateField(["excludes"], items)}
+            onIexcludesChange={(items) => updateField(["iexcludes"], items)}
+          />
         </SectionCard>
       </TwoPaneSection>
 

@@ -12,6 +12,7 @@ import { alerts } from "../../components/common/Alerts";
 import { useShowModal } from "../../components/common/ModalManager";
 import { StringListSchema } from "../../../gen/ts/types/value_pb";
 import type { Config, Plan } from "../../../gen/ts/v1/config_pb";
+import { scopeText } from "./backupScopeCatalog";
 
 // --- Harness -----------------------------------------------------------------
 // AddPlanModal closes itself by calling showModal(null). Rendering it through the
@@ -74,7 +75,8 @@ const selectRepo = async (user: ReturnType<typeof newUser>, repoId = "r1") => {
 };
 
 const addPath = async (user: ReturnType<typeof newUser>, path: string) => {
-  // The first "Add" button belongs to the (first) paths DynamicList.
+  await user.click(screen.getByTestId("backup-scope-advanced-trigger"));
+  // The first "Add" button belongs to the paths DynamicList in advanced rules.
   const addButtons = screen.getAllByRole("button", {
     name: m.add_plan_modal_field_add(),
   });
@@ -119,9 +121,7 @@ describe("AddPlanModal", () => {
     const config = configWithRepo();
     renderModal({ config });
 
-    expect(
-      await screen.findByText(m.app_menu_add_plan()),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(m.app_menu_add_plan())).toBeInTheDocument();
     // Plan name input (placeholder derives from existing plan count).
     expect(screen.getByPlaceholderText("plan1")).toBeInTheDocument();
     // Repo select shows its placeholder before a choice is made.
@@ -132,10 +132,38 @@ describe("AddPlanModal", () => {
     expect(
       screen.getByText(m.add_plan_modal_field_paths()),
     ).toBeInTheDocument();
+    expect(screen.getByText(scopeText("en").backupTitle)).toBeInTheDocument();
     // Submit button.
     expect(
       screen.getByRole("button", { name: m.add_plan_modal_button_submit() }),
     ).toBeInTheDocument();
+  });
+
+  it("saves named backup sources and exclusion presets without editing glob rules", async () => {
+    const config = configWithRepo();
+    vi.mocked(backrestService.setConfig).mockImplementation(
+      async (c: any) => c,
+    );
+    renderModal({ config });
+    const user = newUser();
+
+    await screen.findByText(m.app_menu_add_plan());
+    await typeName(user, config, "guided-plan");
+    await selectRepo(user, "r1");
+    await user.click(screen.getByTestId("backup-source-docker"));
+    await user.click(screen.getByTestId("exclude-preset-git-history"));
+    await submit(user);
+
+    await waitFor(() =>
+      expect(backrestService.setConfig).toHaveBeenCalledTimes(1),
+    );
+    const savedConfig = vi.mocked(backrestService.setConfig).mock
+      .calls[0][0] as Config;
+    const savedPlan = savedConfig.plans.find(
+      (plan) => plan.id === "guided-plan",
+    );
+    expect(savedPlan?.paths).toContain("/source/docker");
+    expect(savedPlan?.excludes).toContain("**/.git/**");
   });
 
   it("lets the user pick a repository from the (portalled) select", async () => {
@@ -172,9 +200,7 @@ describe("AddPlanModal", () => {
 
     await waitFor(() => expect(errorSpy).toHaveBeenCalled());
     const [content] = errorSpy.mock.calls[errorSpy.mock.calls.length - 1];
-    expect(String(content)).toContain(
-      m.settings_auth_name_pattern(),
-    );
+    expect(String(content)).toContain(m.settings_auth_name_pattern());
     expect(backrestService.setConfig).not.toHaveBeenCalled();
     expect(setConfig).not.toHaveBeenCalled();
   });
@@ -249,9 +275,7 @@ describe("AddPlanModal", () => {
     expect(setConfig).toHaveBeenCalledWith(savedConfig);
     // Modal closes on success.
     await waitFor(() =>
-      expect(
-        screen.queryByText(m.app_menu_add_plan()),
-      ).not.toBeInTheDocument(),
+      expect(screen.queryByText(m.app_menu_add_plan())).not.toBeInTheDocument(),
     );
   });
 
@@ -305,9 +329,7 @@ describe("AddPlanModal", () => {
     expect(backrestService.setConfig).not.toHaveBeenCalled();
     // Modal still closes after the override resolves.
     await waitFor(() =>
-      expect(
-        screen.queryByText(m.app_menu_add_plan()),
-      ).not.toBeInTheDocument(),
+      expect(screen.queryByText(m.app_menu_add_plan())).not.toBeInTheDocument(),
     );
   });
 

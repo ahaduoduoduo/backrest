@@ -46,6 +46,7 @@ test.describe('add plan and run first backup (CUJ3)', () => {
     // Backup path: the paths list starts empty (plan defaults carry no paths),
     // so add a row first, then fill its input. The input is a URI-autocomplete
     // combobox; filling it updates the plan and pops an autocomplete list.
+    await dialog.getByTestId('backup-scope-advanced-trigger').click();
     await dialog.getByTestId('add-plan-path-add').click();
     const pathInput = dialog.getByTestId('add-plan-path-input').last();
     await pathInput.fill(dataPath);

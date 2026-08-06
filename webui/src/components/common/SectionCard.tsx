@@ -33,8 +33,8 @@ export const SectionCard: React.FC<SectionCardProps> = ({
       <Flex
         align="center"
         gap={2.5}
-        px={5}
-        py={3.5}
+        px={{ base: 3.5, md: 5 }}
+        py={{ base: 3, md: 3.5 }}
         borderBottomWidth="1px"
         borderColor="border"
       >
@@ -56,7 +56,7 @@ export const SectionCard: React.FC<SectionCardProps> = ({
           )}
         </Box>
       </Flex>
-      <Box p={5}>{children}</Box>
+      <Box p={{ base: 3.5, md: 5 }}>{children}</Box>
     </Box>
   );
 };
