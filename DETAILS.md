@@ -13,12 +13,12 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `cmd/backrest/backrest.go`: registers the proxy inside Backrest's existing
   authenticated route set.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response.
-- `webui/src/features/dashboard/BackupHero.tsx`: compact phone backup status and
-  a reduced purple/blue activity surface for larger displays.
+- `webui/src/features/dashboard/BackupHero.tsx`: large protected-size metric
+  integrated with the purple/blue activity surface on phone and desktop.
 - `webui/src/features/dashboard/GatewayUsageCard.tsx`: current 115 day, month,
   and rate values from OpenList.
-- `webui/src/features/dashboard/BackupScopeOverview.tsx`: first-dashboard-card
-  summary of uploaded and skipped content, with direct plan editing.
+- `webui/src/features/dashboard/BackupScopeOverview.tsx`: numbered editorial
+  index of uploaded and skipped content, with direct plan editing.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
   summary data and the optional OpenList panel.
 - `webui/src/features/plans/backupScopeCatalog.ts`: reusable mapping from the
@@ -29,6 +29,8 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/index.sass`, `webui/src/app/App.tsx`, and
   `webui/src/components/layout/MainContentArea.tsx`: fixed dark application
   shell, responsive navigation, spacing, border, and canvas treatment.
+- `webui/src/components/layout/MobileNavigation.tsx`: full-screen mobile
+  contents index for dashboard, plans, repositories, and settings.
 - `webui/src/components/common/TwoPaneModal.tsx`: desktop two-pane editor and a
   fixed, opaque phone editor covering the complete viewport.
 - `docs/openlist-115-backup.md`: deployment, plan grouping, excludes,

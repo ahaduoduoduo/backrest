@@ -64,9 +64,11 @@ stored in the normal Backrest plan fields, so the configuration remains usable
 by the upstream API and Restic. Custom paths and patterns remain available in
 **Advanced paths and rules**.
 
-On phone-sized screens the application uses the menu drawer, one-column cards,
-and a full-screen plan dialog. The section rail becomes horizontal tabs so the
-form does not require desktop-width scrolling.
+On phone-sized screens the application uses a full-screen numbered contents
+index, a one-column editorial dashboard, and a full-screen plan dialog. The
+section rail becomes horizontal tabs so the form does not require desktop-width
+scrolling. The HTML viewport is declared explicitly and tested with an iPhone
+browser context rather than a desktop page resized to 390 pixels.
 
 ### DSM recovery assets
 

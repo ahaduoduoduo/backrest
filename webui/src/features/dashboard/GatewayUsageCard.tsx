@@ -11,18 +11,19 @@ export const GatewayUsageCard = ({
   if (!usage) return null;
 
   return (
-    <Card.Root borderRadius={{ base: "18px", md: "20px" }}>
-      <Card.Body p={{ base: 4, md: 6 }}>
-        <Flex align="center" justify="space-between" mb={{ base: 3, md: 5 }}>
+    <Card.Root borderRadius={{ base: "20px", md: "24px" }} overflow="hidden">
+      <Card.Body p={0}>
+        <Flex
+          align="center"
+          justify="space-between"
+          px={{ base: 4, md: 6 }}
+          py={{ base: 3.5, md: 4 }}
+        >
           <Box>
             <Text fontSize="11px" color="whiteAlpha.500" letterSpacing="0.14em">
               OPENLIST
             </Text>
-            <Text
-              mt={1}
-              fontSize={{ base: "16px", md: "18px" }}
-              fontWeight="580"
-            >
+            <Text mt={1} fontSize="14px" fontWeight="520">
               {m.dashboard_gateway_title()}
             </Text>
           </Box>
@@ -34,24 +35,40 @@ export const GatewayUsageCard = ({
             boxShadow="0 0 18px #72d7b1"
           />
         </Flex>
-        <SimpleGrid columns={{ base: 2, md: 3 }} gap={{ base: 4, md: 8 }}>
-          <UsageMetric
-            label={m.dashboard_gateway_today()}
-            used={usage.day_bytes}
-            limit={usage.day_limit}
-          />
-          <UsageMetric
-            label={m.dashboard_gateway_month()}
-            used={usage.month_bytes}
-            limit={usage.month_limit}
-          />
-          <Box gridColumn={{ base: "1 / -1", md: "auto" }}>
+        <SimpleGrid
+          columns={3}
+          borderTopWidth="1px"
+          borderColor="whiteAlpha.100"
+        >
+          <Box p={{ base: 3.5, md: 5 }}>
+            <UsageMetric
+              label={m.dashboard_gateway_today()}
+              used={usage.day_bytes}
+              limit={usage.day_limit}
+            />
+          </Box>
+          <Box
+            p={{ base: 3.5, md: 5 }}
+            borderLeftWidth="1px"
+            borderColor="whiteAlpha.100"
+          >
+            <UsageMetric
+              label={m.dashboard_gateway_month()}
+              used={usage.month_bytes}
+              limit={usage.month_limit}
+            />
+          </Box>
+          <Box
+            p={{ base: 3.5, md: 5 }}
+            borderLeftWidth="1px"
+            borderColor="whiteAlpha.100"
+          >
             <Text color="whiteAlpha.500" fontSize="11px" letterSpacing="0.1em">
               {m.dashboard_gateway_rate()}
             </Text>
             <Text
-              mt={2}
-              fontSize={{ base: "19px", md: "24px" }}
+              mt={{ base: 1.5, md: 2 }}
+              fontSize={{ base: "15px", sm: "18px", md: "24px" }}
               fontWeight="450"
               fontVariantNumeric="tabular-nums"
             >
@@ -82,14 +99,14 @@ const UsageMetric = ({
         {label}
       </Text>
       <Text
-        mt={2}
-        fontSize={{ base: "19px", md: "24px" }}
+        mt={{ base: 1.5, md: 2 }}
+        fontSize={{ base: "15px", sm: "18px", md: "24px" }}
         fontWeight="450"
         fontVariantNumeric="tabular-nums"
       >
         {formatBytes(used)}
       </Text>
-      <Flex mt={2} align="center" gap={3}>
+      <Flex mt={2} align="center" gap={{ base: 1.5, md: 3 }}>
         <Box
           flex={1}
           h="3px"
@@ -107,7 +124,8 @@ const UsageMetric = ({
         <Text
           color="whiteAlpha.400"
           fontSize="10px"
-          minW={{ base: "58px", md: "72px" }}
+          minW={0}
+          display={{ base: "none", sm: "block" }}
           textAlign="right"
         >
           {limit > 0 ? formatBytes(limit) : m.dashboard_gateway_unlimited()}
