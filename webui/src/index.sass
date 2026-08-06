@@ -12,9 +12,11 @@
 html, body, #app
   min-height: 100%
   background: var(--console-canvas)
+  max-width: 100%
 
 body
   margin: 0
+  overflow-x: hidden
   color: var(--console-text)
   font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
   letter-spacing: -0.01em
@@ -67,6 +69,26 @@ body::before
 
 .console-main
   background: transparent !important
+  min-width: 0
+
+@media (max-width: 767px)
+  body::before
+    left: 5%
+    width: 38rem
+
+  .backup-console
+    min-width: 0
+
+  .backup-console [data-scope="dialog"][data-part="content"]
+    max-width: 100vw
+
+  .backup-console table
+    font-size: 12px
+
+  .backup-console code,
+  .backup-console pre
+    max-width: 100%
+    overflow-wrap: anywhere
 
 .backrest
   &.operation-details

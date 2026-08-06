@@ -115,11 +115,13 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
     >
       <Portal>
         <DialogBackdrop />
-        <DialogPositioner>
+        <DialogPositioner p={{ base: 0, md: 4 }}>
           <DialogContent
             maxW={width}
-            height="86vh"
-            maxH="820px"
+            width={{ base: "100vw", md: "calc(100vw - 32px)" }}
+            height={{ base: "100dvh", md: "86vh" }}
+            maxH={{ base: "100dvh", md: "820px" }}
+            borderRadius={{ base: 0, md: "lg" }}
             p={0}
             overflow="hidden"
             display="flex"
@@ -129,8 +131,8 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
             <Flex
               align="center"
               gap={3}
-              px={5}
-              py={3.5}
+              px={{ base: 3.5, md: 5 }}
+              py={{ base: 3, md: 3.5 }}
               borderBottomWidth="1px"
               borderColor="border"
               flexShrink={0}
@@ -153,13 +155,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
               )}
               <Box flex={1} minW={0}>
                 <Flex align="center" gap={2} flexWrap="nowrap" minW={0}>
-                  <Text
-                    fontSize="md"
-                    fontWeight="semibold"
-                    color="fg"
-                    whiteSpace="nowrap"
-                    flexShrink={0}
-                  >
+                  <Text fontSize="md" fontWeight="semibold" color="fg" truncate>
                     {title}
                   </Text>
                   {headerExtra}
@@ -192,18 +188,22 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
             </Flex>
 
             {/* Two-pane body */}
-            <Flex flex={1} minH={0}>
+            <Flex flex={1} minH={0} direction={{ base: "column", md: "row" }}>
               {/* Nav rail */}
               <Box
                 as="nav"
-                w="196px"
-                borderRightWidth="1px"
+                w={{ base: "full", md: "196px" }}
+                borderRightWidth={{ base: "0", md: "1px" }}
+                borderBottomWidth={{ base: "1px", md: "0" }}
                 borderColor="border"
-                py={3}
+                py={{ base: 2, md: 3 }}
                 px={2}
                 flexShrink={0}
                 bg="bg.subtle"
-                overflowY="auto"
+                overflowX={{ base: "auto", md: "hidden" }}
+                overflowY={{ base: "hidden", md: "auto" }}
+                display={{ base: "flex", md: "block" }}
+                gap={{ base: 1, md: 0 }}
               >
                 {sections.map((s) => {
                   const isActive = activeSection === s.id;
@@ -215,7 +215,8 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                       display="flex"
                       alignItems="center"
                       gap={2}
-                      w="full"
+                      w={{ base: "auto", md: "full" }}
+                      minW={{ base: "max-content", md: "auto" }}
                       py={1.5}
                       px={2.5}
                       bg={isActive ? "bg.muted" : "transparent"}
@@ -226,7 +227,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                       color="fg"
                       cursor="pointer"
                       textAlign="left"
-                      mb={0.5}
+                      mb={{ base: 0, md: 0.5 }}
                       _hover={{ bg: isActive ? "bg.muted" : "bg.emphasized" }}
                     >
                       <Box
@@ -239,7 +240,9 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                               size: 14,
                             })}
                       </Box>
-                      <Text flex={1}>{s.label}</Text>
+                      <Text flex={1} whiteSpace="nowrap">
+                        {s.label}
+                      </Text>
                     </Box>
                   );
                 })}
@@ -249,9 +252,11 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
               <Box
                 ref={scrollRef}
                 flex={1}
+                minW={0}
                 overflowY="auto"
+                overflowX="hidden"
                 bg="bg.subtle"
-                p={5}
+                p={{ base: 3, md: 5 }}
               >
                 <TwoPaneContext.Provider value={{ registerRef }}>
                   {children}
@@ -265,7 +270,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
               <Box
                 borderTopWidth="1px"
                 borderColor="border"
-                px={4}
+                px={{ base: 3, md: 4 }}
                 py={2.5}
                 flexShrink={0}
               >
@@ -275,8 +280,9 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
               <Flex
                 align="center"
                 gap={2.5}
-                px={4}
+                px={{ base: 3, md: 4 }}
                 py={2.5}
+                flexWrap={{ base: "wrap", md: "nowrap" }}
                 borderTopWidth="1px"
                 borderColor="border"
                 bg={dirty ? "orange.50" : "bg.panel"}

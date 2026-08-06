@@ -52,6 +52,22 @@ record.
 Use several plans rather than one root-filesystem plan. Each group can have its
 own schedule, snapshot hook, excludes, and restore procedure.
 
+The dashboard shows the effective scope of every plan in two columns:
+
+- **What is backed up** maps the deployed mounts to Docker services, Home
+  Assistant, DSM certificates, Synology recovery files, and Time Machine.
+- **What is excluded** groups generated files, Git history, old transfer
+  caches, Backrest runtime data, and live databases.
+
+The same groups are editable as switches in the plan dialog. Their values are
+stored in the normal Backrest plan fields, so the configuration remains usable
+by the upstream API and Restic. Custom paths and patterns remain available in
+**Advanced paths and rules**.
+
+On phone-sized screens the application uses the menu drawer, one-column cards,
+and a full-screen plan dialog. The section rail becomes horizontal tabs so the
+form does not require desktop-width scrolling.
+
 ### DSM recovery assets
 
 Include a directory populated by the existing DSM configuration export,

@@ -27,7 +27,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
     <Flex direction="column" height="100%" width="100%">
       {/* Header Section */}
       {(breadcrumbs || heading || actions) && (
-        <Box py={4} px={8} borderBottomWidth="1px" bg={bg}>
+        <Box py={4} px={{ base: 4, md: 8 }} borderBottomWidth="1px" bg={bg}>
           {/* Breadcrumbs */}
           {breadcrumbs && breadcrumbs.length > 0 && (
             <Breadcrumb.Root size="sm" mb={actions || heading ? 2 : 0}>
@@ -39,7 +39,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
             </Breadcrumb.Root>
           )}
 
-          <Flex justify="space-between" align="center">
+          <Flex justify="space-between" align="center" gap={3} wrap="wrap">
             {heading && (
               <Heading size="xl" fontWeight="bold">
                 {heading}
@@ -51,7 +51,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
       )}
 
       {/* Main Content */}
-      <Box flex="1" overflow="auto" p={8}>
+      <Box flex="1" minW={0} overflow="auto" p={{ base: 4, md: 8 }}>
         <Container maxW="6xl" p={0}>
           {children}
         </Container>

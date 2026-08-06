@@ -40,7 +40,7 @@ export const BackupHero = ({
   return (
     <Box
       position="relative"
-      minH={{ base: "360px", lg: "420px" }}
+      minH={{ base: "300px", sm: "340px", lg: "420px" }}
       border="1px solid"
       borderColor="whiteAlpha.100"
       borderRadius={{ base: "20px", lg: "28px" }}
@@ -105,16 +105,26 @@ export const BackupHero = ({
         minH="inherit"
         direction="column"
         justify="space-between"
-        p={{ base: 6, md: 8, lg: 10 }}
+        p={{ base: 5, sm: 6, md: 8, lg: 10 }}
       >
         <Box>
           <Flex align="center" gap={2.5} mb={5}>
             <motion.div
               animate={state === "run" ? { opacity: [1, 0.35, 1] } : {}}
               transition={{ duration: 1.5, repeat: Infinity }}
-              style={{ width: 8, height: 8, borderRadius: 8, background: color }}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 8,
+                background: color,
+              }}
             />
-            <Text color={color} fontSize="12px" fontWeight="650" letterSpacing="0.08em">
+            <Text
+              color={color}
+              fontSize="12px"
+              fontWeight="650"
+              letterSpacing="0.08em"
+            >
               {title}
             </Text>
           </Flex>
@@ -129,7 +139,7 @@ export const BackupHero = ({
           </Text>
           <Text
             mt={1}
-            fontSize={{ base: "46px", md: "70px", xl: "86px" }}
+            fontSize={{ base: "38px", sm: "46px", md: "70px", xl: "86px" }}
             fontWeight="400"
             lineHeight="0.98"
             letterSpacing="-0.065em"
@@ -137,13 +147,17 @@ export const BackupHero = ({
           >
             {protectedBytes > 0 ? formatBytes(protectedBytes) : "—"}
           </Text>
-          <Text mt={4} color="whiteAlpha.600" fontSize="13px">
+          <Text mt={4} color="whiteAlpha.600" fontSize="13px" lineHeight="1.6">
             {lastBackup}
             {nextBackup ? ` · ${nextBackup}` : ""}
           </Text>
         </Box>
 
-        <Flex gap={{ base: 7, md: 12 }} mt={12} flexWrap="wrap">
+        <Flex
+          gap={{ base: 6, md: 12 }}
+          mt={{ base: 8, md: 12 }}
+          flexWrap="wrap"
+        >
           <Metric label={plansLabel} value={String(planCount)} />
           <Metric
             label={addedLabel}
@@ -157,10 +171,20 @@ export const BackupHero = ({
 
 const Metric = ({ label, value }: { label: string; value: string }) => (
   <Box>
-    <Text color="whiteAlpha.500" fontSize="10px" fontWeight="650" letterSpacing="0.12em">
+    <Text
+      color="whiteAlpha.500"
+      fontSize="10px"
+      fontWeight="650"
+      letterSpacing="0.12em"
+    >
       {label.toUpperCase()}
     </Text>
-    <Text mt={1} fontSize="18px" fontWeight="520" fontVariantNumeric="tabular-nums">
+    <Text
+      mt={1}
+      fontSize="18px"
+      fontWeight="520"
+      fontVariantNumeric="tabular-nums"
+    >
       {value}
     </Text>
   </Box>

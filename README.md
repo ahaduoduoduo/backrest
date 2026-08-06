@@ -34,6 +34,12 @@ credentials are never sent to the browser. Source selection, excludes,
 snapshot browsing, historical versions, single-file restore, retention, check,
 and prune continue to use Backrest's existing plan and repository model.
 
+The dashboard presents every plan as **What is backed up / What is excluded**.
+The plan editor maps the Synology mounts and standard Restic exclude patterns
+to named switches, while retaining the original path and glob editors under an
+advanced section. The application shell, dashboard, navigation drawer, and
+two-pane forms use a dedicated phone layout down to a 390 px viewport.
+
 See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
 recovery configuration.
 

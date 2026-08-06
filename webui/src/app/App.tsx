@@ -906,12 +906,24 @@ export const App: React.FC = () => {
         <Box display={{ base: "block", lg: "none" }} mr={2}>
           <MobileNavTrigger />
         </Box>
-        <Flex as="a" cursor="pointer" onClick={() => navigate("/")} mr={6} align="center" gap={3}>
+        <Flex
+          as="a"
+          cursor="pointer"
+          onClick={() => navigate("/")}
+          mr={{ base: 2, md: 6 }}
+          align="center"
+          gap={{ base: 2, md: 3 }}
+        >
           <img src={LogoSvg} style={{ height: "25px" }} />
           <Text className="console-wordmark">BACKREST</Text>
         </Flex>
 
-        <Flex align="baseline" gap={4}>
+        <Flex
+          align="baseline"
+          gap={4}
+          minW={0}
+          display={{ base: "none", md: "flex" }}
+        >
           <Link
             href="https://github.com/garethgeorge/backrest"
             target="_blank"
@@ -957,7 +969,14 @@ export const App: React.FC = () => {
         <Sidebar />
 
         {/* CONTENT AREA */}
-        <Box className="console-main" flex="1" overflowY="auto" bg="#07080b">
+        <Box
+          className="console-main"
+          flex="1"
+          minW={0}
+          overflowY="auto"
+          overflowX="hidden"
+          bg="#07080b"
+        >
           <AuthenticationBoundary>
             <Suspense
               fallback={
@@ -1028,11 +1047,16 @@ const MobileNavTrigger = () => {
       onOpenChange={(e) => setOpen(e.open)}
     >
       <DrawerTrigger asChild>
-        <IconButton variant="ghost" size="sm" color="white" aria-label={m.app_menu()}>
+        <IconButton
+          variant="ghost"
+          size="sm"
+          color="white"
+          aria-label={m.app_menu()}
+        >
           <FiMenu />
         </IconButton>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent maxW="min(88vw, 320px)">
         <DrawerHeader>
           <DrawerTitle>{m.app_menu()}</DrawerTitle>
           <DrawerCloseTrigger />

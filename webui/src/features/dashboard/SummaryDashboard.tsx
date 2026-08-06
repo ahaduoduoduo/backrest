@@ -46,6 +46,7 @@ import * as m from "../../paraglide/messages";
 import { HistoryStrip } from "./HistoryStrip";
 import { BackupHero } from "./BackupHero";
 import { GatewayUsageCard } from "./GatewayUsageCard";
+import { BackupScopeOverview } from "./BackupScopeOverview";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -723,7 +724,9 @@ export const SummaryDashboard = () => {
   const navigate = useNavigate();
   const [summaryData, setSummaryData] =
     useState<SummaryDashboardResponse | null>(null);
-  const [openListUsage, setOpenListUsage] = useState<OpenListUsage | null>(null);
+  const [openListUsage, setOpenListUsage] = useState<OpenListUsage | null>(
+    null,
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -734,7 +737,9 @@ export const SummaryDashboard = () => {
       } catch (e: unknown) {
         alerts.error(m.dashboard_error_fetch() + e);
       }
-      getOpenListUsage().then(setOpenListUsage).catch(() => setOpenListUsage(null));
+      getOpenListUsage()
+        .then(setOpenListUsage)
+        .catch(() => setOpenListUsage(null));
     };
 
     fetchData();
@@ -779,7 +784,7 @@ export const SummaryDashboard = () => {
   const nextBackup = hero.nextMs ? untilText(hero.nextMs) : null;
 
   return (
-    <Stack gap={10} width="full">
+    <Stack gap={{ base: 6, md: 10 }} width="full">
       {plans.length > 0 && (
         <BackupHero
           title={HERO_TITLE[hero.state]()}
@@ -802,6 +807,8 @@ export const SummaryDashboard = () => {
       )}
 
       <GatewayUsageCard usage={openListUsage} />
+
+      <BackupScopeOverview plans={config?.plans ?? []} />
 
       <MultihostSummary multihostConfig={config?.multihost ?? null} />
 
