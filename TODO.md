@@ -8,6 +8,8 @@ Updated: 2026-08-06
   configuration dialogs for narrow phone viewports.
 - [x] 2026-08-06: Replace raw Synology source paths and common Restic glob
   patterns with named backup and exclusion controls, plus a dashboard summary.
+- [x] 2026-08-06: Run feature-branch tests only for pull requests, avoiding a
+  duplicate full test matrix for every pushed commit.
 - [x] 2026-08-06: Add a manual GitHub Actions build that publishes one
   linux/amd64 Backrest image with bundled Restic and immutable commit tags.
 - [x] 2026-08-06: Fork Backrest under `ahaduoduoduo` and isolate the work on
