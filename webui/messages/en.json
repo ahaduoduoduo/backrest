@@ -682,5 +682,10 @@
   "app_remote_repo_info": "This is a remote repo from {origin}. Operation history only includes backups run locally and may be incomplete.",
   "add_repo_modal_error_env_format": "Environment variable must be in format KEY=VALUE",
   "add_repo_modal_env_vars_placeholder": "KEY=VALUE (One per line)",
-  "hooks_form_list_webhook_url": "{service} Webhook URL"
+  "hooks_form_list_webhook_url": "{service} Webhook URL",
+  "dashboard_gateway_title": "115 upload",
+  "dashboard_gateway_today": "TODAY",
+  "dashboard_gateway_month": "THIS MONTH",
+  "dashboard_gateway_rate": "RATE",
+  "dashboard_gateway_unlimited": "Unlimited"
 }

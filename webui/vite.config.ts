@@ -60,6 +60,10 @@ export default defineConfig(({ mode }) => {
           target: env.UI_BACKEND_URL || 'http://localhost:9898',
           secure: false,
         },
+        '/api/openlist': {
+          target: env.UI_BACKEND_URL || 'http://localhost:9898',
+          secure: false,
+        },
       },
     },
   };

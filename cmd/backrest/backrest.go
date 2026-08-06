@@ -274,6 +274,7 @@ func newRootMux(
 	syncStatePath, syncStateHandlerUnauthed := v1syncconnect.NewBackrestSyncStateServiceHandler(syncStateHandler)
 	authedMux.Handle(syncStatePath, syncStateHandlerUnauthed)
 	authedMux.Handle("/metrics", metric.GetRegistry().Handler())
+	authedMux.Handle("/api/openlist/restic/usage", api.NewOpenListUsageHandler())
 
 	// Unauthenticated routes
 	unauthedMux := http.NewServeMux()

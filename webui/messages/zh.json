@@ -694,5 +694,10 @@
   "app_remote_repo_info": "This is a remote repo from {origin}. Operation history only includes backups run locally and may be incomplete.",
   "add_repo_modal_error_env_format": "环境变量必须是 KEY=VALUE 格式",
   "add_repo_modal_env_vars_placeholder": "KEY=VALUE（每行一个）",
-  "hooks_form_list_webhook_url": "{service} Webhook URL"
+  "hooks_form_list_webhook_url": "{service} Webhook URL",
+  "dashboard_gateway_title": "115 上传",
+  "dashboard_gateway_today": "今日",
+  "dashboard_gateway_month": "本月",
+  "dashboard_gateway_rate": "速率",
+  "dashboard_gateway_unlimited": "不限"
 }

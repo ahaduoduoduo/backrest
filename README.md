@@ -22,6 +22,21 @@ By building on restic, Backrest leverages its mature, fast, reliable, and secure
 
 Built with Go, Backrest is distributed as a standalone, lightweight binary with restic as its sole dependency. It can securely create new repositories or manage existing ones. Once storage is configured, the WebUI handles most operations, while still allowing direct access to the powerful [restic CLI](https://restic.readthedocs.io/en/latest/manual_rest.html) for advanced operations when needed.
 
+## OpenList 115 disaster-recovery fork
+
+This fork keeps upstream Restic and Backrest orchestration, while adding a
+purpose-built dark console and an authenticated OpenList traffic view. Restic
+uses OpenList's native REST endpoint directly; rclone, WebDAV, and S3 adapters
+are not part of this path.
+
+The console reads 115 upload usage through the Backrest backend, so OpenList
+credentials are never sent to the browser. Source selection, excludes,
+snapshot browsing, historical versions, single-file restore, retention, check,
+and prune continue to use Backrest's existing plan and repository model.
+
+See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
+recovery configuration.
+
 ## Key Features
 
 - **Web Interface**: Access locally or remotely (perfect for NAS deployments)
@@ -166,6 +181,9 @@ Download the Windows installer for your architecture from the [releases page](ht
 | `BACKREST_CONFIG`         | Path to config file         | `$HOME/.config/backrest/config.json`<br>(or, if `$XDG_CONFIG_HOME` is set, `$XDG_CONFIG_HOME/backrest/config.json`) |
 | `BACKREST_DATA`           | Path to the data directory  | `$HOME/.local/share/backrest`<br>(or, if `$XDG_DATA_HOME` is set, `$XDG_DATA_HOME/backrest`)                        |
 | `BACKREST_RESTIC_COMMAND` | Path to restic binary       | Defaults to a Backrest managed version of restic at `$XDG_DATA_HOME/backrest/restic-x.x.x`                          |
+| `BACKREST_OPENLIST_URL` | OpenList base URL for the 115 usage panel | Empty |
+| `BACKREST_OPENLIST_USERNAME` | OpenList Restic HTTP username | Empty |
+| `BACKREST_OPENLIST_PASSWORD` | OpenList Restic HTTP password | Empty |
 | `XDG_CACHE_HOME`          | Path to the cache directory |                                                                                                                     |
 
 ## Environment Variables (Windows)
