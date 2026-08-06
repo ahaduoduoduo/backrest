@@ -133,16 +133,29 @@ func newSyncHandlerServer(mgr *SyncManager, snapshot *syncConfigSnapshot, mapper
 var _ syncSessionHandler = (*syncSessionHandlerServer)(nil)
 
 func (h *syncSessionHandlerServer) OnConnectionEstablished(ctx context.Context, stream *bidiSyncCommandStream, peer *v1.Multihost_Peer) error {
-	// Verify that the peer is in our authorized clients list
-	authorizedClientPeerIdx := slices.IndexFunc(h.snapshot.config.Multihost.GetAuthorizedClients(), func(p *v1.Multihost_Peer) bool {
+	// Pairing persists a newly authorized client after the session snapshot was
+	// created. Prefer the snapshot, then consult the current config so the same
+	// handshake can pass the final authorization gate without a reconnect race.
+	authorizedClients := h.snapshot.config.Multihost.GetAuthorizedClients()
+	authorizedClientPeerIdx := slices.IndexFunc(authorizedClients, func(p *v1.Multihost_Peer) bool {
 		return p.InstanceId == peer.InstanceId && p.Keyid == peer.Keyid
 	})
+	if authorizedClientPeerIdx == -1 {
+		currentConfig, err := h.mgr.configMgr.Get()
+		if err != nil {
+			return NewSyncErrorInternal(fmt.Errorf("refreshing authorized clients: %w", err))
+		}
+		authorizedClients = currentConfig.GetMultihost().GetAuthorizedClients()
+		authorizedClientPeerIdx = slices.IndexFunc(authorizedClients, func(p *v1.Multihost_Peer) bool {
+			return p.InstanceId == peer.InstanceId && p.Keyid == peer.Keyid
+		})
+	}
 	if authorizedClientPeerIdx == -1 {
 		h.l.Sugar().Warnf("rejected a connection from client instance ID %q because it is not authorized", peer.InstanceId)
 		return NewSyncErrorAuth(errors.New("client is not an authorized peer"))
 	}
 
-	h.peer = h.snapshot.config.Multihost.AuthorizedClients[authorizedClientPeerIdx]
+	h.peer = authorizedClients[authorizedClientPeerIdx]
 	h.l = zap.L().Named(fmt.Sprintf("syncserver handler for peer %q", h.peer.InstanceId))
 
 	var err error
