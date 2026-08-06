@@ -11,6 +11,7 @@ name: Release Please
 
 jobs:
   release-please:
+    if: ${{ github.repository == 'garethgeorge/backrest' }}
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v4
