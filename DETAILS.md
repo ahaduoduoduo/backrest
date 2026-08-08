@@ -23,7 +23,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   backup activity wall and protected-data metrics derived from Backrest's local
   operation log; operation queries do not read repository data.
 - `webui/src/features/dashboard/GatewayUsageCard.tsx`: current 115 day, month,
-  and rate values from OpenList.
+  and rate values from OpenList. Day and month values are payload bytes sent by
+  the 115 driver and include retransmitted bytes when an upload part is retried.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
   summary data, activity overview, and the optional OpenList panel.
 - `webui/src/features/plans/backupScopeCatalog.ts`: reusable mapping from the
@@ -33,7 +34,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   `Plan.iexcludes` fields.
 - `webui/src/index.sass`, `webui/src/app/App.tsx`, and
   `webui/src/components/layout/MainContentArea.tsx`: fixed dark application
-  shell, responsive navigation, spacing, border, and canvas treatment.
+  shell, on-demand glass desktop navigation, responsive navigation, spacing,
+  border, and canvas treatment.
 - `webui/src/components/layout/MobileNavigation.tsx`: full-screen mobile
   contents index for dashboard, plans, repositories, and settings.
 - `webui/src/components/common/TwoPaneModal.tsx`: desktop two-pane editor and a

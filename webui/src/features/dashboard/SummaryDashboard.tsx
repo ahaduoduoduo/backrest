@@ -651,14 +651,19 @@ const RecentActivity = ({
                 </Text>
               </Box>
               {row.bytesAdded > 0 && (
-                <Text
-                  fontSize="12.5px"
-                  color="fg.muted"
-                  fontVariantNumeric="tabular-nums"
-                  flexShrink={0}
-                >
-                  +{formatBytes(row.bytesAdded)}
-                </Text>
+                <Box flexShrink={0} textAlign="right">
+                  <Text fontSize="10px" color="fg.subtle" lineHeight="1.2">
+                    {m.dashboard_card_last_upload()}
+                  </Text>
+                  <Text
+                    mt={1}
+                    fontSize="12.5px"
+                    color="fg.muted"
+                    fontVariantNumeric="tabular-nums"
+                  >
+                    {formatBytes(row.bytesAdded)}
+                  </Text>
+                </Box>
               )}
             </Flex>
           </Box>

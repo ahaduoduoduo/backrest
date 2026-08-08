@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -18,6 +19,7 @@ import {
   FiServer,
   FiEdit2,
   FiMenu,
+  FiX,
   FiHome,
   FiChevronRight,
 } from "react-icons/fi";
@@ -471,27 +473,31 @@ const SidebarPlanItem = React.memo(
     const planPath = `/plan/${plan.id}`;
     return (
       <Flex
+        className="console-sidebar-item group"
+        data-active={active || undefined}
         align="center"
-        pl={9}
-        pr={2}
-        py={1}
-        bg={active ? "bg.emphasized" : undefined}
-        _hover={{ bg: "bg.muted" }}
-        className="group"
+        mx={1}
+        px={2.5}
+        py={2.5}
+        borderRadius="12px"
         data-testid={`sidebar-item-plan-${plan.id}`}
+        cursor="pointer"
+        userSelect="none"
+        aria-current={active ? "page" : undefined}
+        onClick={() => onNav(planPath)}
       >
-        <Box flexShrink={0} mr={2}>
+        <Box flexShrink={0} mr={2.5} display="flex">
           <IconForResource selector={sel} />
         </Box>
         <Tooltip content={plan.id}>
-          <Box
-            flex="1"
-            minW="0"
-            cursor="pointer"
-            onClick={() => onNav(planPath)}
-            userSelect="none"
-          >
-            <Text overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+          <Box flex="1" minW="0">
+            <Text
+              fontSize="13px"
+              fontWeight={active ? "600" : "450"}
+              overflow="hidden"
+              textOverflow="ellipsis"
+              whiteSpace="nowrap"
+            >
               {plan.id}
             </Text>
           </Box>
@@ -538,27 +544,31 @@ const SidebarRepoItem = React.memo(
     const repoPath = `/repo/${repo.id}`;
     return (
       <Flex
+        className="console-sidebar-item group"
+        data-active={active || undefined}
         align="center"
-        pl={9}
-        pr={2}
-        py={1}
-        bg={active ? "bg.emphasized" : undefined}
-        _hover={{ bg: "bg.muted" }}
-        className="group"
+        mx={1}
+        px={2.5}
+        py={2.5}
+        borderRadius="12px"
         data-testid={`sidebar-item-repo-${repo.id}`}
+        cursor="pointer"
+        userSelect="none"
+        aria-current={active ? "page" : undefined}
+        onClick={() => onNav(repoPath)}
       >
-        <Box flexShrink={0} mr={2}>
+        <Box flexShrink={0} mr={2.5} display="flex">
           <IconForResource selector={sel} />
         </Box>
         <Tooltip content={repo.uri}>
-          <Box
-            flex="1"
-            minW="0"
-            cursor="pointer"
-            onClick={() => onNav(repoPath)}
-            userSelect="none"
-          >
-            <Text overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+          <Box flex="1" minW="0">
+            <Text
+              fontSize="13px"
+              fontWeight={active ? "600" : "450"}
+              overflow="hidden"
+              textOverflow="ellipsis"
+              whiteSpace="nowrap"
+            >
               {repo.id}
             </Text>
             {repo.originInstanceId && (
@@ -619,61 +629,125 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
 
   return (
     <Box
-      className="console-sidebar"
-      minW="252px"
-      maxW="252px"
-      bg="#090a0e"
-      borderRightWidth="1px"
-      borderColor="whiteAlpha.100"
+      className="console-navigation-panel"
+      width="full"
       h="full"
       overflowY="auto"
-      flexShrink={0}
     >
       <AccordionRoot
+        className="console-sidebar-nav"
         multiple
         defaultValue={["plans", "repos", "authorized-clients"]}
         variant="plain"
         lazyMount
+        minH="full"
+        display="flex"
+        flexDirection="column"
+        p={3}
       >
+        <Flex align="center" px={2} pt={1} pb={3} pr={10}>
+          <Box>
+            <Text
+              color="blue.300"
+              fontFamily="mono"
+              fontSize="9px"
+              letterSpacing="0.16em"
+            >
+              115 OFFSITE
+            </Text>
+            <Text mt={1} color="whiteAlpha.450" fontSize="10px">
+              BACKUP CONSOLE
+            </Text>
+          </Box>
+        </Flex>
+
         {/* DASHBOARD */}
         <Box
+          className="console-sidebar-primary"
+          data-active={isActive("/") || undefined}
           cursor="pointer"
           onClick={() => handleNav("/")}
-          px={4}
-          py={2}
-          bg={isActive("/") ? "bg.muted" : undefined}
-          _hover={{ bg: "bg.muted" }}
+          px={3}
+          py={3}
+          borderRadius="14px"
           userSelect="none"
+          aria-current={isActive("/") ? "page" : undefined}
         >
-          <Flex align="center" gap={2}>
-            <FiHome />
-            <Text fontWeight="medium">{m.app_menu_dashboard()}</Text>
+          <Flex align="center" gap={3}>
+            <Flex
+              className="console-sidebar-icon"
+              align="center"
+              justify="center"
+              width="34px"
+              height="34px"
+              borderRadius="11px"
+              flexShrink={0}
+            >
+              <FiHome />
+            </Flex>
+            <Box>
+              <Text
+                color="whiteAlpha.350"
+                fontFamily="mono"
+                fontSize="9px"
+                lineHeight="1"
+              >
+                01
+              </Text>
+              <Text mt={1} fontSize="14px" fontWeight="600">
+                {m.app_menu_dashboard()}
+              </Text>
+            </Box>
+            <Box
+              className="console-sidebar-active-dot"
+              ml="auto"
+              width="6px"
+              height="6px"
+              borderRadius="full"
+              flexShrink={0}
+            />
           </Flex>
         </Box>
 
         {/* PLANS SECTION */}
-        <AccordionItem value="plans">
-          <AccordionItemTrigger px={4} py={2} _hover={{ bg: "bg.muted" }}>
-            <Flex align="center" gap={2}>
+        <AccordionItem value="plans" mt={3}>
+          <AccordionItemTrigger
+            className="console-sidebar-section"
+            px={3}
+            py={2.5}
+            borderRadius="12px"
+          >
+            <Flex align="center" gap={2.5} width="full">
+              <Text color="blue.300" fontFamily="mono" fontSize="9px">
+                02
+              </Text>
               <FiCalendar />
-              <Text fontWeight="medium">{m.app_menu_plans()}</Text>
+              <Text fontSize="12px" fontWeight="600">
+                {m.app_menu_plans()}
+              </Text>
+              <Text ml="auto" color="whiteAlpha.350" fontSize="10px">
+                {String(configPlans.length).padStart(2, "0")}
+              </Text>
             </Flex>
           </AccordionItemTrigger>
-          <AccordionItemContent pb={2}>
+          <AccordionItemContent px={0} pt={1.5} pb={1}>
             <Button
+              className="console-sidebar-add"
               variant="ghost"
               size="sm"
-              width="full"
+              width="calc(100% - 8px)"
               justifyContent="flex-start"
-              _hover={{ bg: "bg.muted" }}
               onClick={async () => {
                 const { AddPlanModal } =
                   await import("../features/plans/AddPlanModal");
                 showModal(<AddPlanModal template={null} />);
                 onClose?.();
               }}
-              pl={9}
-              mb={1}
+              mx={1}
+              px={2.5}
+              mb={1.5}
+              borderRadius="10px"
+              fontSize="11px"
               data-testid="sidebar-add-plan"
             >
               <FiPlus /> {m.app_menu_add_plan()}
@@ -697,28 +771,47 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
         </AccordionItem>
 
         {/* REPOS SECTION */}
-        <AccordionItem value="repos">
-          <AccordionItemTrigger px={4} py={2} _hover={{ bg: "bg.muted" }}>
-            <Flex align="center" gap={2}>
+        <AccordionItem value="repos" mt={2}>
+          <AccordionItemTrigger
+            className="console-sidebar-section"
+            px={3}
+            py={2.5}
+            borderRadius="12px"
+          >
+            <Flex align="center" gap={2.5} width="full">
+              <Text color="blue.300" fontFamily="mono" fontSize="9px">
+                03
+              </Text>
               <FiDatabase />
-              <Text fontWeight="medium">{m.app_menu_repos()}</Text>
+              <Text fontSize="12px" fontWeight="600">
+                {m.app_menu_repos()}
+              </Text>
+              <Text ml="auto" color="whiteAlpha.350" fontSize="10px">
+                {String(localRepos.length + remoteRepos.length).padStart(
+                  2,
+                  "0",
+                )}
+              </Text>
             </Flex>
           </AccordionItemTrigger>
-          <AccordionItemContent pb={2}>
+          <AccordionItemContent px={0} pt={1.5} pb={1}>
             <Button
+              className="console-sidebar-add"
               variant="ghost"
               size="sm"
-              width="full"
+              width="calc(100% - 8px)"
               justifyContent="flex-start"
-              _hover={{ bg: "bg.muted" }}
               onClick={async () => {
                 const { AddRepoModal } =
                   await import("../features/repositories/AddRepoModal");
                 showModal(<AddRepoModal template={null} />);
                 onClose?.();
               }}
-              pl={9}
-              mb={1}
+              mx={1}
+              px={2.5}
+              mb={1.5}
+              borderRadius="10px"
+              fontSize="11px"
               data-testid="sidebar-add-repo"
             >
               <FiPlus /> {m.app_menu_add_repo()}
@@ -845,12 +938,17 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
         ) : null}
 
         {/* SETTINGS */}
-        <Box mt={4} mx={4}>
+        <Box mt="auto" pt={4} px={1}>
+          <Separator mb={3} borderColor="whiteAlpha.100" />
           <Button
-            variant="outline"
+            className="console-sidebar-settings"
+            variant="ghost"
             size="sm"
             width="full"
             justifyContent="flex-start"
+            height="44px"
+            px={3}
+            borderRadius="12px"
             onClick={async () => {
               const { SettingsModal } =
                 await import("../features/settings/SettingsModal");
@@ -866,22 +964,51 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
   );
 };
 
-const Sidebar = () => {
+const DesktopNavTrigger = () => {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const closeNavigation = useCallback(() => {
+    detailsRef.current?.removeAttribute("open");
+  }, []);
+
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeNavigation();
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [closeNavigation]);
+
   return (
-    <Box
-      className="console-sidebar"
-      minW="252px"
-      maxW="252px"
-      bg="#090a0e"
-      borderRightWidth="1px"
-      borderColor="whiteAlpha.100"
-      h="full"
-      overflowY="auto"
-      flexShrink={0}
-      display={{ base: "none", lg: "block" }}
-    >
-      <SidebarContent />
-    </Box>
+    <details ref={detailsRef} className="console-navigation-details">
+      <summary
+        className="console-navigation-trigger"
+        aria-label={m.app_menu()}
+        aria-controls="desktop-navigation-panel"
+      >
+        <FiMenu />
+      </summary>
+      <Box className="console-navigation-backdrop" onClick={closeNavigation}>
+        <Box
+          as="aside"
+          id="desktop-navigation-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label={m.app_menu()}
+          className="console-navigation-drawer"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            aria-label={m.button_close()}
+            onClick={closeNavigation}
+            className="console-navigation-close"
+          >
+            <FiX />
+          </button>
+          <SidebarContent onClose={closeNavigation} />
+        </Box>
+      </Box>
+    </details>
   );
 };
 
@@ -907,6 +1034,9 @@ export const App: React.FC = () => {
       >
         <Box display={{ base: "block", lg: "none" }} mr={2}>
           <MobileNavTrigger />
+        </Box>
+        <Box display={{ base: "none", lg: "block" }} mr={3}>
+          <DesktopNavTrigger />
         </Box>
         <Flex
           as="a"
@@ -972,9 +1102,6 @@ export const App: React.FC = () => {
 
       {/* MAIN LAYOUT */}
       <Flex flex="1" overflow="hidden">
-        {/* SIDEBAR */}
-        <Sidebar />
-
         {/* CONTENT AREA */}
         <Box
           className="console-main"

@@ -447,7 +447,7 @@
   "dashboard_activity_row_ran": "已运行",
   "dashboard_activity_title": "近期活动",
   "dashboard_card_destination": "目的地",
-  "dashboard_card_last_upload": "上次上传",
+  "dashboard_card_last_upload": "仓库新增",
   "dashboard_card_next_run": "下次运行",
   "dashboard_card_protected": "已保护",
   "dashboard_card_retention": "保留 {parts}",
@@ -696,8 +696,8 @@
   "add_repo_modal_env_vars_placeholder": "KEY=VALUE（每行一个）",
   "hooks_form_list_webhook_url": "{service} Webhook URL",
   "dashboard_gateway_title": "115 上传",
-  "dashboard_gateway_today": "今日",
-  "dashboard_gateway_month": "本月",
+  "dashboard_gateway_today": "今日上传流量",
+  "dashboard_gateway_month": "本月上传流量",
   "dashboard_gateway_rate": "速率",
   "dashboard_gateway_unlimited": "不限"
 }

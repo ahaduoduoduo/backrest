@@ -439,7 +439,7 @@
   "dashboard_activity_row_ran": "Ran",
   "dashboard_activity_title": "Recent activity",
   "dashboard_card_destination": "Destination",
-  "dashboard_card_last_upload": "Last upload",
+  "dashboard_card_last_upload": "Repository added",
   "dashboard_card_next_run": "Next run",
   "dashboard_card_protected": "Protected",
   "dashboard_card_retention": "Keeps {parts}",
@@ -684,8 +684,8 @@
   "add_repo_modal_env_vars_placeholder": "KEY=VALUE (One per line)",
   "hooks_form_list_webhook_url": "{service} Webhook URL",
   "dashboard_gateway_title": "115 upload",
-  "dashboard_gateway_today": "TODAY",
-  "dashboard_gateway_month": "THIS MONTH",
+  "dashboard_gateway_today": "UPLOADED TODAY",
+  "dashboard_gateway_month": "UPLOADED THIS MONTH",
   "dashboard_gateway_rate": "RATE",
   "dashboard_gateway_unlimited": "Unlimited"
 }

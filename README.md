@@ -34,13 +34,13 @@ credentials are never sent to the browser. Source selection, excludes,
 snapshot browsing, historical versions, single-file restore, retention, check,
 and prune continue to use Backrest's existing plan and repository model.
 
-The dashboard uses an editorial content index for every plan's **Backed up /
-Skipped** content, a large protected-size visual, and a divided OpenList metric
-strip. The mobile navigation is a full-screen numbered contents page rather
-than a reduced desktop accordion. The plan editor maps Synology mounts and
-standard Restic exclude patterns to named switches while retaining exact paths
-and glob rules under an advanced section. Real mobile browser rendering is
-covered through an iPhone device context and an explicit viewport declaration.
+The dashboard uses a contribution-style yearly backup activity wall, an
+on-demand glass navigation panel, and a divided OpenList traffic strip. The traffic
+strip reports bytes actually sent toward 115, while plan cards report Restic's
+logical repository additions. The mobile navigation remains a full-screen
+numbered contents page. The plan editor maps Synology mounts and standard Restic
+exclude patterns to named switches while retaining exact paths and glob rules
+under an advanced section.
 
 See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
 recovery configuration.
@@ -49,8 +49,8 @@ Frontend work can run through the Dockerized Vite development service without
 rebuilding the embedded Go binary. Setup and request routing are documented in
 [docs/webui-development.md](docs/webui-development.md).
 
-The customized dashboard presents a contribution-style yearly backup activity
-wall while backup sources and exclusion rules remain in each plan editor.
+Backup sources and exclusion rules remain in each plan editor rather than the
+dashboard summary.
 
 ## Key Features
 

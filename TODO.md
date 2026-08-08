@@ -4,6 +4,10 @@ Updated: 2026-08-08
 
 ## Completed
 
+- [x] 2026-08-08: Remove the persistent desktop navigation rail in favor of a
+  header-triggered glass navigation panel, and clarify the difference between
+  OpenList upload traffic and Restic repository additions throughout the
+  dashboard.
 - [x] 2026-08-08: Replace the dashboard backup-scope index and decorative hero
   with a responsive contribution-style activity wall showing protected bytes,
   yearly additions, active days, and backup streaks from the local operation

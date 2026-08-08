@@ -48,7 +48,7 @@ const activityCopy = () => {
     year: zh ? "最近一年" : "Past year",
     weeks: zh ? "最近 16 周" : "Past 16 weeks",
     protected: zh ? "已保护" : "Protected",
-    added: zh ? "一年新增" : "Added this year",
+    added: zh ? "一年仓库新增" : "Repository added this year",
     days: zh ? "备份天数" : "Backup days",
     currentStreak: zh ? "当前连续" : "Current streak",
     longestStreak: zh ? "最长连续" : "Longest streak",
@@ -61,7 +61,7 @@ const activityCopy = () => {
     warning: zh ? "警告" : "warnings",
     failed: zh ? "异常" : "failed",
     running: zh ? "进行中" : "running",
-    addedOnDay: zh ? "新增" : "added",
+    addedOnDay: zh ? "仓库新增" : "repository added",
     weekdays: zh
       ? ["", "一", "", "三", "", "五", ""]
       : ["", "Mon", "", "Wed", "", "Fri", ""],
