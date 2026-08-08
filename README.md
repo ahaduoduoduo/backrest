@@ -34,13 +34,13 @@ credentials are never sent to the browser. Source selection, excludes,
 snapshot browsing, historical versions, single-file restore, retention, check,
 and prune continue to use Backrest's existing plan and repository model.
 
-The dashboard uses a contribution-style yearly backup activity wall, an
-on-demand glass navigation panel, and a divided OpenList traffic strip. The traffic
-strip reports bytes actually sent toward 115, while plan cards report Restic's
-logical repository additions. The mobile navigation remains a full-screen
-numbered contents page. The plan editor maps Synology mounts and standard Restic
-exclude patterns to named switches while retaining exact paths and glob rules
-under an advanced section.
+The dashboard uses a contribution-style yearly backup activity wall, a
+root-level neutral glass navigation panel, and a divided OpenList traffic strip.
+The traffic strip reports bytes actually sent toward 115, while plan cards
+report Restic's logical repository additions. The mobile navigation remains a
+full-screen numbered contents page. The plan editor maps Synology mounts and
+standard Restic exclude patterns to named switches while retaining exact paths
+and glob rules under an advanced section.
 
 See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
 recovery configuration.

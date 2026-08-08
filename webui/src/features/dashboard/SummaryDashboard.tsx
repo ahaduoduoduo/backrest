@@ -186,8 +186,7 @@ const ProgressBar = ({ pct }: { pct: number }) => (
       style={{
         height: "100%",
         borderRadius: "999px",
-        background:
-          "linear-gradient(90deg, var(--chakra-colors-blue-500) 0%, var(--chakra-colors-blue-300) 100%)",
+        background: "rgba(224, 228, 234, 0.68)",
       }}
     />
   </Box>

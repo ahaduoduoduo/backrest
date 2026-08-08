@@ -33,6 +33,7 @@ import {
   Spinner,
   Separator,
   IconButton,
+  Portal,
 } from "@chakra-ui/react";
 import { Tooltip } from "../components/ui/tooltip";
 import { keyframes } from "@emotion/react";
@@ -648,7 +649,7 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
         <Flex align="center" px={2} pt={1} pb={3} pr={10}>
           <Box>
             <Text
-              color="blue.300"
+              color="whiteAlpha.550"
               fontFamily="mono"
               fontSize="9px"
               letterSpacing="0.16em"
@@ -718,7 +719,7 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
             borderRadius="12px"
           >
             <Flex align="center" gap={2.5} width="full">
-              <Text color="blue.300" fontFamily="mono" fontSize="9px">
+              <Text color="whiteAlpha.450" fontFamily="mono" fontSize="9px">
                 02
               </Text>
               <FiCalendar />
@@ -779,7 +780,7 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
             borderRadius="12px"
           >
             <Flex align="center" gap={2.5} width="full">
-              <Text color="blue.300" fontFamily="mono" fontSize="9px">
+              <Text color="whiteAlpha.450" fontFamily="mono" fontSize="9px">
                 03
               </Text>
               <FiDatabase />
@@ -966,8 +967,10 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => {
 
 const DesktopNavTrigger = () => {
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [open, setOpen] = useState(false);
   const closeNavigation = useCallback(() => {
     detailsRef.current?.removeAttribute("open");
+    setOpen(false);
   }, []);
 
   useEffect(() => {
@@ -979,7 +982,11 @@ const DesktopNavTrigger = () => {
   }, [closeNavigation]);
 
   return (
-    <details ref={detailsRef} className="console-navigation-details">
+    <details
+      ref={detailsRef}
+      className="console-navigation-details"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
       <summary
         className="console-navigation-trigger"
         aria-label={m.app_menu()}
@@ -987,27 +994,34 @@ const DesktopNavTrigger = () => {
       >
         <FiMenu />
       </summary>
-      <Box className="console-navigation-backdrop" onClick={closeNavigation}>
-        <Box
-          as="aside"
-          id="desktop-navigation-panel"
-          role="dialog"
-          aria-modal="true"
-          aria-label={m.app_menu()}
-          className="console-navigation-drawer"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <button
-            type="button"
-            aria-label={m.button_close()}
+      {open && (
+        <Portal>
+          <Box
+            className="console-navigation-backdrop"
             onClick={closeNavigation}
-            className="console-navigation-close"
           >
-            <FiX />
-          </button>
-          <SidebarContent onClose={closeNavigation} />
-        </Box>
-      </Box>
+            <Box
+              as="aside"
+              id="desktop-navigation-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-label={m.app_menu()}
+              className="console-navigation-drawer"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                aria-label={m.button_close()}
+                onClick={closeNavigation}
+                className="console-navigation-close"
+              >
+                <FiX />
+              </button>
+              <SidebarContent onClose={closeNavigation} />
+            </Box>
+          </Box>
+        </Portal>
+      )}
     </details>
   );
 };

@@ -117,7 +117,7 @@ const UsageMetric = ({
           <Box
             h="full"
             width={`${percent}%`}
-            bg="linear-gradient(90deg, #61b8ff, #8b6cff)"
+            bg="rgba(224, 228, 234, 0.62)"
             borderRadius="full"
           />
         </Box>

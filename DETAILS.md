@@ -34,8 +34,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   `Plan.iexcludes` fields.
 - `webui/src/index.sass`, `webui/src/app/App.tsx`, and
   `webui/src/components/layout/MainContentArea.tsx`: fixed dark application
-  shell, on-demand glass desktop navigation, responsive navigation, spacing,
-  border, and canvas treatment.
+  shell, page-root neutral glass desktop navigation, responsive navigation,
+  spacing, border, and canvas treatment.
 - `webui/src/components/layout/MobileNavigation.tsx`: full-screen mobile
   contents index for dashboard, plans, repositories, and settings.
 - `webui/src/components/common/TwoPaneModal.tsx`: desktop two-pane editor and a
