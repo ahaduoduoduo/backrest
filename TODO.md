@@ -4,6 +4,10 @@ Updated: 2026-08-08
 
 ## Completed
 
+- [x] 2026-08-08: Replace the dashboard backup-scope index and decorative hero
+  with a responsive contribution-style activity wall showing protected bytes,
+  yearly additions, active days, and backup streaks from the local operation
+  log; keep source and exclusion controls in plan configuration.
 - [x] 2026-08-08: Add a Dockerized Vite development service with HMR, persistent
   dependency caches, and same-origin proxying to the deployed Backrest API.
 - [x] 2026-08-06: Add the missing mobile viewport declaration and replace the

@@ -49,6 +49,9 @@ Frontend work can run through the Dockerized Vite development service without
 rebuilding the embedded Go binary. Setup and request routing are documented in
 [docs/webui-development.md](docs/webui-development.md).
 
+The customized dashboard presents a contribution-style yearly backup activity
+wall while backup sources and exclusion rules remain in each plan editor.
+
 ## Key Features
 
 - **Web Interface**: Access locally or remotely (perfect for NAS deployments)

@@ -19,14 +19,13 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `cmd/backrest/backrest.go`: registers the proxy inside Backrest's existing
   authenticated route set.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response.
-- `webui/src/features/dashboard/BackupHero.tsx`: large protected-size metric
-  integrated with the purple/blue activity surface on phone and desktop.
+- `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
+  backup activity wall and protected-data metrics derived from Backrest's local
+  operation log; operation queries do not read repository data.
 - `webui/src/features/dashboard/GatewayUsageCard.tsx`: current 115 day, month,
   and rate values from OpenList.
-- `webui/src/features/dashboard/BackupScopeOverview.tsx`: numbered editorial
-  index of uploaded and skipped content, with direct plan editing.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
-  summary data and the optional OpenList panel.
+  summary data, activity overview, and the optional OpenList panel.
 - `webui/src/features/plans/backupScopeCatalog.ts`: reusable mapping from the
   deployed Synology mount paths and Restic patterns to concise labels.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: guided source and exclusion

@@ -44,9 +44,8 @@ import { useConfig } from "../../app/provider";
 import { useSyncStates } from "../../state/peerStates";
 import * as m from "../../paraglide/messages";
 import { HistoryStrip } from "./HistoryStrip";
-import { BackupHero } from "./BackupHero";
 import { GatewayUsageCard } from "./GatewayUsageCard";
-import { BackupScopeOverview } from "./BackupScopeOverview";
+import { BackupActivityOverview } from "./BackupActivityOverview";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -146,15 +145,6 @@ const STATE_COLORS: Record<PlanState, string> = {
   idle: "gray.400",
 };
 
-// Worst-wins ordering used to derive the hero state across all plans.
-const STATE_SEVERITY: Record<PlanState, number> = {
-  err: 3,
-  warn: 2,
-  run: 1,
-  ok: 0,
-  idle: -1,
-};
-
 const STATE_LABEL: Record<PlanState, () => string> = {
   ok: m.dashboard_state_label_ok,
   warn: m.dashboard_hero_warn,
@@ -202,45 +192,6 @@ const ProgressBar = ({ pct }: { pct: number }) => (
     />
   </Box>
 );
-
-// ─── Hero banner ──────────────────────────────────────────────────────────────
-
-const HERO_TITLE: Record<PlanState, () => string> = {
-  ok: m.dashboard_hero_ok,
-  run: m.dashboard_hero_run,
-  warn: m.dashboard_hero_warn,
-  err: m.dashboard_hero_err,
-  idle: m.dashboard_hero_idle,
-};
-
-interface HeroStats {
-  state: PlanState;
-  newestMs: number;
-  nextMs: number | null;
-}
-
-// Worst state across all plans (a running backup takes over the hero), the
-// newest backup time, and the soonest upcoming backup time.
-function heroStats(plans: SummaryDashboardResponse_Summary[]): HeroStats {
-  let state: PlanState = "idle";
-  let newestMs = 0;
-  let nextMs: number | null = null;
-  let anyRunning = false;
-
-  for (const summary of plans) {
-    const status = summaryStatus(summary);
-    anyRunning ||= status.running;
-    newestMs = Math.max(newestMs, status.latestTs);
-    if (STATE_SEVERITY[status.state] > STATE_SEVERITY[state]) {
-      state = status.state;
-    }
-    const next = Number(summary.nextBackupTimeMs ?? 0);
-    if (next > 0 && (nextMs === null || next < nextMs)) nextMs = next;
-  }
-
-  if (anyRunning) state = "run";
-  return { state, newestMs, nextMs };
-}
 
 // ─── Live progress hook ───────────────────────────────────────────────────────
 
@@ -772,41 +723,17 @@ export const SummaryDashboard = () => {
   }
 
   const plans = summaryData.planSummaries;
-  const hero = heroStats(plans);
   const protectedBytes = summaryData.repoSummaries.reduce(
     (total, summary) => total + Number(summary.protectedBytes),
     0,
   );
-  const bytesAdded30Days = plans.reduce(
-    (total, summary) => total + Number(summary.bytesAddedLast30days),
-    0,
-  );
-  const nextBackup = hero.nextMs ? untilText(hero.nextMs) : null;
 
   return (
     <Stack gap={{ base: 4, md: 8 }} width="full">
-      <BackupScopeOverview plans={config?.plans ?? []} />
-
-      {plans.length > 0 && (
-        <BackupHero
-          title={HERO_TITLE[hero.state]()}
-          state={hero.state}
-          protectedBytes={protectedBytes}
-          bytesAdded30Days={bytesAdded30Days}
-          planCount={plans.length}
-          lastBackup={
-            hero.newestMs
-              ? m.dashboard_hero_last_backup({ ago: agoText(hero.newestMs) })
-              : m.dashboard_hero_no_backups()
-          }
-          nextBackup={
-            nextBackup ? m.dashboard_hero_next({ when: nextBackup }) : null
-          }
-          protectedLabel={m.dashboard_card_protected()}
-          addedLabel={m.dashboard_repo_added()}
-          plansLabel={m.app_menu_plans()}
-        />
-      )}
+      <BackupActivityOverview
+        protectedBytes={protectedBytes}
+        planIds={plans.map((plan) => plan.id)}
+      />
 
       <GatewayUsageCard usage={openListUsage} />
 

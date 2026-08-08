@@ -112,7 +112,7 @@ export const MobileNavigation = ({ onClose }: { onClose: () => void }) => {
       <MobileNavRow
         index="01"
         title={m.app_menu_dashboard()}
-        detail="状态、流量与备份内容"
+        detail="状态、流量与备份记录"
         active={location.pathname === "/"}
         onClick={() => navigateTo("/")}
       />
