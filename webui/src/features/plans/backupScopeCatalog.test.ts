@@ -10,10 +10,18 @@ import {
 
 describe("backupScopeCatalog", () => {
   it("maps mounted Synology paths to readable source groups", () => {
-    const paths = ["/source/docker", "/staging", "/custom/archive"];
+    const paths = [
+      "/source/docker",
+      "/source/docker-volumes/telegram-data",
+      "/source/web-live",
+      "/staging",
+      "/custom/archive",
+    ];
 
     expect(getKnownSources(paths).map((source) => source.id)).toEqual([
       "docker",
+      "docker-named-volumes",
+      "web-live",
       "recovery-staging",
     ]);
     expect(getCustomPaths(paths)).toEqual(["/custom/archive"]);
