@@ -1,6 +1,11 @@
 name: Custom Docker image
 
 on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
   workflow_dispatch:
 
 permissions:

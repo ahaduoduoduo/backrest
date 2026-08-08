@@ -1,6 +1,6 @@
 # WebUI hot-reload development
 
-Updated: 2026-08-08
+Updated: 2026-08-09
 
 The production Backrest binary embeds `webui/dist`. Visual iteration does not
 need to rebuild that binary or a Docker image. The development Compose service
@@ -58,5 +58,7 @@ development session.
 ## Release boundary
 
 Use the Vite service for iterative visual work. After the selected interface
-passes TypeScript, component, and mobile browser checks, run the manual GitHub
-Actions image workflow once and deploy its immutable SHA tag.
+passes TypeScript, component, and mobile browser checks, merge it into `main`.
+The GitHub Actions image workflow runs automatically and publishes an immutable
+SHA tag for production deployment. The manual trigger remains available for a
+rebuild of the same branch state.

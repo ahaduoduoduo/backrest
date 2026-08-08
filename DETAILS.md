@@ -5,6 +5,9 @@ Updated: 2026-08-09
 The fork retains upstream Backrest's Go orchestrator, Restic process runner,
 configuration model, operation log, snapshot browser, and restore operations.
 
+- `.github/workflows/custom-image.yml`: builds the production linux/amd64 image
+  after non-documentation changes reach `main`, retains a manual rebuild entry,
+  and publishes both a stable console tag and an immutable commit tag.
 - `compose.dev.yaml`: Dockerized Vite HMR service attached to the deployed
   Backrest network; source and dependency caches are separate volumes.
 - `webui/vite.config.ts`: separates the browser-visible same-origin backend URL

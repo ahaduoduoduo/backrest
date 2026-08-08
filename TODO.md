@@ -4,6 +4,9 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Build and publish the custom linux/amd64 Backrest image
+  automatically after non-documentation changes reach `main`, while retaining
+  manual rebuild support and immutable commit tags.
 - [x] 2026-08-09: Correct every 30-day backup strip to chronological order,
   with the oldest date on the left and today on the right, and add a regression
   test for the date mapping.
@@ -44,8 +47,8 @@ Updated: 2026-08-09
   patterns with named backup and exclusion controls, plus a dashboard summary.
 - [x] 2026-08-06: Run feature-branch tests only for pull requests, avoiding a
   duplicate full test matrix for every pushed commit.
-- [x] 2026-08-06: Add a manual GitHub Actions build that publishes one
-  linux/amd64 Backrest image with bundled Restic and immutable commit tags.
+- [x] 2026-08-06: Add a GitHub Actions build that publishes one linux/amd64
+  Backrest image with bundled Restic and immutable commit tags.
 - [x] 2026-08-06: Fork Backrest under `ahaduoduoduo` and isolate the work on
   `agent/restic-backup-console`.
 - [x] 2026-08-06: Add an authenticated backend proxy for OpenList Restic upload
