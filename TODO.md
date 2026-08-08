@@ -4,6 +4,12 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Correct every 30-day backup strip to chronological order,
+  with the oldest date on the left and today on the right, and add a regression
+  test for the date mapping.
+- [x] 2026-08-09: Limit the dashboard to backup activity and task status; move
+  repository capacity and 30-day health to repository pages, and move runtime
+  paths plus configuration JSON to Settings.
 - [x] 2026-08-09: Remove the backup-calendar intensity legend and add a
   desktop-hover and mobile-tap detail panel for each day's processed backup
   size and repository upload amount.

@@ -7,7 +7,7 @@ import {
   Text,
   Box,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useShowModal } from "../../components/common/ModalManager";
 import {
   FiPlus as Plus,
@@ -18,10 +18,17 @@ import {
   FiSettings,
   FiLock,
   FiGlobe,
+  FiServer,
 } from "react-icons/fi";
 import { formatErrorAlert, alerts } from "../../components/common/Alerts";
 import { backrestService, authenticationService } from "../../api/client";
-import { clone, create, fromJson, toJson } from "@bufbuild/protobuf";
+import {
+  clone,
+  create,
+  fromJson,
+  toJson,
+  toJsonString,
+} from "@bufbuild/protobuf";
 import {
   AuthSchema,
   ConfigSchema,
@@ -54,6 +61,13 @@ import {
 } from "../../components/common/TwoPaneModal";
 import { SectionCard } from "../../components/common/SectionCard";
 import { ToggleField } from "../../components/common/ToggleField";
+import {
+  AccordionItem,
+  AccordionItemContent,
+  AccordionItemTrigger,
+  AccordionRoot,
+} from "../../components/ui/accordion";
+import { DataListItem, DataListRoot } from "../../components/ui/data-list";
 
 export const SettingsModal = () => {
   const [config, setConfig] = useConfig();
@@ -72,6 +86,28 @@ export const SettingsModal = () => {
   const [initialTokenCount] = useState(
     () => config?.multihost?.pairingTokens?.length || 0,
   );
+  const [systemInfo, setSystemInfo] = useState<{
+    configPath: string;
+    dataPath: string;
+  } | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    backrestService
+      .getSummaryDashboard({})
+      .then((summary) => {
+        if (!disposed) {
+          setSystemInfo({
+            configPath: summary.configPath,
+            dataPath: summary.dataPath,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   // Local state initialized from config
   const [formData, setFormData] = useState<any>(() => {
@@ -251,6 +287,11 @@ export const SettingsModal = () => {
           } as SectionDef,
         ]
       : []),
+    {
+      id: "system",
+      label: m.dashboard_system_info_title(),
+      icon: <FiServer size={14} />,
+    },
   ];
 
   return (
@@ -585,6 +626,49 @@ export const SettingsModal = () => {
           </SectionCard>
         </TwoPaneSection>
       )}
+
+      <TwoPaneSection id="system">
+        <SectionCard
+          icon={<FiServer size={16} />}
+          title={m.dashboard_system_info_title()}
+        >
+          <Stack gap={4}>
+            <DataListRoot orientation="horizontal">
+              <DataListItem
+                label={m.dashboard_config_path()}
+                value={systemInfo?.configPath ?? m.loading()}
+              />
+              <DataListItem
+                label={m.dashboard_data_dir()}
+                value={systemInfo?.dataPath ?? m.loading()}
+              />
+            </DataListRoot>
+
+            <AccordionRoot collapsible variant="plain">
+              <AccordionItem value="config">
+                <AccordionItemTrigger>
+                  {m.dashboard_config_json()}
+                </AccordionItemTrigger>
+                <AccordionItemContent>
+                  <Box
+                    as="pre"
+                    p={3}
+                    bg="#0c0e12"
+                    color="whiteAlpha.800"
+                    border="1px solid"
+                    borderColor="whiteAlpha.100"
+                    borderRadius="md"
+                    fontSize="xs"
+                    overflowX="auto"
+                  >
+                    {toJsonString(ConfigSchema, config, { prettySpaces: 2 })}
+                  </Box>
+                </AccordionItemContent>
+              </AccordionItem>
+            </AccordionRoot>
+          </Stack>
+        </SectionCard>
+      </TwoPaneSection>
     </TwoPaneModal>
   );
 };

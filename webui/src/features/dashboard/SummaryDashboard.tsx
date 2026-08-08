@@ -11,10 +11,9 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import React, { useEffect, useMemo, useState } from "react";
-import { FiDatabase, FiServer } from "react-icons/fi";
+import { FiServer } from "react-icons/fi";
 import { useNavigate } from "react-router";
-import { toJsonString } from "@bufbuild/protobuf";
-import { ConfigSchema, Multihost } from "../../../gen/ts/v1/config_pb";
+import { Multihost } from "../../../gen/ts/v1/config_pb";
 import { Operation, OperationStatus } from "../../../gen/ts/v1/operations_pb";
 import {
   GetOperationsRequestSchema,
@@ -31,12 +30,6 @@ import { getOperations, operationsStream } from "../../api/oplog";
 import { matchSelector } from "../../api/logState";
 import { alerts } from "../../components/common/Alerts";
 import { PeerStateConnectionStatusIcon } from "../../components/common/SyncStateIcon";
-import {
-  AccordionItem,
-  AccordionItemContent,
-  AccordionItemTrigger,
-  AccordionRoot,
-} from "../../components/ui/accordion";
 import { DataListItem, DataListRoot } from "../../components/ui/data-list";
 import { EmptyState } from "../../components/ui/empty-state";
 import { formatBytes, formatDuration, formatTime } from "../../lib/formatting";
@@ -461,216 +454,6 @@ const PlanCard = ({
   );
 };
 
-// ─── Repo card (slimmed — no schedule/next-run) ───────────────────────────────
-
-const RepoCard = ({
-  summary,
-}: {
-  summary: SummaryDashboardResponse_Summary;
-}) => {
-  const status = summaryStatus(summary);
-  const protectedBytes = Number(summary.protectedBytes);
-  const bytesAdded30d = Number(summary.bytesAddedLast30days);
-
-  return (
-    <Card.Root borderRadius="2xl" shadow="sm">
-      <Card.Body px={5} py={5}>
-        <Flex justify="space-between" align="flex-start" gap={3}>
-          <CardTitle>{summary.id}</CardTitle>
-          <Box mt="6px" flexShrink={0}>
-            <StatusDot color={status.color} />
-          </Box>
-        </Flex>
-
-        <StatusLine status={status} />
-
-        <Flex flexWrap="wrap" gap="4px 18px" mt={3}>
-          <Box fontSize="12.5px" color="fg.muted">
-            {m.dashboard_repo_window_30d()}{" "}
-            <Text as="span" fontWeight="600" color="green.500">
-              {summary.backupsSuccessLast30days
-                ? m.dashboard_repo_ok({
-                    count: Number(summary.backupsSuccessLast30days),
-                  })
-                : ""}
-            </Text>
-            {summary.backupsFailed30days ? (
-              <Text as="span" fontWeight="600" color="red.500" ml={2}>
-                {m.dashboard_repo_failed({
-                  count: Number(summary.backupsFailed30days),
-                })}
-              </Text>
-            ) : null}
-          </Box>
-          {protectedBytes > 0 && (
-            <MetaItem label={m.dashboard_card_protected()}>
-              {formatBytes(protectedBytes)}
-            </MetaItem>
-          )}
-          {bytesAdded30d > 0 && (
-            <MetaItem label={m.dashboard_repo_added()}>
-              {formatBytes(bytesAdded30d)}
-            </MetaItem>
-          )}
-        </Flex>
-
-        {/* 30-day history strip */}
-        <HistoryStrip buckets={summary.historyLast30days} />
-      </Card.Body>
-    </Card.Root>
-  );
-};
-
-// ─── Recent activity timeline ─────────────────────────────────────────────────
-
-interface ActivityRow {
-  planId: string;
-  flowId: bigint;
-  status: OperationStatus;
-  timestampMs: number;
-  durationMs: number;
-  bytesAdded: number;
-}
-
-function rowLabel(status: OperationStatus): string {
-  if (status === OperationStatus.STATUS_SUCCESS)
-    return m.dashboard_activity_row_completed();
-  if (status === OperationStatus.STATUS_WARNING)
-    return m.dashboard_activity_row_completed_warnings();
-  if (status === OperationStatus.STATUS_ERROR)
-    return m.dashboard_activity_row_failed();
-  return m.dashboard_activity_row_ran();
-}
-
-const RecentActivity = ({
-  summaries,
-}: {
-  summaries: SummaryDashboardResponse_Summary[];
-}) => {
-  const [config] = useConfig();
-
-  // planId -> destination repo ID, derived from config.
-  const destByPlan = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const plan of config?.plans ?? []) {
-      map.set(plan.id, plan.repo ?? "");
-    }
-    return map;
-  }, [config]);
-
-  const rows = useMemo<ActivityRow[]>(() => {
-    const all: ActivityRow[] = [];
-    for (const s of summaries) {
-      const rb = s.recentBackups;
-      if (!rb) continue;
-      for (let i = 0; i < rb.timestampMs.length; i++) {
-        const status = rb.status[i];
-        if (
-          status === OperationStatus.STATUS_INPROGRESS ||
-          status === OperationStatus.STATUS_PENDING
-        )
-          continue;
-        all.push({
-          planId: s.id,
-          flowId: rb.flowId[i],
-          status,
-          timestampMs: Number(rb.timestampMs[i]),
-          durationMs: Number(rb.durationMs[i]),
-          bytesAdded: Number(rb.bytesAdded[i]),
-        });
-      }
-    }
-    all.sort((a, b) => b.timestampMs - a.timestampMs);
-    return all.slice(0, 8);
-  }, [summaries]);
-
-  if (rows.length === 0) {
-    return (
-      <Card.Root borderRadius="2xl" shadow="sm">
-        <Card.Body>
-          <Text color="fg.muted" textAlign="center" py={8} fontSize="sm">
-            {m.dashboard_activity_no_backups()}
-          </Text>
-        </Card.Body>
-      </Card.Root>
-    );
-  }
-
-  return (
-    <Card.Root borderRadius="2xl" shadow="sm" overflow="hidden">
-      {rows.map((row, i) => {
-        const dotColor = STATE_COLORS[planState(row.status, false)];
-        const dest = destByPlan.get(row.planId);
-
-        // Muted secondary line: relative + absolute time, duration, destination.
-        const detailParts: string[] = [agoText(row.timestampMs)];
-        detailParts.push(formatTime(row.timestampMs));
-        if (row.durationMs > 0) {
-          detailParts.push(
-            m.op_subtitle_took({
-              duration: formatDuration(row.durationMs),
-            }),
-          );
-        }
-        if (dest) detailParts.push(dest);
-
-        return (
-          <Box
-            key={`${row.planId}-${row.flowId}`}
-            px={5}
-            py="13px"
-            borderTop={i === 0 ? "none" : "1px solid"}
-            borderColor="border.subtle"
-          >
-            <Flex align="center" gap="13px">
-              <Box
-                w="8px"
-                h="8px"
-                borderRadius="full"
-                bg={dotColor}
-                flexShrink={0}
-              />
-              <Box flex={1} minW={0}>
-                <Flex align="baseline" gap="7px" minW={0}>
-                  <Text fontSize="14px" fontWeight="550" truncate>
-                    {prettyPlanId(row.planId)}
-                  </Text>
-                  <Text
-                    fontSize="12.5px"
-                    fontWeight="600"
-                    color={dotColor}
-                    flexShrink={0}
-                  >
-                    {rowLabel(row.status)}
-                  </Text>
-                </Flex>
-                <Text fontSize="12.5px" color="fg.muted" truncate>
-                  {detailParts.join(" · ")}
-                </Text>
-              </Box>
-              {row.bytesAdded > 0 && (
-                <Box flexShrink={0} textAlign="right">
-                  <Text fontSize="10px" color="fg.subtle" lineHeight="1.2">
-                    {m.dashboard_card_last_upload()}
-                  </Text>
-                  <Text
-                    mt={1}
-                    fontSize="12.5px"
-                    color="fg.muted"
-                    fontVariantNumeric="tabular-nums"
-                  >
-                    {formatBytes(row.bytesAdded)}
-                  </Text>
-                </Box>
-              )}
-            </Flex>
-          </Box>
-        );
-      })}
-    </Card.Root>
-  );
-};
-
 // ─── Root component ───────────────────────────────────────────────────────────
 
 export const SummaryDashboard = () => {
@@ -762,64 +545,6 @@ export const SummaryDashboard = () => {
         </Stack>
       )}
 
-      {/* Recent activity */}
-      {plans.length > 0 && (
-        <Stack gap={4}>
-          <Heading size="md">{m.dashboard_activity_title()}</Heading>
-          <RecentActivity summaries={plans} />
-        </Stack>
-      )}
-
-      {/* Repos */}
-      <Stack gap={4}>
-        <Heading size="md">{m.dashboard_repos_title()}</Heading>
-        {summaryData.repoSummaries.length > 0 ? (
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-            {summaryData.repoSummaries.map((s) => (
-              <RepoCard key={s.id} summary={s} />
-            ))}
-          </SimpleGrid>
-        ) : (
-          <EmptyState title={m.dashboard_repos_empty()} icon={<FiDatabase />} />
-        )}
-      </Stack>
-
-      {/* System Info */}
-      <Stack gap={4}>
-        <Heading size="md">{m.dashboard_system_info_title()}</Heading>
-        <DataListRoot orientation="horizontal">
-          <DataListItem
-            label={m.dashboard_config_path()}
-            value={summaryData.configPath}
-          />
-          <DataListItem
-            label={m.dashboard_data_dir()}
-            value={summaryData.dataPath}
-          />
-        </DataListRoot>
-
-        <AccordionRoot collapsible variant="plain">
-          <AccordionItem value="config">
-            <AccordionItemTrigger>
-              {m.dashboard_config_json()}
-            </AccordionItemTrigger>
-            <AccordionItemContent>
-              <Box
-                as="pre"
-                p={2}
-                bg="gray.900"
-                color="white"
-                borderRadius="md"
-                fontSize="xs"
-                overflowX="auto"
-              >
-                {config &&
-                  toJsonString(ConfigSchema, config, { prettySpaces: 2 })}
-              </Box>
-            </AccordionItemContent>
-          </AccordionItem>
-        </AccordionRoot>
-      </Stack>
     </Stack>
   );
 };

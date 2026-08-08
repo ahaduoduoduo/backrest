@@ -25,7 +25,17 @@ configuration model, operation log, snapshot browser, and restore operations.
   repository-added bytes through a hover/tap detail panel; operation queries
   do not read repository data.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
-  summary data and the activity overview.
+  activity data and backup-task cards without duplicating repository or system
+  administration details on the dashboard.
+- `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
+  status strips in chronological order, from the oldest date on the left to
+  today on the right, with per-day backup-size details.
+- `webui/src/features/repositories/RepoView.tsx`: repository file browser,
+  operations, storage statistics, maintenance actions, and a top-level 30-day
+  capacity and backup-health summary.
+- `webui/src/features/settings/SettingsModal.tsx`: instance, authentication,
+  multihost, and read-only system information including runtime paths and the
+  saved configuration JSON.
 - `webui/src/features/repositories/OpenListRepositoryRate.tsx`: resolves an
   OpenList REST repository name from its URI and displays its effective upload
   rate inside repository settings.

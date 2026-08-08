@@ -16,12 +16,14 @@ import { StringValueSchema } from "../../../gen/ts/types/value_pb";
 
 // The modal renders inside a Portal (TwoPaneModal -> DialogRoot/Portal), so the
 // content lives on document.body; `screen` queries reach it. There is no
-// getConfig-on-mount call: SettingsModal seeds its form from the injected
-// ConfigContext value and only hits backrestService on save / token actions.
-// generatePairingToken is only invoked from an explicit button, never on
-// render, but default it to resolve harmlessly in case anything triggers it.
+// SettingsModal seeds its editable form from ConfigContext and separately
+// loads the read-only system paths shown in the System Info section.
 const primeDefaults = () => {
   vi.mocked(backrestService.generatePairingToken).mockResolvedValue({} as any);
+  vi.mocked(backrestService.getSummaryDashboard).mockResolvedValue({
+    configPath: "/config/config.json",
+    dataPath: "/data",
+  } as any);
 };
 
 const instancePlaceholder = m.settings_field_instance_id_placeholder();
@@ -38,6 +40,10 @@ describe("SettingsModal (first-run path)", () => {
 
     expect(await screen.findByText(initialSetupTitle)).toBeInTheDocument();
     expect(screen.getByText(m.app_menu_settings())).toBeInTheDocument();
+    expect(
+      await screen.findByText("/config/config.json"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("/data")).toBeInTheDocument();
 
     const instanceInput = screen.getByPlaceholderText(instancePlaceholder);
     expect(instanceInput).toHaveValue("");

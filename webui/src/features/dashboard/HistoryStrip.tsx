@@ -90,11 +90,11 @@ function cellKind(
 
 const MS_PER_DAY = 86_400_000;
 
-// Fixed 30-cell strip, most-recent day first (left). Buckets are matched to cells
-// by day distance from the newest bucket (always "today" on the server), which
-// tolerates server/browser timezone differences and any gaps in the bucket list.
+// Fixed 30-cell strip in conventional timeline order: oldest day on the left,
+// today on the right. Buckets are matched by day distance from the newest bucket
+// (always "today" on the server), which tolerates timezone differences and gaps.
 // Days before the plan's first backup render as dimmed "before start" cells.
-function toCells(
+export function toCells(
   buckets: SummaryDashboardResponse_DayStatusBucket[],
 ): DayCell[] {
   const midnight = new Date();
@@ -112,7 +112,8 @@ function toCells(
     maxDaysAgo = Math.max(maxDaysAgo, daysAgo);
   }
 
-  return Array.from({ length: HISTORY_DAYS }, (_, daysAgo): DayCell => {
+  return Array.from({ length: HISTORY_DAYS }, (_, index): DayCell => {
+    const daysAgo = HISTORY_DAYS - 1 - index;
     const date = new Date(midnight);
     date.setDate(midnight.getDate() - daysAgo);
     const bucket = byDaysAgo.get(daysAgo);
@@ -263,6 +264,9 @@ export const HistoryStrip = ({
               closeDelay={60}
             >
               <Box
+                data-testid="history-day"
+                data-is-today={c.isToday || undefined}
+                aria-label={c.label}
                 flexGrow={1}
                 flexShrink={1}
                 flexBasis={0}

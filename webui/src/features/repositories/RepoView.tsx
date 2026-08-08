@@ -1,7 +1,15 @@
 import React, { Suspense, useContext, useEffect, useState } from "react";
 import { Repo } from "../../../gen/ts/v1/config_pb";
 import { Button } from "../../components/ui/button";
-import { Flex, Heading, Box, Group, IconButton } from "@chakra-ui/react";
+import {
+  Flex,
+  Heading,
+  Box,
+  Group,
+  IconButton,
+  SimpleGrid,
+  Text,
+} from "@chakra-ui/react";
 import { FiChevronDown } from "react-icons/fi";
 import {
   Tabs,
@@ -28,6 +36,7 @@ import {
   DoRepoTaskRequestSchema,
   GetOperationsRequestSchema,
   OpSelectorSchema,
+  SummaryDashboardResponse_Summary,
 } from "../../../gen/ts/v1/service_pb";
 import { backrestService } from "../../api/client";
 import { SpinButton } from "../../components/common/SpinButton";
@@ -37,14 +46,125 @@ import { useShowModal } from "../../components/common/ModalManager";
 import { create } from "@bufbuild/protobuf";
 import { RepoProps } from "../../state/peerStates";
 import * as m from "../../paraglide/messages";
+import { formatBytes } from "../../lib/formatting";
+import { HistoryStrip } from "../dashboard/HistoryStrip";
 
 const StatsPanel = React.lazy(() => import("../dashboard/StatsPanel"));
+
+const RepositoryMetric = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: string;
+}) => (
+  <Box px={{ base: 4, md: 5 }} py={{ base: 4, md: 5 }} minW={0}>
+    <Text
+      color={tone}
+      fontSize={{ base: "20px", md: "24px" }}
+      fontWeight="520"
+      lineHeight="1"
+      letterSpacing="-0.035em"
+      fontVariantNumeric="tabular-nums"
+      truncate
+    >
+      {value}
+    </Text>
+    <Text mt={2} color="whiteAlpha.500" fontSize="11px">
+      {label}
+    </Text>
+  </Box>
+);
+
+const RepositoryOverview = ({
+  summary,
+}: {
+  summary: SummaryDashboardResponse_Summary;
+}) => (
+  <Box
+    mb={{ base: 5, md: 7 }}
+    border="1px solid"
+    borderColor="whiteAlpha.100"
+    borderRadius={{ base: "18px", md: "22px" }}
+    bg="#0c0e12"
+    overflow="hidden"
+    data-testid="repository-overview"
+  >
+    <SimpleGrid
+      columns={{ base: 2, md: 4 }}
+      css={{
+        "& > div": {
+          borderRight: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+        },
+      }}
+    >
+      <RepositoryMetric
+        label={m.dashboard_card_protected()}
+        value={formatBytes(Number(summary.protectedBytes))}
+      />
+      <RepositoryMetric
+        label={`${m.dashboard_repo_window_30d()} ${m.dashboard_repo_added()}`}
+        value={formatBytes(Number(summary.bytesAddedLast30days))}
+      />
+      <RepositoryMetric
+        label={`${m.dashboard_repo_window_30d()} ${m.dashboard_card_backups_ok()}`}
+        value={Number(summary.backupsSuccessLast30days).toLocaleString()}
+        tone="green.400"
+      />
+      <RepositoryMetric
+        label={`${m.dashboard_repo_window_30d()} ${m.dashboard_card_backups_failed()}`}
+        value={Number(summary.backupsFailed30days).toLocaleString()}
+        tone={summary.backupsFailed30days ? "orange.400" : undefined}
+      />
+    </SimpleGrid>
+    <Box px={{ base: 4, md: 5 }} pt={1} pb={{ base: 4, md: 5 }}>
+      <HistoryStrip buckets={summary.historyLast30days} />
+    </Box>
+  </Box>
+);
+
+const useRepositorySummary = (repoId: string) => {
+  const [summary, setSummary] =
+    useState<SummaryDashboardResponse_Summary | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    const load = () => {
+      if (document.hidden) return;
+      backrestService
+        .getSummaryDashboard({})
+        .then((response) => {
+          if (!disposed) {
+            setSummary(
+              response.repoSummaries.find((item) => item.id === repoId) ??
+                null,
+            );
+          }
+        })
+        .catch(() => {});
+    };
+    load();
+    document.addEventListener("visibilitychange", load);
+    const interval = window.setInterval(load, 60_000);
+    return () => {
+      disposed = true;
+      document.removeEventListener("visibilitychange", load);
+      window.clearInterval(interval);
+    };
+  }, [repoId]);
+
+  return summary;
+};
 
 export const RepoView = ({
   repo,
 }: React.PropsWithChildren<{ repo: RepoProps }>) => {
   const [config, _] = useConfig();
   const showModal = useShowModal();
+  const summary = useRepositorySummary(repo.id);
 
   // Task handlers
   const handleIndexNow = async () => {
@@ -193,6 +313,8 @@ export const RepoView = ({
           </MenuRoot>
         </Group>
       </Flex>
+
+      {summary && <RepositoryOverview summary={summary} />}
 
       <TabsRoot defaultValue="tree" lazyMount>
         <TabsList>
