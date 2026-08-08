@@ -75,6 +75,15 @@ export const BACKUP_SOURCE_OPTIONS: BackupSourceOption[] = [
     },
   },
   {
+    id: "dsm-package-config",
+    path: "/source/dsm-packages",
+    title: { zh: "DSM 套件配置", en: "DSM package settings" },
+    description: {
+      zh: "Container Manager、Download Station、DDNS 和 VMM 等套件设置。",
+      en: "Settings for Container Manager, Download Station, DDNS, VMM, and other packages.",
+    },
+  },
+  {
     id: "recovery-staging",
     path: "/staging",
     title: { zh: "群晖恢复资料", en: "Synology recovery files" },
@@ -181,6 +190,15 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
     description: {
       zh: "主机与备份服务之间的一次性请求和执行日志。",
       en: "One-time requests and execution logs exchanged by the host and backup service.",
+    },
+  },
+  {
+    id: "dsm-package-runtime",
+    patterns: ["/source/dsm-packages/appconf/Virtualization/ccc/etcd.data/**"],
+    title: { zh: "DSM 套件运行数据", en: "DSM package runtime data" },
+    description: {
+      zh: "跳过 VMM 活动状态；可迁移的套件配置仍会上传。",
+      en: "Omits active VMM state while retaining portable package settings.",
     },
   },
 ];

@@ -14,6 +14,7 @@ describe("backupScopeCatalog", () => {
       "/source/docker",
       "/source/docker-volumes/telegram-data",
       "/source/web-live",
+      "/source/dsm-packages",
       "/staging",
       "/custom/archive",
     ];
@@ -22,6 +23,7 @@ describe("backupScopeCatalog", () => {
       "docker",
       "docker-named-volumes",
       "web-live",
+      "dsm-package-config",
       "recovery-staging",
     ]);
     expect(getCustomPaths(paths)).toEqual(["/custom/archive"]);
