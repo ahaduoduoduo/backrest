@@ -61,7 +61,7 @@ export const BACKUP_SOURCE_OPTIONS: BackupSourceOption[] = [
     path: "/source/time-machine",
     title: { zh: "Time Machine", en: "Time Machine" },
     description: {
-      zh: "Mac 的完整本地备份包；此计划只承担异地容灾。",
+      zh: "Mac 的完整本地备份包；此备份任务只用于异地容灾。",
       en: "The complete local Mac backup bundle, copied only for off-site recovery.",
     },
   },
@@ -125,7 +125,7 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
     patterns: ["/source/docker/autofilm-suite/autofilm-core/data/backrest/**"],
     title: { zh: "Backrest 运行目录", en: "Backrest runtime data" },
     description: {
-      zh: "排除缓存、任务记录和本地仓库元数据，避免备份包含自身。",
+      zh: "排除缓存、任务记录和本地存储库元数据，避免备份包含自身。",
       en: "Omits cache, operation history, and local metadata so the backup does not include itself.",
     },
   },
@@ -167,18 +167,18 @@ export const scopeText = (locale = getLocale()) => {
       : "Use this for custom paths or exact Restic patterns.",
     overviewTitle: zh ? "备份内容" : "Backup content",
     overviewDescription: zh
-      ? "每个计划会上传哪些内容、跳过哪些内容。"
+      ? "每个备份任务会上传哪些内容、跳过哪些内容。"
       : "What each plan uploads and skips.",
     editorDescription: zh
       ? "选择需要上传的内容和可以跳过的内容。"
       : "Choose what to upload and what can be skipped.",
     editPlan: zh ? "编辑内容" : "Edit content",
     planCount: (count: number) =>
-      zh ? `${count} 个备份计划` : `${count} backup plans`,
+      zh ? `${count} 个备份任务` : `${count} backup plans`,
     detailsNav: zh ? "基本信息" : "Details",
     scopeNav: zh ? "备份内容" : "Content",
-    scheduleNav: zh ? "运行时间" : "Schedule",
-    retentionNav: zh ? "版本保留" : "Retention",
+    scheduleNav: zh ? "自动备份" : "Schedule",
+    retentionNav: zh ? "历史版本" : "Retention",
     advancedNav: zh ? "高级设置" : "Advanced",
     noExcludes: zh ? "没有设置排除项" : "No exclusions configured",
     noSources: zh ? "没有设置备份目录" : "No backup paths configured",

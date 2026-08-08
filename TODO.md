@@ -4,6 +4,10 @@ Updated: 2026-08-08
 
 ## Completed
 
+- [x] 2026-08-08: Replace scheduler, repository, snapshot, retention, and
+  maintenance terminology across the Chinese interface with direct backup
+  task language; distinguish deleting old version records from reclaiming
+  unreferenced storage space.
 - [x] 2026-08-08: Consolidate backup size and 115 upload usage into the activity
   wall, move effective upload rate to repository settings, use compact storage
   unit labels, and stabilize the Vite dashboard by removing React development

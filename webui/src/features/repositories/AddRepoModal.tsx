@@ -900,7 +900,7 @@ export const AddRepoModal = ({
                   checked={getField(["shared"]) || false}
                   onChange={(v) => updateField(["shared"], v)}
                   label={m.add_repo_modal_shared()}
-                  hint="If using multihost management, enables sharing this repo's configuration to all authorized clients with read permission."
+                  hint="启用后，具有读取权限的其他 Backrest 实例可以接收此存储库配置。"
                 />
                 {getField(["shared"]) && (
                   <CText fontSize="sm" color="orange.500">

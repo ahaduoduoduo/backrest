@@ -32,6 +32,11 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: guided source and exclusion
   controls backed by the unchanged `Plan.paths`, `Plan.excludes`, and
   `Plan.iexcludes` fields.
+- `webui/messages/zh.json`: plain-language Chinese product copy for navigation,
+  backup-task editing, storage repositories, version browsing, restore, and
+  maintenance operations. Destructive maintenance text preserves the
+  behavioral difference between deleting old version records and reclaiming
+  unreferenced storage space.
 - `webui/src/index.sass`, `webui/src/app/App.tsx`, and
   `webui/src/components/layout/MainContentArea.tsx`: fixed dark application
   shell, page-root neutral glass desktop navigation, responsive navigation,

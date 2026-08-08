@@ -41,6 +41,10 @@ the effective OpenList upload rate is shown in the matching repository editor.
 The mobile navigation remains a full-screen numbered contents page. The plan
 editor maps Synology mounts and standard Restic exclude patterns to named
 switches while retaining exact paths and glob rules under an advanced section.
+The Chinese interface uses task-oriented terms throughout: backup tasks,
+storage repositories, backup versions, file browsing, old-version deletion,
+space reclamation, and integrity checks. Restic command names remain in
+advanced descriptions only where they are needed to explain exact behavior.
 
 See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
 recovery configuration.

@@ -103,9 +103,9 @@ export const MobileNavigation = ({ onClose }: { onClose: () => void }) => {
           </Heading>
         </Box>
         <Text color="whiteAlpha.400" fontSize="11px" textAlign="right">
-          {config.plans.length} 个计划
+          {config.plans.length} 个备份任务
           <br />
-          {config.repos.length} 个仓库
+          {config.repos.length} 个存储库
         </Text>
       </Flex>
 
@@ -183,7 +183,7 @@ export const MobileNavigation = ({ onClose }: { onClose: () => void }) => {
           key={repo.id}
           index={`03.${index + 1}`}
           title={repo.id}
-          detail={repo.originInstanceId || "本机仓库"}
+          detail={repo.originInstanceId || "本机存储库"}
           active={location.pathname === `/repo/${repo.id}`}
           onClick={() => navigateTo(`/repo/${repo.id}`)}
           action={

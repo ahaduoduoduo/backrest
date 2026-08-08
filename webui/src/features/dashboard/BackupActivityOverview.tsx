@@ -51,7 +51,7 @@ const activityCopy = () => {
     todayUpload: zh ? "今日上传" : "Uploaded today",
     monthUpload: zh ? "本月上传" : "Uploaded this month",
     days: zh ? "备份天数" : "Backup days",
-    daily: zh ? "每日备份" : "Daily backups",
+    daily: zh ? "备份日历" : "Daily backups",
     less: zh ? "少" : "Less",
     more: zh ? "多" : "More",
     noBackup: zh ? "无备份" : "No backup",
@@ -59,7 +59,7 @@ const activityCopy = () => {
     warning: zh ? "警告" : "warnings",
     failed: zh ? "异常" : "failed",
     running: zh ? "进行中" : "running",
-    addedOnDay: zh ? "仓库新增" : "repository added",
+    addedOnDay: zh ? "本次新增" : "repository added",
     weekdays: zh
       ? ["", "一", "", "三", "", "五", ""]
       : ["", "Mon", "", "Wed", "", "Fri", ""],
