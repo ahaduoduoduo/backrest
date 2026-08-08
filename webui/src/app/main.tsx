@@ -23,11 +23,9 @@ const darkTheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const el = document.querySelector("#app");
 el &&
   createRoot(el).render(
-    <React.StrictMode>
-      <Root>
-        <HashRouter>
-          <App />
-        </HashRouter>
-      </Root>
-    </React.StrictMode>,
+    <Root>
+      <HashRouter>
+        <App />
+      </HashRouter>
+    </Root>,
   );

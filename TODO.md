@@ -4,13 +4,17 @@ Updated: 2026-08-08
 
 ## Completed
 
+- [x] 2026-08-08: Consolidate backup size and 115 upload usage into the activity
+  wall, move effective upload rate to repository settings, use compact storage
+  unit labels, and stabilize the Vite dashboard by removing React development
+  StrictMode around protobuf `bigint` state.
 - [x] 2026-08-08: Remove the persistent desktop navigation rail in favor of a
   header-triggered neutral glass navigation panel rendered at the page root,
   and clarify the difference between OpenList upload traffic and Restic
   repository additions throughout the dashboard.
 - [x] 2026-08-08: Replace the dashboard backup-scope index and decorative hero
-  with a responsive contribution-style activity wall showing protected bytes,
-  yearly additions, active days, and backup streaks from the local operation
+  with a responsive contribution-style activity wall showing backed-up bytes,
+  yearly backup size, upload traffic, and active days from the local operation
   log; keep source and exclusion controls in plan configuration.
 - [x] 2026-08-08: Add a Dockerized Vite development service with HMR, persistent
   dependency caches, and same-origin proxying to the deployed Backrest API.

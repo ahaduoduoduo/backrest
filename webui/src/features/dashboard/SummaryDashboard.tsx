@@ -44,7 +44,6 @@ import { useConfig } from "../../app/provider";
 import { useSyncStates } from "../../state/peerStates";
 import * as m from "../../paraglide/messages";
 import { HistoryStrip } from "./HistoryStrip";
-import { GatewayUsageCard } from "./GatewayUsageCard";
 import { BackupActivityOverview } from "./BackupActivityOverview";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -693,8 +692,10 @@ export const SummaryDashboard = () => {
         alerts.error(m.dashboard_error_fetch() + e);
       }
       getOpenListUsage()
-        .then(setOpenListUsage)
-        .catch(() => setOpenListUsage(null));
+        .then((usage) => {
+          if (usage) setOpenListUsage(usage);
+        })
+        .catch(() => {});
     };
 
     fetchData();
@@ -737,9 +738,8 @@ export const SummaryDashboard = () => {
       <BackupActivityOverview
         protectedBytes={protectedBytes}
         planIds={plans.map((plan) => plan.id)}
+        openListUsage={openListUsage}
       />
-
-      <GatewayUsageCard usage={openListUsage} />
 
       <MultihostSummary multihostConfig={config?.multihost ?? null} />
 

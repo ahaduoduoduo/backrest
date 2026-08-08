@@ -24,33 +24,33 @@ describe("formatBytes", () => {
     expect(formatBytes(1024)).toBe("1024 B");
   });
 
-  it("crosses the KiB boundary just above 1024", () => {
-    expect(formatBytes(1025)).toBe("1 KiB");
+  it("crosses the KB boundary just above 1024", () => {
+    expect(formatBytes(1025)).toBe("1 KB");
   });
 
-  it("does not convert at exactly 1024 KiB", () => {
-    expect(formatBytes(1024 * 1024)).toBe("1024 KiB");
+  it("does not convert at exactly 1024 KB", () => {
+    expect(formatBytes(1024 * 1024)).toBe("1024 KB");
   });
 
-  it("crosses the MiB boundary just above 1024 KiB", () => {
-    expect(formatBytes(1024 * 1024 + 1)).toBe("1 MiB");
+  it("crosses the MB boundary just above 1024 KB", () => {
+    expect(formatBytes(1024 * 1024 + 1)).toBe("1 MB");
   });
 
-  it("does not convert at exactly 1024 MiB", () => {
-    expect(formatBytes(1024 * 1024 * 1024)).toBe("1024 MiB");
+  it("does not convert at exactly 1024 MB", () => {
+    expect(formatBytes(1024 * 1024 * 1024)).toBe("1024 MB");
   });
 
-  it("crosses the GiB boundary just above 1024 MiB", () => {
-    expect(formatBytes(1024 * 1024 * 1024 + 1)).toBe("1 GiB");
+  it("crosses the GB boundary just above 1024 MB", () => {
+    expect(formatBytes(1024 * 1024 * 1024 + 1)).toBe("1 GB");
   });
 
   it("rounds to 2 decimal places", () => {
-    // 1500 bytes -> 1.46484375 KiB, rounded to 1.46
-    expect(formatBytes(1500)).toBe("1.46 KiB");
+    // 1500 bytes -> 1.46484375 KB, rounded to 1.46
+    expect(formatBytes(1500)).toBe("1.46 KB");
   });
 
   it("parses string input", () => {
-    expect(formatBytes("2048")).toBe("2 KiB");
+    expect(formatBytes("2048")).toBe("2 KB");
   });
 });
 

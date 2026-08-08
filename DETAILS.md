@@ -20,13 +20,13 @@ configuration model, operation log, snapshot browser, and restore operations.
   authenticated route set.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
-  backup activity wall and protected-data metrics derived from Backrest's local
-  operation log; operation queries do not read repository data.
-- `webui/src/features/dashboard/GatewayUsageCard.tsx`: current 115 day, month,
-  and rate values from OpenList. Day and month values are payload bytes sent by
-  the 115 driver and include retransmitted bytes when an upload part is retried.
+  backup activity wall combining Backrest operation metrics with current 115
+  day and month upload traffic; operation queries do not read repository data.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
-  summary data, activity overview, and the optional OpenList panel.
+  summary data and the activity overview.
+- `webui/src/features/repositories/OpenListRepositoryRate.tsx`: resolves an
+  OpenList REST repository name from its URI and displays its effective upload
+  rate inside repository settings.
 - `webui/src/features/plans/backupScopeCatalog.ts`: reusable mapping from the
   deployed Synology mount paths and Restic patterns to concise labels.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: guided source and exclusion

@@ -686,6 +686,6 @@
   "dashboard_gateway_title": "115 upload",
   "dashboard_gateway_today": "UPLOADED TODAY",
   "dashboard_gateway_month": "UPLOADED THIS MONTH",
-  "dashboard_gateway_rate": "RATE",
+  "dashboard_gateway_rate": "UPLOAD RATE",
   "dashboard_gateway_unlimited": "Unlimited"
 }

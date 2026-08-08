@@ -698,6 +698,6 @@
   "dashboard_gateway_title": "115 上传",
   "dashboard_gateway_today": "今日上传流量",
   "dashboard_gateway_month": "本月上传流量",
-  "dashboard_gateway_rate": "速率",
+  "dashboard_gateway_rate": "上传速率",
   "dashboard_gateway_unlimited": "不限"
 }

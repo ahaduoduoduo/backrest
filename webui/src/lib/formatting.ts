@@ -1,4 +1,4 @@
-const units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"];
+const units = ["B", "KB", "MB", "GB", "TB", "PB"];
 export const formatBytes = (bytes?: number | string) => {
   if (!bytes) {
     return "0B";

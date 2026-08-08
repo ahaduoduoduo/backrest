@@ -71,6 +71,7 @@ import {
   AccordionItemTrigger,
   AccordionItemContent,
 } from "../../components/ui/accordion";
+import { OpenListRepositoryRate } from "./OpenListRepositoryRate";
 
 const repoDefaults = create(RepoSchema, {
   prunePolicy: {
@@ -257,7 +258,11 @@ const SftpConfigSection = ({
       if (res.error) {
         setHostKeyWarning(res.error);
       }
-      alerts.success(m.add_repo_modal_generated_ssh_keypair_at_keyPath({ keyPath: res.keyPath }));
+      alerts.success(
+        m.add_repo_modal_generated_ssh_keypair_at_keyPath({
+          keyPath: res.keyPath,
+        }),
+      );
     } catch (e: any) {
       alerts.error(formatErrorAlert(e, m.add_repo_modal_sftp_setup_failed()));
     } finally {
@@ -276,7 +281,9 @@ const SftpConfigSection = ({
             <AccordionItemContent>
               <Stack gap={3} p={2}>
                 <CText fontSize="sm">
-                  {m.add_repo_modal_click_generate_key_to_create_an_ssh_key_pair_for_this_host_b()} <Code>{m.add_repo_modal_sshauthorized_keys()}</Code> {m.add_repo_modal_on_the_remote_server()}
+                  {m.add_repo_modal_click_generate_key_to_create_an_ssh_key_pair_for_this_host_b()}{" "}
+                  <Code>{m.add_repo_modal_sshauthorized_keys()}</Code>{" "}
+                  {m.add_repo_modal_on_the_remote_server()}
                 </CText>
                 <Button
                   size="sm"
@@ -300,7 +307,8 @@ const SftpConfigSection = ({
             </CText>
             <CText fontSize="sm">
               {m.add_repo_modal_add_the_following_public_key_to()}{" "}
-              <Code>{m.add_repo_modal_sshauthorized_keys()}</Code> {m.add_repo_modal_on_the_remote_server_2()}
+              <Code>{m.add_repo_modal_sshauthorized_keys()}</Code>{" "}
+              {m.add_repo_modal_on_the_remote_server_2()}
             </CText>
             <Box position="relative">
               <Code
@@ -334,7 +342,8 @@ const SftpConfigSection = ({
                 bg="yellow.subtle"
               >
                 <CText fontSize="sm" color="yellow.700">
-                  <strong>{m.add_repo_modal_host_key_scan_failed()}</strong> {hostKeyWarning}
+                  <strong>{m.add_repo_modal_host_key_scan_failed()}</strong>{" "}
+                  {hostKeyWarning}
                 </CText>
               </Box>
             )}
@@ -356,7 +365,9 @@ const SftpConfigSection = ({
 
       <Field
         label={m.add_repo_modal_sftp_port()}
-        helperText={m.add_repo_modal_optional_specify_a_custom_port_for_sftp_connection_defaults({ port: 22 })}
+        helperText={m.add_repo_modal_optional_specify_a_custom_port_for_sftp_connection_defaults(
+          { port: 22 },
+        )}
       >
         <NumberInputField
           data-testid="add-repo-sftp-port"
@@ -618,9 +629,7 @@ export const AddRepoModal = ({
         }
       }
     } catch (e: any) {
-      alerts.error(
-        formatErrorAlert(e, m.settings_error_operation()),
-      );
+      alerts.error(formatErrorAlert(e, m.settings_error_operation()));
     } finally {
       setConfirmLoading(false);
     }
@@ -719,11 +728,27 @@ export const AddRepoModal = ({
   ];
 
   const sections: SectionDef[] = [
-    { id: "identity", label: m.add_repo_modal_identity(), icon: <FiTag size={14} /> },
-    { id: "connection", label: m.add_repo_modal_connection(), icon: <FiLink size={14} /> },
-    { id: "scheduling", label: m.add_repo_modal_scheduling(), icon: <FiClock size={14} /> },
+    {
+      id: "identity",
+      label: m.add_repo_modal_identity(),
+      icon: <FiTag size={14} />,
+    },
+    {
+      id: "connection",
+      label: m.add_repo_modal_connection(),
+      icon: <FiLink size={14} />,
+    },
+    {
+      id: "scheduling",
+      label: m.add_repo_modal_scheduling(),
+      icon: <FiClock size={14} />,
+    },
     { id: "hooks", label: m.add_repo_modal_hooks(), icon: <FiZap size={14} /> },
-    { id: "advanced", label: m.add_plan_modal_advanced(), icon: <FiSliders size={14} /> },
+    {
+      id: "advanced",
+      label: m.add_plan_modal_advanced(),
+      icon: <FiSliders size={14} />,
+    },
   ];
 
   const footer = (
@@ -783,7 +808,9 @@ export const AddRepoModal = ({
             <DialogActionTrigger asChild>
               <Button variant="outline">{m.button_cancel()}</Button>
             </DialogActionTrigger>
-            <Button onClick={confirmation.onOk}>{m.add_repo_modal_confirm()}</Button>
+            <Button onClick={confirmation.onOk}>
+              {m.add_repo_modal_confirm()}
+            </Button>
           </DialogFooter>
           <DialogCloseTrigger />
         </DialogContent>
@@ -817,7 +844,8 @@ export const AddRepoModal = ({
             >
               <CText fontSize="sm">
                 {m.add_repo_modal_this_repository_is_managed_by_remote_instance()}{" "}
-                <strong>{template?.originInstanceId}</strong> {m.add_repo_modal_and_cannot_be_edited_you_may_delete_it_to_remove_the_local_c()}
+                <strong>{template?.originInstanceId}</strong>{" "}
+                {m.add_repo_modal_and_cannot_be_edited_you_may_delete_it_to_remove_the_local_c()}
               </CText>
             </Box>
           )}
@@ -923,6 +951,8 @@ export const AddRepoModal = ({
                     inputProps={{ "data-testid": "add-repo-uri" }}
                   />
                 </Field>
+
+                <OpenListRepositoryRate uri={getField(["uri"])} />
 
                 {getField(["uri"])?.startsWith("sftp:") && (
                   <SftpConfigSection

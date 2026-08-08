@@ -15,6 +15,7 @@ import {
 } from "../../../gen/ts/v1/operations_pb";
 import { authenticatedFetch } from "../../api/client";
 import { operationsStream } from "../../api/oplog";
+import type { OpenListUsage } from "../../api/openlist";
 import { formatBytes } from "../../lib/formatting";
 import { getLocale } from "../../paraglide/runtime";
 import { backendUrl } from "../../state/buildcfg";
@@ -36,8 +37,6 @@ interface ActivitySummary {
   days: Map<string, ActivityDay>;
   bytesAdded: number;
   backupDays: number;
-  currentStreak: number;
-  longestStreak: number;
 }
 
 const activityCopy = () => {
@@ -47,12 +46,11 @@ const activityCopy = () => {
     title: zh ? "备份活动" : "Backup activity",
     year: zh ? "最近一年" : "Past year",
     weeks: zh ? "最近 16 周" : "Past 16 weeks",
-    protected: zh ? "已保护" : "Protected",
-    added: zh ? "一年仓库新增" : "Repository added this year",
+    protected: zh ? "已备份" : "Backed up",
+    added: zh ? "备份大小" : "Backup size",
+    todayUpload: zh ? "今日上传" : "Uploaded today",
+    monthUpload: zh ? "本月上传" : "Uploaded this month",
     days: zh ? "备份天数" : "Backup days",
-    currentStreak: zh ? "当前连续" : "Current streak",
-    longestStreak: zh ? "最长连续" : "Longest streak",
-    dayUnit: zh ? "天" : " days",
     daily: zh ? "每日备份" : "Daily backups",
     less: zh ? "少" : "Less",
     more: zh ? "多" : "More",
@@ -134,32 +132,6 @@ function summarizeActivity(operations: Operation[]): ActivitySummary {
     days.set(key, day);
   }
 
-  const isBackedUp = (date: Date) => {
-    const day = days.get(dateKey(date));
-    return Boolean(day && day.success + day.warning > 0);
-  };
-
-  let currentStreak = 0;
-  let cursor = today;
-  if (!isBackedUp(cursor) && isBackedUp(addDays(cursor, -1))) {
-    cursor = addDays(cursor, -1);
-  }
-  while (cursor >= firstDay && isBackedUp(cursor)) {
-    currentStreak += 1;
-    cursor = addDays(cursor, -1);
-  }
-
-  let longestStreak = 0;
-  let runningStreak = 0;
-  for (let date = firstDay; date <= today; date = addDays(date, 1)) {
-    if (isBackedUp(date)) {
-      runningStreak += 1;
-      longestStreak = Math.max(longestStreak, runningStreak);
-    } else {
-      runningStreak = 0;
-    }
-  }
-
   return {
     days,
     bytesAdded: Array.from(days.values()).reduce(
@@ -169,8 +141,6 @@ function summarizeActivity(operations: Operation[]): ActivitySummary {
     backupDays: Array.from(days.values()).filter(
       (day) => day.success + day.warning > 0,
     ).length,
-    currentStreak,
-    longestStreak,
   };
 }
 
@@ -364,9 +334,11 @@ const Metric = ({ label, value }: { label: string; value: string }) => (
 export const BackupActivityOverview = ({
   protectedBytes,
   planIds,
+  openListUsage,
 }: {
   protectedBytes: number;
   planIds: string[];
+  openListUsage: OpenListUsage | null;
 }) => {
   const copy = activityCopy();
   const { operations, loaded } = useBackupOperations(planIds);
@@ -416,15 +388,15 @@ export const BackupActivityOverview = ({
           ? formatBytes(summary.bytesAdded)
           : "0 B",
     },
+    {
+      label: copy.todayUpload,
+      value: openListUsage ? formatBytes(openListUsage.day_bytes) : "—",
+    },
+    {
+      label: copy.monthUpload,
+      value: openListUsage ? formatBytes(openListUsage.month_bytes) : "—",
+    },
     { label: copy.days, value: loaded ? String(summary.backupDays) : "—" },
-    {
-      label: copy.currentStreak,
-      value: loaded ? `${summary.currentStreak}${copy.dayUnit}` : "—",
-    },
-    {
-      label: copy.longestStreak,
-      value: loaded ? `${summary.longestStreak}${copy.dayUnit}` : "—",
-    },
   ];
 
   const describeDay = (date: Date, day: ActivityDay | undefined) => {
