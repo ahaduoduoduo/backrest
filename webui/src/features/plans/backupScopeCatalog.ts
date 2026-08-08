@@ -39,6 +39,33 @@ export const BACKUP_SOURCE_OPTIONS: BackupSourceOption[] = [
     },
   },
   {
+    id: "docker-named-volumes",
+    path: "/source/docker-volumes/telegram-data",
+    title: { zh: "Docker 命名卷", en: "Docker named volumes" },
+    description: {
+      zh: "Telegram 服务状态；恢复时可迁移为普通持久化目录。",
+      en: "Telegram service state, portable to a regular persistent directory during recovery.",
+    },
+  },
+  {
+    id: "web-live",
+    path: "/source/web-live",
+    title: { zh: "直播代理", en: "Live proxy" },
+    description: {
+      zh: "直播代理代码、Compose 和频道配置。",
+      en: "Live proxy code, Compose configuration, and channel data.",
+    },
+  },
+  {
+    id: "web-autoaccount",
+    path: "/source/web-autoaccount",
+    title: { zh: "自动化服务数据", en: "Automation service data" },
+    description: {
+      zh: "自动化服务配置与附件；数据库使用备份前生成的一致副本。",
+      en: "Automation settings and artifacts; the database uses a consistent pre-backup copy.",
+    },
+  },
+  {
     id: "dsm-certificates",
     path: "/source/dsm-certificates",
     title: { zh: "DSM 证书", en: "DSM certificates" },
@@ -48,12 +75,21 @@ export const BACKUP_SOURCE_OPTIONS: BackupSourceOption[] = [
     },
   },
   {
+    id: "dsm-package-config",
+    path: "/source/dsm-packages",
+    title: { zh: "DSM 套件配置", en: "DSM package settings" },
+    description: {
+      zh: "Container Manager、Download Station、DDNS 和 VMM 等套件设置。",
+      en: "Settings for Container Manager, Download Station, DDNS, VMM, and other packages.",
+    },
+  },
+  {
     id: "recovery-staging",
     path: "/staging",
     title: { zh: "群晖恢复资料", en: "Synology recovery files" },
     description: {
-      zh: "DSM 配置、套件清单、容器清单和 OpenList 数据库副本。",
-      en: "DSM configuration, package and container inventories, and an OpenList database copy.",
+      zh: "DSM 重建资料、完整 Docker 清单和应用数据库一致副本。",
+      en: "DSM reconstruction facts, a complete Docker inventory, and consistent application database copies.",
     },
   },
   {
@@ -133,12 +169,36 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
     id: "live-databases",
     patterns: [
       "/source/docker/alist/data.db*",
+      "/source/docker/autofilm-suite/autofilm-core/data/autofilm.sqlite*",
+      "/source/docker/jellyfin/config/data/*.db*",
+      "/source/docker/subhub/data/subhub.db*",
+      "/source/docker/localproxy-data/localproxy.db*",
+      "/source/docker/nas-gateway-manager/data/manager.db*",
+      "/source/web-autoaccount/automation.db*",
       "/source/home-assistant/home-assistant_v2.db*",
     ],
     title: { zh: "运行中的数据库原文件", en: "Live database files" },
     description: {
-      zh: "OpenList 改用备份前生成的一致副本；Home Assistant 历史数据库不上传。",
-      en: "OpenList uses a consistent pre-backup copy; Home Assistant history is omitted.",
+      zh: "应用数据库改用备份前生成的一致副本；Home Assistant 历史数据库不上传。",
+      en: "Application databases use consistent pre-backup copies; Home Assistant history is omitted.",
+    },
+  },
+  {
+    id: "staging-control",
+    patterns: ["/staging/control/**"],
+    title: { zh: "备份协调文件", en: "Backup coordination files" },
+    description: {
+      zh: "主机与备份服务之间的一次性请求和执行日志。",
+      en: "One-time requests and execution logs exchanged by the host and backup service.",
+    },
+  },
+  {
+    id: "dsm-package-runtime",
+    patterns: ["/source/dsm-packages/appconf/Virtualization/ccc/etcd.data/**"],
+    title: { zh: "DSM 套件运行数据", en: "DSM package runtime data" },
+    description: {
+      zh: "跳过 VMM 活动状态；可迁移的套件配置仍会上传。",
+      en: "Omits active VMM state while retaining portable package settings.",
     },
   },
 ];

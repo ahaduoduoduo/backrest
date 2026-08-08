@@ -7,6 +7,9 @@ Updated: 2026-08-09
 - [x] 2026-08-09: Build and publish the custom linux/amd64 Backrest image
   automatically after non-documentation changes reach `main`, while retaining
   manual rebuild support and immutable commit tags.
+- [x] 2026-08-09: Present Docker named-volume data, Web-hosted container data,
+  AI-readable DSM recovery facts, full Docker inventories, and consistent
+  application database copies as named backup content and exclusions.
 - [x] 2026-08-09: Correct every 30-day backup strip to chronological order,
   with the oldest date on the left and today on the right, and add a regression
   test for the date mapping.
@@ -70,5 +73,6 @@ Updated: 2026-08-09
   rollover against the GitHub-built OpenList and Backrest images.
 - [ ] Add a DSM snapshot provider that can create and remove read-only source
   snapshots without a user-maintained hook script.
-- [ ] Add a guided portable-Docker recovery export containing Compose files,
-  image digests, mount mappings, and a generated recovery manifest.
+- [x] 2026-08-09: Add a guided portable-Docker recovery export containing
+  rendered and generated Compose files, image digests, mount mappings, and a
+  generated recovery manifest.
