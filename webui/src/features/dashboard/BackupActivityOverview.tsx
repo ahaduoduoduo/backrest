@@ -4,6 +4,7 @@ import {
   Flex,
   Grid,
   SimpleGrid,
+  Stack,
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
@@ -16,6 +17,7 @@ import {
 import { authenticatedFetch } from "../../api/client";
 import { operationsStream } from "../../api/oplog";
 import type { OpenListUsage } from "../../api/openlist";
+import { Tooltip } from "../../components/ui/tooltip";
 import { formatBytes } from "../../lib/formatting";
 import { getLocale } from "../../paraglide/runtime";
 import { backendUrl } from "../../state/buildcfg";
@@ -27,6 +29,7 @@ const MOBILE_WALL_DAYS = 112;
 
 interface ActivityDay {
   bytesAdded: number;
+  bytesProcessed: number;
   success: number;
   warning: number;
   failed: number;
@@ -52,14 +55,13 @@ const activityCopy = () => {
     monthUpload: zh ? "本月上传" : "Uploaded this month",
     days: zh ? "备份天数" : "Backup days",
     daily: zh ? "备份日历" : "Daily backups",
-    less: zh ? "少" : "Less",
-    more: zh ? "多" : "More",
     noBackup: zh ? "无备份" : "No backup",
     success: zh ? "成功" : "successful",
     warning: zh ? "警告" : "warnings",
     failed: zh ? "异常" : "failed",
     running: zh ? "进行中" : "running",
-    addedOnDay: zh ? "本次新增" : "repository added",
+    dayBackupSize: zh ? "备份大小" : "Backup size",
+    dayUpload: zh ? "上传量" : "Uploaded",
     weekdays: zh
       ? ["", "一", "", "三", "", "五", ""]
       : ["", "Mon", "", "Wed", "", "Fri", ""],
@@ -83,10 +85,21 @@ function dateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function dataAdded(operation: Operation): number {
-  if (operation.op.case !== "operationBackup") return 0;
+function backupMetrics(operation: Operation): {
+  bytesAdded: number;
+  bytesProcessed: number;
+} {
+  if (operation.op.case !== "operationBackup") {
+    return { bytesAdded: 0, bytesProcessed: 0 };
+  }
   const entry = operation.op.value.lastStatus?.entry;
-  return entry?.case === "summary" ? Number(entry.value.dataAdded) : 0;
+  if (entry?.case !== "summary") {
+    return { bytesAdded: 0, bytesProcessed: 0 };
+  }
+  return {
+    bytesAdded: Number(entry.value.dataAdded),
+    bytesProcessed: Number(entry.value.totalBytesProcessed),
+  };
 }
 
 function summarizeActivity(operations: Operation[]): ActivitySummary {
@@ -105,12 +118,15 @@ function summarizeActivity(operations: Operation[]): ActivitySummary {
     const key = dateKey(date);
     const day = days.get(key) ?? {
       bytesAdded: 0,
+      bytesProcessed: 0,
       success: 0,
       warning: 0,
       failed: 0,
       running: 0,
     };
-    day.bytesAdded += dataAdded(operation);
+    const metrics = backupMetrics(operation);
+    day.bytesAdded += metrics.bytesAdded;
+    day.bytesProcessed += metrics.bytesProcessed;
 
     switch (operation.status) {
       case OperationStatus.STATUS_SUCCESS:
@@ -331,6 +347,64 @@ const Metric = ({ label, value }: { label: string; value: string }) => (
   </Box>
 );
 
+const ActivityDayTooltip = ({
+  date,
+  day,
+  copy,
+  formatter,
+}: {
+  date: Date;
+  day: ActivityDay | undefined;
+  copy: ReturnType<typeof activityCopy>;
+  formatter: Intl.DateTimeFormat;
+}) => {
+  const status = day
+    ? [
+        day.success > 0 ? `${day.success} ${copy.success}` : "",
+        day.warning > 0 ? `${day.warning} ${copy.warning}` : "",
+        day.failed > 0 ? `${day.failed} ${copy.failed}` : "",
+        day.running > 0 ? `${day.running} ${copy.running}` : "",
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : copy.noBackup;
+
+  return (
+    <Box minW="172px">
+      <Text fontSize="12px" fontWeight="600">
+        {formatter.format(date)}
+      </Text>
+      <Stack
+        gap="5px"
+        mt="8px"
+        pt="8px"
+        borderTop="1px solid"
+        borderColor="whiteAlpha.150"
+      >
+        <Flex align="center" justify="space-between" gap={5}>
+          <Text color="#98a1af" fontSize="11px">
+            {copy.dayBackupSize}
+          </Text>
+          <Text fontSize="11px" fontVariantNumeric="tabular-nums">
+            {formatBytes(day?.bytesProcessed ?? 0)}
+          </Text>
+        </Flex>
+        <Flex align="center" justify="space-between" gap={5}>
+          <Text color="#98a1af" fontSize="11px">
+            {copy.dayUpload}
+          </Text>
+          <Text fontSize="11px" fontVariantNumeric="tabular-nums">
+            {formatBytes(day?.bytesAdded ?? 0)}
+          </Text>
+        </Flex>
+      </Stack>
+      <Text mt="7px" color="#78818f" fontSize="10px">
+        {status}
+      </Text>
+    </Box>
+  );
+};
+
 export const BackupActivityOverview = ({
   protectedBytes,
   planIds,
@@ -342,6 +416,7 @@ export const BackupActivityOverview = ({
 }) => {
   const copy = activityCopy();
   const { operations, loaded } = useBackupOperations(planIds);
+  const [activeDayKey, setActiveDayKey] = useState<string | null>(null);
   const summary = useMemo(() => summarizeActivity(operations), [operations]);
   const visibleDays = useBreakpointValue({
     base: MOBILE_WALL_DAYS,
@@ -400,15 +475,10 @@ export const BackupActivityOverview = ({
   ];
 
   const describeDay = (date: Date, day: ActivityDay | undefined) => {
-    if (!day) return `${dayFormatter.format(date)} · ${copy.noBackup}`;
     const details = [
-      day.success > 0 ? `${day.success} ${copy.success}` : "",
-      day.warning > 0 ? `${day.warning} ${copy.warning}` : "",
-      day.failed > 0 ? `${day.failed} ${copy.failed}` : "",
-      day.running > 0 ? `${day.running} ${copy.running}` : "",
-      day.bytesAdded > 0
-        ? `${copy.addedOnDay} ${formatBytes(day.bytesAdded)}`
-        : "",
+      `${copy.dayBackupSize} ${formatBytes(day?.bytesProcessed ?? 0)}`,
+      `${copy.dayUpload} ${formatBytes(day?.bytesAdded ?? 0)}`,
+      !day ? copy.noBackup : "",
     ].filter(Boolean);
     return `${dayFormatter.format(date)} · ${details.join(" · ")}`;
   };
@@ -470,28 +540,9 @@ export const BackupActivityOverview = ({
         </SimpleGrid>
 
         <Box pt={{ base: 6, md: 8 }} pb={{ base: 6, md: 8 }}>
-          <Flex align="center" justify="space-between" mb={4}>
-            <Text fontSize="14px" fontWeight="600">
-              {copy.daily}
-            </Text>
-            <Flex align="center" gap="5px">
-              <Text color="whiteAlpha.400" fontSize="10px">
-                {copy.less}
-              </Text>
-              {LEVEL_COLORS.slice(1).map((color) => (
-                <Box
-                  key={color}
-                  w="10px"
-                  h="10px"
-                  borderRadius="3px"
-                  bg={color}
-                />
-              ))}
-              <Text color="whiteAlpha.400" fontSize="10px">
-                {copy.more}
-              </Text>
-            </Flex>
-          </Flex>
+          <Text mb={4} fontSize="14px" fontWeight="600">
+            {copy.daily}
+          </Text>
 
           <Grid
             templateColumns="20px minmax(0, 1fr)"
@@ -545,25 +596,80 @@ export const BackupActivityOverview = ({
               minW={0}
             >
               {wall.dates.map((date) => {
-                const day = summary.days.get(dateKey(date));
+                const key = dateKey(date);
+                const day = summary.days.get(key);
                 const level = activityLevel(day, thresholds);
+                const future = date > startOfDay(new Date());
                 return (
-                  <Box
-                    key={dateKey(date)}
-                    aspectRatio="1"
-                    minW={0}
-                    borderRadius={{ base: "3px", md: "4px" }}
-                    bg={LEVEL_COLORS[level]}
-                    opacity={date > startOfDay(new Date()) ? 0.25 : 1}
-                    boxShadow={
-                      day?.failed
-                        ? "inset 0 0 0 1px rgba(255, 164, 92, 0.9)"
-                        : day?.running
-                          ? "inset 0 0 0 1px rgba(97, 184, 255, 0.95)"
-                          : undefined
+                  <Tooltip
+                    key={key}
+                    content={
+                      <ActivityDayTooltip
+                        date={date}
+                        day={day}
+                        copy={copy}
+                        formatter={dayFormatter}
+                      />
                     }
-                    title={describeDay(date, day)}
-                  />
+                    disabled={future}
+                    open={activeDayKey === key}
+                    onOpenChange={({ open }) => {
+                      setActiveDayKey((current) =>
+                        open ? key : current === key ? null : current,
+                      );
+                    }}
+                    portalled
+                    showArrow
+                    openDelay={100}
+                    closeDelay={80}
+                    positionerProps={{ zIndex: 2100 }}
+                    contentProps={{
+                      bg: "rgba(14, 17, 22, 0.96)",
+                      color: "#f2f4f8",
+                      border: "1px solid rgba(255, 255, 255, 0.12)",
+                      borderRadius: "11px",
+                      px: "12px",
+                      py: "10px",
+                      boxShadow: "0 16px 44px rgba(0, 0, 0, 0.46)",
+                      backdropFilter: "blur(16px)",
+                    }}
+                  >
+                    <Box
+                      as="button"
+                      data-testid={`backup-activity-day-${key}`}
+                      data-backup-size={day?.bytesProcessed ?? 0}
+                      data-upload-size={day?.bytesAdded ?? 0}
+                      aria-label={describeDay(date, day)}
+                      aria-disabled={future}
+                      tabIndex={future ? -1 : 0}
+                      aspectRatio="1"
+                      minW={0}
+                      borderRadius={{ base: "3px", md: "4px" }}
+                      bg={LEVEL_COLORS[level]}
+                      opacity={future ? 0.25 : 1}
+                      cursor={future ? "default" : "pointer"}
+                      touchAction="manipulation"
+                      transition="transform 120ms ease, box-shadow 120ms ease"
+                      _hover={future ? undefined : { transform: "scale(1.16)" }}
+                      _focusVisible={{
+                        outline: "2px solid #8bd4fb",
+                        outlineOffset: "2px",
+                      }}
+                      onClick={(event) => {
+                        if (!future) {
+                          event.currentTarget.focus();
+                          setActiveDayKey(key);
+                        }
+                      }}
+                      boxShadow={
+                        day?.failed
+                          ? "inset 0 0 0 1px rgba(255, 164, 92, 0.9)"
+                          : day?.running
+                            ? "inset 0 0 0 1px rgba(97, 184, 255, 0.95)"
+                            : undefined
+                      }
+                    />
+                  </Tooltip>
                 );
               })}
             </Grid>

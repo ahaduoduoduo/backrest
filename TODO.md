@@ -1,9 +1,12 @@
 # Custom Backrest development status
 
-Updated: 2026-08-08
+Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Remove the backup-calendar intensity legend and add a
+  desktop-hover and mobile-tap detail panel for each day's processed backup
+  size and repository upload amount.
 - [x] 2026-08-08: Replace scheduler, repository, snapshot, retention, and
   maintenance terminology across the Chinese interface with direct backup
   task language; distinguish deleting old version records from reclaiming

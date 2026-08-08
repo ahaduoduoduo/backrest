@@ -1,6 +1,6 @@
 # Custom Backrest module map
 
-Updated: 2026-08-08
+Updated: 2026-08-09
 
 The fork retains upstream Backrest's Go orchestrator, Restic process runner,
 configuration model, operation log, snapshot browser, and restore operations.
@@ -21,7 +21,9 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
   backup activity wall combining Backrest operation metrics with current 115
-  day and month upload traffic; operation queries do not read repository data.
+  day and month upload traffic. Each day exposes Restic's processed bytes and
+  repository-added bytes through a hover/tap detail panel; operation queries
+  do not read repository data.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
   summary data and the activity overview.
 - `webui/src/features/repositories/OpenListRepositoryRate.tsx`: resolves an
