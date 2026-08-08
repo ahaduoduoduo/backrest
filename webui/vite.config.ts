@@ -7,6 +7,8 @@ import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const browserBackendUrl = env.UI_BROWSER_BACKEND_URL || env.UI_BACKEND_URL;
+  const proxyTarget = env.UI_PROXY_TARGET || env.UI_BACKEND_URL || 'http://localhost:9898';
 
   return {
     plugins: [
@@ -43,28 +45,36 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.UI_OS': JSON.stringify(env.UI_OS),
       'process.env.BACKREST_BUILD_VERSION': JSON.stringify(env.BACKREST_BUILD_VERSION),
-      'process.env.UI_BACKEND_URL': JSON.stringify(env.UI_BACKEND_URL),
+      'process.env.UI_BACKEND_URL': JSON.stringify(browserBackendUrl),
       'process.env.UI_FEATURES': JSON.stringify(env.UI_FEATURES),
     },
     server: {
+      allowedHosts: ['webui'],
       proxy: {
         '/v1.Backrest': {
-          target: env.UI_BACKEND_URL || 'http://localhost:9898',
+          target: proxyTarget,
           secure: false,
         },
         '/v1.Authentication': {
-          target: env.UI_BACKEND_URL || 'http://localhost:9898',
+          target: proxyTarget,
           secure: false,
         },
         '/download': {
-          target: env.UI_BACKEND_URL || 'http://localhost:9898',
+          target: proxyTarget,
           secure: false,
         },
         '/api/openlist': {
-          target: env.UI_BACKEND_URL || 'http://localhost:9898',
+          target: proxyTarget,
           secure: false,
         },
       },
+      watch:
+        env.UI_USE_POLLING === 'true'
+          ? {
+              usePolling: true,
+              interval: 250,
+            }
+          : undefined,
     },
   };
 });

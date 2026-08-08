@@ -1,10 +1,16 @@
 # Custom Backrest module map
 
-Updated: 2026-08-06
+Updated: 2026-08-08
 
 The fork retains upstream Backrest's Go orchestrator, Restic process runner,
 configuration model, operation log, snapshot browser, and restore operations.
 
+- `compose.dev.yaml`: Dockerized Vite HMR service attached to the deployed
+  Backrest network; source and dependency caches are separate volumes.
+- `webui/vite.config.ts`: separates the browser-visible same-origin backend URL
+  from the development proxy target and enables polling for NAS bind mounts.
+- `docs/webui-development.md`: start, stop, routing, caching, and release notes
+  for rapid interface iteration.
 - `internal/api/openlistusagehandler.go`: authenticated server-side proxy for
   the OpenList `/restic/_usage` response. It uses a bounded response body and a
   ten-second client timeout.

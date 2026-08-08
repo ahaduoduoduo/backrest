@@ -1,9 +1,11 @@
 # Custom Backrest development status
 
-Updated: 2026-08-06
+Updated: 2026-08-08
 
 ## Completed
 
+- [x] 2026-08-08: Add a Dockerized Vite development service with HMR, persistent
+  dependency caches, and same-origin proxying to the deployed Backrest API.
 - [x] 2026-08-06: Add the missing mobile viewport declaration and replace the
   scaled desktop drawer with a full-screen numbered navigation index; rebuild
   dashboard hierarchy around editorial content, large metrics, and divided

@@ -45,6 +45,10 @@ covered through an iPhone device context and an explicit viewport declaration.
 See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
 recovery configuration.
 
+Frontend work can run through the Dockerized Vite development service without
+rebuilding the embedded Go binary. Setup and request routing are documented in
+[docs/webui-development.md](docs/webui-development.md).
+
 ## Key Features
 
 - **Web Interface**: Access locally or remotely (perfect for NAS deployments)

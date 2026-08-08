@@ -1,0 +1,39 @@
+services:
+  webui:
+    image: node:20-alpine
+    init: true
+    working_dir: /workspace/webui
+    command:
+      - sh
+      - -lc
+      - |
+        corepack enable
+        corepack prepare pnpm@9 --activate
+        pnpm config set store-dir /pnpm/store
+        pnpm install --frozen-lockfile
+        pnpm exec vite --host 0.0.0.0 --port 5173 --strictPort
+    environment:
+      BACKREST_BUILD_VERSION: dev-snapshot-build
+      CHOKIDAR_USEPOLLING: "true"
+      CI: "true"
+      UI_BROWSER_BACKEND_URL: ./
+      UI_OS: unix
+      UI_PROXY_TARGET: http://backrest:9898
+      UI_USE_POLLING: "true"
+    ports:
+      - "${BACKREST_WEBUI_DEV_PORT:-5173}:5173"
+    volumes:
+      - ./webui:/workspace/webui
+      - backrest-webui-node-modules:/workspace/webui/node_modules
+      - backrest-webui-pnpm-store:/pnpm/store
+    networks:
+      - autofilm
+
+volumes:
+  backrest-webui-node-modules:
+  backrest-webui-pnpm-store:
+
+networks:
+  autofilm:
+    external: true
+    name: "${BACKREST_DOCKER_NETWORK:-autofilm}"
