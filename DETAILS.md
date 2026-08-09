@@ -67,7 +67,8 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/PlanView.tsx`: owns the single task title, file and
   operation card faces, 3D flip state, and icon-only two-step version deletion.
 - `webui/src/components/layout/BottomDock.tsx`: fixed desktop/mobile capsule
-  navigation with Home, Plans, Repositories, and Settings; task and repository
+  navigation with closed-path Home, Plans, Repositories, and Settings glyphs;
+  its shared selection pill moves between items, while task and repository
   submenus support pointer hover and touch click without a page header.
 - `webui/src/lib/repositoryLocation.ts`: classifies the actual Restic backend
   URI as local storage, remote storage, or a remote Backrest instance.
@@ -82,8 +83,10 @@ configuration model, operation log, snapshot browser, and restore operations.
   `webui/src/components/layout/MainContentArea.tsx`: headerless dark application
   shell, full-width page sizing, bottom-dock clearance, glass surfaces, and
   responsive canvas treatment.
-- `webui/src/components/common/TwoPaneModal.tsx`: desktop two-pane editor and a
-  fixed, opaque phone editor covering the complete viewport.
+- `webui/src/components/common/TwoPaneModal.tsx` and `SectionCard.tsx`: shared
+  floating workspace for task, repository, and settings editing; it retains a
+  visible application backdrop and bottom dock on desktop and mobile, with
+  consistent navigation, cards, footer, borders, and corner treatment.
 - `webui/src/components/ui/toaster.tsx`: viewport-bounded global notifications
   with wrapped, scrollable long-error content on phone screens.
 - `docs/openlist-115-backup.md`: deployment, plan grouping, excludes,

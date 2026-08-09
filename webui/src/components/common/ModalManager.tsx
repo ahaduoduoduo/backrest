@@ -16,7 +16,7 @@ export const ModalContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [modal, setModals] = React.useState<React.ReactNode | null>([]);
+  const [modal, setModals] = React.useState<React.ReactNode | null>(null);
 
   return (
     <ModalContext.Provider
@@ -34,4 +34,9 @@ export const ModalContextProvider = ({
 export const useShowModal = () => {
   const context = useContext(ModalContext);
   return context.setModel;
+};
+
+export const useModalPresence = () => {
+  const context = useContext(ModalContext);
+  return context.model !== null;
 };

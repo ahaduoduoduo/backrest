@@ -116,23 +116,11 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
       size="xl"
     >
       <Portal>
-        <DialogBackdrop bg="rgba(0, 0, 0, 0.82)" />
-        <DialogPositioner
-          position="fixed"
-          inset="0"
-          width="100vw"
-          height="100dvh"
-          p={{ base: 0, md: 4 }}
-        >
+        <DialogBackdrop className="console-workspace-backdrop" />
+        <DialogPositioner className="console-workspace-positioner">
           <DialogContent
+            className="console-workspace-shell"
             maxW={width}
-            width={{ base: "100vw", md: "calc(100vw - 32px)" }}
-            height={{ base: "100dvh", md: "86vh" }}
-            maxH={{ base: "100dvh", md: "820px" }}
-            my={{ base: 0, md: "auto" }}
-            borderRadius={{ base: 0, md: "lg" }}
-            bg="#090a0e"
-            borderColor="whiteAlpha.100"
             p={0}
             overflow="hidden"
             display="flex"
@@ -140,23 +128,17 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
           >
             {/* Header */}
             <Flex
+              className="console-workspace-header"
               align="center"
               gap={3}
-              px={{ base: 3.5, md: 5 }}
-              py={{ base: 3, md: 3.5 }}
-              borderBottomWidth="1px"
-              borderColor="border"
               flexShrink={0}
             >
               {headerStart}
               {headerIcon && (
                 <Flex
+                  className="console-workspace-header-icon"
                   w={7}
                   h={7}
-                  borderRadius="sm"
-                  bg="bg.subtle"
-                  borderWidth="1px"
-                  borderColor="border"
                   align="center"
                   justify="center"
                   color="fg.muted"
@@ -184,34 +166,28 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                 )}
               </Box>
               <Box
+                className="console-workspace-close"
                 as="button"
                 onClick={onClose}
-                bg="transparent"
-                border={0}
                 cursor="pointer"
-                color="fg.subtle"
-                p={1.5}
-                borderRadius="sm"
                 flexShrink={0}
-                _hover={{ bg: "bg.muted" }}
               >
                 <FiX size={16} />
               </Box>
             </Flex>
 
             {/* Two-pane body */}
-            <Flex flex={1} minH={0} direction={{ base: "column", md: "row" }}>
+            <Flex
+              className="console-workspace-body"
+              flex={1}
+              minH={0}
+              direction={{ base: "column", md: "row" }}
+            >
               {/* Nav rail */}
               <Box
+                className="console-workspace-nav"
                 as="nav"
-                w={{ base: "full", md: "196px" }}
-                borderRightWidth={{ base: "0", md: "1px" }}
-                borderBottomWidth={{ base: "1px", md: "0" }}
-                borderColor="border"
-                py={{ base: 2, md: 3 }}
-                px={2}
                 flexShrink={0}
-                bg={{ base: "#0d0f14", md: "bg.subtle" }}
                 overflowX={{ base: "auto", md: "hidden" }}
                 overflowY={{ base: "hidden", md: "auto" }}
                 display={{ base: "flex", md: "block" }}
@@ -222,6 +198,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                   return (
                     <Box
                       key={s.id}
+                      className="console-workspace-nav-item"
                       as="button"
                       onClick={() => scrollTo(s.id)}
                       display="flex"
@@ -231,16 +208,13 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                       minW={{ base: "max-content", md: "auto" }}
                       py={1.5}
                       px={2.5}
-                      bg={isActive ? "bg.muted" : "transparent"}
-                      border={0}
-                      borderRadius="sm"
                       fontSize="sm"
                       fontWeight={isActive ? "medium" : "normal"}
                       color="fg"
                       cursor="pointer"
                       textAlign="left"
                       mb={{ base: 0, md: 0.5 }}
-                      _hover={{ bg: isActive ? "bg.muted" : "bg.emphasized" }}
+                      data-active={isActive || undefined}
                     >
                       <Box
                         color={isActive ? "fg" : "fg.muted"}
@@ -262,13 +236,12 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
 
               {/* Scrolling content */}
               <Box
+                className="console-workspace-content"
                 ref={scrollRef}
                 flex={1}
                 minW={0}
                 overflowY="auto"
                 overflowX="hidden"
-                bg={{ base: "#090a0e", md: "bg.subtle" }}
-                p={{ base: 3, md: 5 }}
               >
                 <TwoPaneContext.Provider value={{ registerRef }}>
                   {children}
@@ -280,6 +253,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
             {/* Footer / save bar */}
             {footer ? (
               <Box
+                className="console-workspace-footer"
                 borderTopWidth="1px"
                 borderColor="border"
                 px={{ base: 3, md: 4 }}
@@ -290,16 +264,13 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
               </Box>
             ) : (
               <Flex
+                className="console-workspace-footer"
                 align="center"
                 gap={2.5}
                 px={{ base: 3, md: 4 }}
                 py={2.5}
                 flexWrap={{ base: "wrap", md: "nowrap" }}
-                borderTopWidth="1px"
-                borderColor="border"
-                bg={dirty ? "orange.50" : "bg.panel"}
-                _dark={{ bg: dirty ? "orange.950" : "bg.panel" }}
-                transition="background 120ms linear"
+                data-dirty={dirty || undefined}
                 flexShrink={0}
               >
                 <Flex align="center" gap={2} flex={1} minW={0}>

@@ -21,6 +21,7 @@ export const SectionCard: React.FC<SectionCardProps> = ({
 }) => {
   return (
     <Box
+      className="console-workspace-card"
       ref={cardRef}
       data-section={id}
       bg="bg.panel"
@@ -31,6 +32,7 @@ export const SectionCard: React.FC<SectionCardProps> = ({
       scrollMarginTop="16px"
     >
       <Flex
+        className="console-workspace-card-header"
         align="center"
         gap={2.5}
         px={{ base: 3.5, md: 5 }}
@@ -56,7 +58,7 @@ export const SectionCard: React.FC<SectionCardProps> = ({
           )}
         </Box>
       </Flex>
-      <Box p={{ base: 3.5, md: 5 }}>{children}</Box>
+      <Box className="console-workspace-card-content">{children}</Box>
     </Box>
   );
 };
