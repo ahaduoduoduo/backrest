@@ -4,6 +4,10 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Scope the default CI matrix to the deployed Linux amd64
+  Docker path; retain Go, WebUI, backup, restore, history, authentication, and
+  mobile checks while excluding Windows, rclone, and SFTP jobs, and make the
+  multi-platform release preview manual-only.
 - [x] 2026-08-09: Migrate browser journeys from the removed persistent
   sidebar to the current header navigation drawer, replace hidden-navigation
   absence checks with persisted-config assertions, and cover the dashboard
