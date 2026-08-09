@@ -4,6 +4,9 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Add a mobile-sized manual backup action to every dashboard
+  task card, keep it disabled while the task is active, and allow a failed
+  task to be started again after the underlying issue is resolved.
 - [x] 2026-08-09: Build and publish the custom linux/amd64 Backrest image
   automatically after non-documentation changes reach `main`, while retaining
   manual rebuild support and immutable commit tags.

@@ -28,8 +28,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   repository-added bytes through a hover/tap detail panel; operation queries
   do not read repository data.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
-  activity data and backup-task cards without duplicating repository or system
-  administration details on the dashboard.
+  activity data and backup-task cards, including a plan-level manual backup
+  action that reports active progress and refreshes the card after completion.
 - `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
   status strips in chronological order, from the oldest date on the left to
   today on the right, with per-day backup-size details.

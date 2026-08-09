@@ -10,12 +10,13 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, { useEffect, useMemo, useState } from "react";
-import { FiServer } from "react-icons/fi";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { FiPlay, FiServer } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { Multihost } from "../../../gen/ts/v1/config_pb";
 import { Operation, OperationStatus } from "../../../gen/ts/v1/operations_pb";
 import {
+  BackupRequestSchema,
   GetOperationsRequestSchema,
   OpSelectorSchema,
   SummaryDashboardResponse,
@@ -29,6 +30,7 @@ import type { OpenListUsage } from "../../api/openlist";
 import { getOperations, operationsStream } from "../../api/oplog";
 import { matchSelector } from "../../api/logState";
 import { alerts } from "../../components/common/Alerts";
+import { SpinButton } from "../../components/common/SpinButton";
 import { PeerStateConnectionStatusIcon } from "../../components/common/SyncStateIcon";
 import { DataListItem, DataListRoot } from "../../components/ui/data-list";
 import { EmptyState } from "../../components/ui/empty-state";
@@ -333,16 +335,43 @@ const MetaItem = ({
 
 // ─── Plan card ────────────────────────────────────────────────────────────────
 
-const PlanCard = ({
+export const PlanCard = ({
   summary,
+  onRefresh,
 }: {
   summary: SummaryDashboardResponse_Summary;
+  onRefresh?: () => void | Promise<void>;
 }) => {
   const [config] = useConfig();
-  const status = summaryStatus(summary);
-  const { running } = status;
+  const [manualRunning, setManualRunning] = useState(false);
+  const reportedStatus = summaryStatus(summary);
+  const running = reportedStatus.running || manualRunning;
+  const status: SummaryStatus = manualRunning
+    ? {
+        ...reportedStatus,
+        running: true,
+        state: "run",
+        color: STATE_COLORS.run,
+      }
+    : reportedStatus;
 
-  const progress = useLiveProgress(summary.id, running);
+  const progress = useLiveProgress(summary.id, running, onRefresh);
+
+  const handleBackupNow = async () => {
+    setManualRunning(true);
+    try {
+      await backrestService.backup(
+        create(BackupRequestSchema, { value: summary.id }),
+      );
+      alerts.success(m.plan_backup_scheduled());
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      alerts.error(m.plan_error_backup() + message);
+    } finally {
+      setManualRunning(false);
+      await onRefresh?.();
+    }
+  };
 
   // Plan config fields
   const planCfg = useMemo(
@@ -436,19 +465,37 @@ const PlanCard = ({
         {/* 30-day history strip */}
         <HistoryStrip buckets={summary.historyLast30days} />
 
-        {/* Retention footer */}
-        {retLine && (
-          <Box
-            mt={3}
-            pt={3}
-            borderTop="1px solid"
-            borderColor="border.subtle"
-            fontSize="12px"
-            color="fg.muted"
+        {/* Plan footer */}
+        <Flex
+          mt={4}
+          pt={4}
+          borderTop="1px solid"
+          borderColor="border.subtle"
+          direction={{ base: "column", sm: "row" }}
+          align={{ base: "stretch", sm: "center" }}
+          justify="space-between"
+          gap={3}
+        >
+          {retLine ? (
+            <Text fontSize="12px" color="fg.muted">
+              {retLine}
+            </Text>
+          ) : (
+            <Box />
+          )}
+          <SpinButton
+            onClickAsync={handleBackupNow}
+            disabled={running}
+            loadingText={m.dashboard_state_label_run()}
+            type="default"
+            minH="44px"
+            width={{ base: "full", sm: "auto" }}
+            flexShrink={0}
           >
-            {retLine}
-          </Box>
-        )}
+            <FiPlay aria-hidden />
+            {m.plan_button_backup()}
+          </SpinButton>
+        </Flex>
       </Card.Body>
     </Card.Root>
   );
@@ -465,22 +512,22 @@ export const SummaryDashboard = () => {
     null,
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (document.hidden) return;
-      try {
-        const data = await backrestService.getSummaryDashboard({});
-        setSummaryData(data);
-      } catch (e: unknown) {
-        alerts.error(m.dashboard_error_fetch() + e);
-      }
-      getOpenListUsage()
-        .then((usage) => {
-          if (usage) setOpenListUsage(usage);
-        })
-        .catch(() => {});
-    };
+  const fetchData = useCallback(async () => {
+    if (document.hidden) return;
+    try {
+      const data = await backrestService.getSummaryDashboard({});
+      setSummaryData(data);
+    } catch (e: unknown) {
+      alerts.error(m.dashboard_error_fetch() + e);
+    }
+    getOpenListUsage()
+      .then((usage) => {
+        if (usage) setOpenListUsage(usage);
+      })
+      .catch(() => {});
+  }, []);
 
+  useEffect(() => {
     fetchData();
     document.addEventListener("visibilitychange", fetchData);
     const interval = setInterval(fetchData, 60000);
@@ -488,7 +535,7 @@ export const SummaryDashboard = () => {
       document.removeEventListener("visibilitychange", fetchData);
       clearInterval(interval);
     };
-  }, []);
+  }, [fetchData]);
 
   useEffect(() => {
     if (!config) return;
@@ -532,7 +579,7 @@ export const SummaryDashboard = () => {
           <Heading size="md">{m.app_menu_plans()}</Heading>
           <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
             {plans.map((s) => (
-              <PlanCard key={s.id} summary={s} />
+              <PlanCard key={s.id} summary={s} onRefresh={fetchData} />
             ))}
           </SimpleGrid>
         </Stack>
@@ -544,7 +591,6 @@ export const SummaryDashboard = () => {
           <EmptyState title={m.dashboard_plans_empty()} icon={<FiServer />} />
         </Stack>
       )}
-
     </Stack>
   );
 };

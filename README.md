@@ -40,10 +40,10 @@ current day and month upload traffic, and backup days share one metric strip;
 each calendar cell reveals that day's processed backup size and repository
 upload amount on hover or tap. The effective OpenList upload rate is shown in
 the matching repository editor.
-The dashboard is limited to backup activity and backup-task status. Repository
-capacity and 30-day health appear at the top of each repository page, while
-runtime paths and the configuration JSON are grouped under System Info in
-Settings.
+The dashboard is limited to backup activity and backup-task status, with an
+immediate backup action on each task card for manual reruns. Repository capacity
+and 30-day health appear at the top of each repository page, while runtime paths
+and the configuration JSON are grouped under System Info in Settings.
 All 30-day backup strips run chronologically from the oldest date on the left
 to today on the right.
 The mobile navigation remains a full-screen numbered contents page. The plan
