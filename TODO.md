@@ -4,6 +4,10 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Sum protected and newly added data across backup plans,
+  simplify yearly-calendar details to “added today”, and resolve each day's
+  fill or outline from every plan's final status while retaining an orange
+  recovery marker after a successful retry.
 - [x] 2026-08-10: Treat OpenList daily upload exhaustion as a blue
   waiting-to-resume result while preserving uploaded Restic packs for reuse.
 - [x] 2026-08-10: Replace the backup-task archive glyph with a calendar,

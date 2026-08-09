@@ -39,11 +39,12 @@ snapshot browsing, historical versions, single-file restore, retention, check,
 and prune continue to use Backrest's existing plan and repository model.
 
 The dashboard uses a contribution-style yearly backup activity wall and a
-root-level neutral glass navigation panel. Backed-up bytes, yearly backup size,
-current day and month upload traffic, and backup days share one metric strip;
-each calendar cell reveals that day's processed backup size and repository
-upload amount on hover or tap. The effective OpenList upload rate is shown in
-the matching repository editor.
+root-level neutral glass navigation panel. Backed-up bytes are summed from the
+latest usable snapshot of every plan; remote backup additions, current day and
+month OpenList traffic, and backup days share the same metric strip. Each
+calendar cell reveals that day's uncompressed repository addition and the
+final state of every plan on hover or tap. The effective OpenList upload rate
+is shown in the matching repository editor.
 The dashboard is limited to backup activity and backup-task status. Each task
 card opens a timeline-based historical file browser, starts idle backups from a
 compact top-right control, and stops the active operation from the same place.
@@ -57,11 +58,13 @@ while only an overflowing file list receives its own scrollbar. Its desktop
 stack compensates for tall-card perspective so older versions remain visibly
 layered behind the active surface.
 All 30-day backup strips run chronologically from the oldest date on the left
-to today on the right. A successful retry clears the yearly calendar warning;
-the task strip uses a green cell with an orange recovery outline, while earlier
-failures remain available in the day details and operation history. In the
-yearly activity wall, a queued backup has a blue outline and only an actively
-running backup uses green.
+to today on the right. The yearly wall resolves each plan to its last operation
+of the day: mixed failure uses a red outline, all-failed uses red fill, mixed
+running uses a green outline, and all-running uses green fill. When all plans
+finish successfully after an earlier failure, the blue activity cell retains
+an orange recovery outline. Earlier attempts remain in operation history but
+do not inflate the tooltip's per-plan success count. A queued backup keeps the
+console-blue outline.
 Desktop and mobile share a compact translucent bottom navigation capsule. Its
 evenly inset selection pill moves between closed-path icons, with a calendar
 representing scheduled backup tasks, while task and
