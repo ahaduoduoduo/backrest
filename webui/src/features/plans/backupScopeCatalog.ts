@@ -54,8 +54,8 @@ export const BACKUP_SOURCE_OPTIONS: BackupSourceOption[] = [
     path: "/source/web-live",
     title: { zh: "直播代理", en: "Live proxy" },
     description: {
-      zh: "直播代理代码、Compose 和频道配置。",
-      en: "Live proxy code, Compose configuration, and channel data.",
+      zh: "直播代理代码和 Compose；频道配置由 Docker 服务入口备份。",
+      en: "Live proxy code and Compose; channel data is included through Docker services.",
     },
   },
   {
@@ -181,11 +181,12 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
     patterns: [
       "/source/docker/homeassistant/**",
       "/source/docker/telegram-data/**",
+      "/source/web-live/data/**",
     ],
     title: { zh: "重复数据入口", en: "Duplicate source aliases" },
     description: {
-      zh: "这两项仍通过 Home Assistant 和 Telegram 独立入口备份。",
-      en: "These remain backed up through the dedicated Home Assistant and Telegram sources.",
+      zh: "数据仍通过 Home Assistant、Telegram 或 Docker 服务入口备份。",
+      en: "Data remains backed up through the Home Assistant, Telegram, or Docker service source.",
     },
   },
   {

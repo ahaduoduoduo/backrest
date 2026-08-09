@@ -55,6 +55,7 @@ describe("backupScopeCatalog", () => {
       "/source/docker/autofilm-core/autofilm.sqlite*",
       "/source/docker/homeassistant/**",
       "/source/docker/telegram-data/**",
+      "/source/web-live/data/**",
     ];
 
     expect(getCustomExcludeRules(rules)).toEqual([]);

@@ -4,6 +4,8 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Exclude the legacy Live Proxy data copy after moving active
+  channel data to `/volume1/docker/live-proxy`.
 - [x] 2026-08-09: Describe flat Synology persistence roots for Backrest and
   AutoFilm, and keep separately mounted Home Assistant and Telegram data from
   appearing twice in one snapshot.
