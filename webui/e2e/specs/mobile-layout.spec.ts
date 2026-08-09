@@ -32,14 +32,16 @@ test.describe('mobile backup console', () => {
     expect(viewport.width).toBe(390);
     expect(viewport.viewportMeta).toContain('width=device-width');
 
-    const contentCard = page.getByTestId('backup-content-card');
-    await expect(contentCard).toBeVisible();
-    await expect(page.getByText('CONTENT / OFFSITE')).toBeVisible();
-    await expect(page.getByText('Backup content')).toBeVisible();
-    await expect(page.getByText('Docker services')).toBeVisible();
-    await expect(page.getByText('Git history')).toBeVisible();
-    const contentBox = await contentCard.boundingBox();
-    expect(contentBox?.y).toBeLessThan(80);
+    const activityCard = page.getByTestId('backup-activity-card');
+    await expect(activityCard).toBeVisible();
+    await expect(page.getByText('Offsite backup')).toBeVisible();
+    await expect(page.getByText('Backup activity')).toBeVisible();
+    await expect(page.getByText('Backed up')).toBeVisible();
+
+    const backupNow = page.getByRole('button', { name: 'Backup Now' });
+    await expect(backupNow).toBeVisible();
+    const backupButtonBox = await backupNow.boundingBox();
+    expect(backupButtonBox?.height).toBeGreaterThanOrEqual(44);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
@@ -63,7 +65,9 @@ test.describe('mobile backup console', () => {
     await page.keyboard.press('Escape');
     await expect(navigation).not.toBeVisible();
 
-    await page.getByTestId('edit-backup-content-nas-config').click();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(navigation).toBeVisible();
+    await navigation.getByRole('button', { name: /Edit Plan nas-config/i }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Content' })).toBeVisible();

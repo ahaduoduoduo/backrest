@@ -2,9 +2,9 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import type { Locator } from '@playwright/test';
-import { test as harnessTest, expect } from '../harness/fixtures';
+import { test as harnessTest, expect, navigationItem } from '../harness/fixtures';
 import { BackrestInstance } from '../harness/backrest';
-import { seedInstance, seedPlan } from '../harness/seed';
+import { backrestClient, seedInstance, seedPlan } from '../harness/seed';
 import { SftpServer } from '../harness/sftpserver';
 
 /**
@@ -99,7 +99,7 @@ test.describe('sftp-backed repository', () => {
     const uri = `sftp:${sftp.user}@${sftp.host}:${repoDir}`;
 
     await page.goto(backrest.url);
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -148,10 +148,10 @@ test.describe('sftp-backed repository', () => {
 
     // Submit initializes the repo over sftp (restic init + cat config).
     await dialog.getByTestId('add-repo-submit').click();
-    await expect(page.getByTestId('sidebar-item-repo-sftp-repo')).toBeVisible({
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(await navigationItem(page, 'sidebar-item-repo-sftp-repo')).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByRole('dialog')).toHaveCount(0);
 
     // Restic data must physically exist in the sftp-served directory.
     await expect(async () => {
@@ -210,7 +210,7 @@ test.describe('sftp-backed repository', () => {
     const uri = `sftp:${os.userInfo().username}@127.0.0.1:/tmp/backrest-e2e-no-such-repo`;
 
     await page.goto(backrest.url);
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -227,7 +227,8 @@ test.describe('sftp-backed repository', () => {
     // en.json add_repo_modal_test_error = "Check error: ".
     await expect(page.getByText(/Check error/).first()).toBeVisible({ timeout: 45_000 });
     await expect(dialog).toBeVisible();
-    await expect(page.getByTestId('sidebar-item-repo-sftp-bad')).toHaveCount(0);
+    const config = await backrestClient(backrest).getConfig({});
+    expect(config.repos.some((repo) => repo.id === 'sftp-bad')).toBe(false);
   });
 
   test('wrong host key: Test Configuration surfaces the friendly host-key flow, not a generic error', async ({
@@ -247,7 +248,7 @@ test.describe('sftp-backed repository', () => {
     const uri = `sftp:${sftp.user}@${sftp.host}:${repoDir}`;
 
     await page.goto(backrest.url);
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -268,7 +269,8 @@ test.describe('sftp-backed repository', () => {
     // generic "Check error" toast.
     await expect(page.getByText('Unknown SFTP Host Key')).toBeVisible({ timeout: 45_000 });
     await expect(page.getByText(/Check error/)).toHaveCount(0);
-    await expect(page.getByTestId('sidebar-item-repo-sftp-badkey')).toHaveCount(0);
+    const config = await backrestClient(backrest).getConfig({});
+    expect(config.repos.some((repo) => repo.id === 'sftp-badkey')).toBe(false);
 
     // Nothing was created on the server side.
     await expect(fs.stat(repoDir)).rejects.toThrow();
@@ -288,7 +290,7 @@ test.describe('sftp-backed repository', () => {
     const uri = `sftp://${sftp.user}@${sftp.host}:${sftp.port}${repoDir}`;
 
     await page.goto(backrest.url);
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 

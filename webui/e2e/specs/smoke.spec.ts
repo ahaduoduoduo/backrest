@@ -1,4 +1,4 @@
-import { test, expect } from '../harness/fixtures';
+import { test, expect, openNavigation } from '../harness/fixtures';
 import { seedInstance } from '../harness/seed';
 
 test.describe('smoke', () => {
@@ -16,16 +16,19 @@ test.describe('smoke', () => {
     await expect(instanceId).toBeEditable();
   });
 
-  test('seeded instance skips setup and shows the sidebar', async ({ page, backrest }) => {
+  test('seeded instance skips setup and shows the navigation contents', async ({
+    page,
+    backrest,
+  }) => {
     await seedInstance(backrest);
 
     await page.goto(backrest.url);
 
-    // Sidebar is rendered once the app has loaded a usable config.
-    await expect(page.getByTestId('sidebar-add-repo')).toBeVisible();
-    await expect(page.getByTestId('sidebar-add-plan')).toBeVisible();
-
-    // And no dialog auto-opens for a configured instance.
+    // No setup dialog auto-opens for a configured instance.
     await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    const navigation = await openNavigation(page);
+    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
+    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
   });
 });

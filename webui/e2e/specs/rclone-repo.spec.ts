@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import * as path from 'node:path';
 import { create } from '@bufbuild/protobuf';
-import { test, expect } from '../harness/fixtures';
+import { test, expect, navigationItem } from '../harness/fixtures';
 import { backrestClient, seedInstance, seedPlan } from '../harness/seed';
 import type { BackrestInstance } from '../harness/backrest';
 import { BackupRequestSchema, GetOperationsRequestSchema } from '../../gen/ts/v1/service_pb';
@@ -100,7 +100,7 @@ test.describe('rclone-backed repo', () => {
     await page.goto(backrest.url);
 
     // --- Add Repo UI ------------------------------------------------------
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
 
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
@@ -147,16 +147,17 @@ test.describe('rclone-backed repo', () => {
     await expect(successBanner).toBeVisible();
 
     // Testing configuration must not have created the repo yet.
-    await expect(page.getByTestId(`sidebar-item-repo-${REPO_NAME}`)).toHaveCount(0);
+    const configBeforeSubmit = await backrestClient(backrest).getConfig({});
+    expect(configBeforeSubmit.repos.some((repo) => repo.id === REPO_NAME)).toBe(false);
     await expect(dialog).toBeVisible();
 
     // --- Submit: initializes the repo through rclone ----------------------
     await dialog.getByTestId('add-repo-submit').click();
 
-    const sidebarItem = page.getByTestId(`sidebar-item-repo-${REPO_NAME}`);
-    // restic init through rclone + AddRepo's GUID lookup can take a while.
-    await expect(sidebarItem).toBeVisible({ timeout: 60_000 });
     await expect(page.getByRole('dialog')).toHaveCount(0);
+    const repoItem = await navigationItem(page, `sidebar-item-repo-${REPO_NAME}`);
+    // restic init through rclone + AddRepo's GUID lookup can take a while.
+    await expect(repoItem).toBeVisible({ timeout: 60_000 });
 
     // --- Prove it's usable: seed a plan + run a real backup via the API ---
     const dataPath = await backrest.makeTestData({
@@ -168,12 +169,12 @@ test.describe('rclone-backed repo', () => {
     await runBackupViaApi(backrest, PLAN_ID);
 
     // --- Assert a successful Backup operation-row in the UI ---------------
-    // Assert via the repo view (the repo is in the live sidebar config, unlike
+    // Assert via the repo view (the repo is in the live navigation config, unlike
     // the API-seeded plan, whose config the already-loaded SPA hasn't fetched).
     // The oplog subscription + on-mount GetOperations surface the historical
     // Backup operation. The list tab renders OperationRows directly (the tree
     // tab needs a flow selected to reveal rows).
-    await sidebarItem.click();
+    await repoItem.click();
     await expect(page).toHaveURL(/#\/repo\//);
     await expect(page.getByRole('heading', { name: REPO_NAME })).toBeVisible();
     await page.getByRole('tab', { name: 'List View' }).click();

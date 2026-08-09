@@ -1,4 +1,4 @@
-import { test as base, expect, type Page } from '@playwright/test';
+import { test as base, expect, type Locator, type Page } from '@playwright/test';
 import { BackrestInstance } from './backrest';
 
 interface BackrestFixtures {
@@ -24,6 +24,29 @@ export const test = base.extend<BackrestFixtures>({
 });
 
 export { expect };
+
+/**
+ * Opens the current desktop navigation drawer and returns its dialog.
+ *
+ * The console no longer keeps a persistent sidebar mounted. Tests that need
+ * a plan, repository, or add action must open the header navigation first.
+ * The helper is idempotent so a journey can request several items from the
+ * same open drawer without toggling it closed.
+ */
+export async function openNavigation(page: Page): Promise<Locator> {
+  const navigation = page.getByRole('dialog', { name: 'Menu' });
+  if (!(await navigation.isVisible())) {
+    await page.getByTestId('desktop-navigation-trigger').click();
+    await expect(navigation).toBeVisible();
+  }
+  return navigation;
+}
+
+/** Returns one stable navigation test target, opening the drawer if needed. */
+export async function navigationItem(page: Page, testId: string): Promise<Locator> {
+  const navigation = await openNavigation(page);
+  return navigation.getByTestId(testId);
+}
 
 /**
  * Navigate to a hash route and force a real reload so the SPA re-fetches its

@@ -991,6 +991,7 @@ const DesktopNavTrigger = () => {
         className="console-navigation-trigger"
         aria-label={m.app_menu()}
         aria-controls="desktop-navigation-panel"
+        data-testid="desktop-navigation-trigger"
       >
         <FiMenu />
       </summary>

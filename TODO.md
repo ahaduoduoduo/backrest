@@ -4,6 +4,10 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Migrate browser journeys from the removed persistent
+  sidebar to the current header navigation drawer, replace hidden-navigation
+  absence checks with persisted-config assertions, and cover the dashboard
+  manual backup action on an iPhone viewport.
 - [x] 2026-08-09: Add a mobile-sized manual backup action to every dashboard
   task card, keep it disabled while the task is active, and allow a failed
   task to be started again after the underlying issue is resolved.
