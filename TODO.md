@@ -4,6 +4,9 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Extend the generic generated-files exclusion switch to
+  recursively omit Node dependency trees, npm/pnpm/yarn/Bun caches, and
+  dependency-cache Docker named volumes without project-specific mappings.
 - [x] 2026-08-09: Replace compiled per-service backup source switches with a
   generic root-directory list so new Docker and Web projects are included
   without frontend changes.
