@@ -4,6 +4,9 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Increase bottom-dock transparency and restore the historical
+  version stack's original 18-pixel depth separation without expanding the
+  compact mobile card reserve.
 - [x] 2026-08-10: Reduce unused space above the historical card, increase its
   dock clearance, use one continuous card surface, expose the page beneath a
   translucent dock, equalize the dock selection inset, and let dock navigation

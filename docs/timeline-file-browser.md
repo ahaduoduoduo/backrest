@@ -19,8 +19,9 @@ When a folder did not exist yet, the browser preserves the path and offers a
 return to that version's root instead of silently navigating somewhere else.
 
 All layouts use a Time Machine-inspired stack of up to five same-size directory
-windows. Older versions recede behind the active window, while a compact rail
-inside its right edge provides older/newer arrows and sampled timeline ticks.
+windows with 18 pixels of vertical separation per depth. Older versions recede
+behind the active window, while a compact rail inside its right edge provides
+older/newer arrows and sampled timeline ticks.
 The active version uses one continuous surface rather than nested panel colors.
 The task title stays in its lower-left corner and the history/delete controls
 stay in the lower center. Folder rows are keyboard accessible; every file and
