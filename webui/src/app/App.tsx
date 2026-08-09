@@ -274,6 +274,7 @@ const PlanViewContainer = () => {
     <MainContentAreaTemplate
       breadcrumbs={[{ title: m.app_breadcrumb_plan() }, { title: planId! }]}
       key={planId}
+      fillViewport
     >
       {plan ? (
         <PlanView plan={plan} />

@@ -11,13 +11,13 @@ import {
 } from "@chakra-ui/react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { FiHardDrive } from "react-icons/fi";
 import {
-  FiChevronLeft,
-  FiFile,
-  FiFolder,
-  FiHardDrive,
-  FiHome,
-} from "react-icons/fi";
+  IoChevronBack,
+  IoDocument,
+  IoFolder,
+  IoHome,
+} from "react-icons/io5";
 import { Operation, OperationStatus } from "../../../gen/ts/v1/operations_pb";
 import { ResticSnapshot } from "../../../gen/ts/v1/restic_pb";
 import {
@@ -157,15 +157,22 @@ const ExplorerBreadcrumbs = ({
 }) => {
   const segments = path.split("/").filter(Boolean);
   return (
-    <Flex align="center" gap="3px" minW={0} overflowX="auto">
+    <Flex
+      className="snapshot-explorer-path"
+      align="center"
+      gap="3px"
+      minW={0}
+      overflowX="auto"
+    >
       <Button
+        className="snapshot-path-control"
         size="xs"
         variant="ghost"
         flexShrink={0}
         aria-label={m.snapshot_explorer_root()}
         onClick={() => onNavigate("/")}
       >
-        <FiHome />
+        <IoHome />
       </Button>
       {segments.map((segment, index) => {
         const segmentPath = `/${segments.slice(0, index + 1).join("/")}`;
@@ -175,6 +182,7 @@ const ExplorerBreadcrumbs = ({
               /
             </Text>
             <Button
+              className="snapshot-path-control"
               size="xs"
               variant="ghost"
               px="7px"
@@ -234,17 +242,17 @@ const FileRow = ({
           }
         }}
       >
-        <Flex
-          width="32px"
+      <Flex
+        className="snapshot-entry-icon"
+        width="32px"
           height="32px"
           align="center"
           justify="center"
           flexShrink={0}
-          borderRadius="10px"
-          bg={isDirectory ? "rgba(97, 184, 255, 0.1)" : "whiteAlpha.050"}
+        bg={isDirectory ? "rgba(97, 184, 255, 0.1)" : "whiteAlpha.050"}
           color={isDirectory ? "#63b9e8" : "whiteAlpha.650"}
         >
-          {isDirectory ? <FiFolder /> : <FiFile />}
+          {isDirectory ? <IoFolder /> : <IoDocument />}
         </Flex>
         <Box minW={0}>
           <Text
@@ -488,9 +496,15 @@ export const PlanSnapshotExplorer = ({
                       className="snapshot-time-window snapshot-time-window-active"
                       overflow="hidden"
                     >
-                      <Flex align="center" minH="52px" px={{ base: 2, md: 3 }}>
+                      <Flex
+                        className="snapshot-window-toolbar"
+                        align="center"
+                        minH="52px"
+                        px={{ base: 2, md: 3 }}
+                      >
                         {currentPath !== "/" && (
                           <IconButton
+                            className="snapshot-path-control"
                             size="xs"
                             variant="ghost"
                             flexShrink={0}
@@ -499,7 +513,7 @@ export const PlanSnapshotExplorer = ({
                               setCurrentPath(parentPath(currentPath))
                             }
                           >
-                            <FiChevronLeft />
+                            <IoChevronBack />
                           </IconButton>
                         )}
                         <ExplorerBreadcrumbs
@@ -521,6 +535,7 @@ export const PlanSnapshotExplorer = ({
                       </Flex>
 
                       <Flex
+                        className="snapshot-window-columns"
                         display={{ base: "none", md: "flex" }}
                         minH="34px"
                         px={4}
@@ -543,16 +558,15 @@ export const PlanSnapshotExplorer = ({
                       </Flex>
 
                       <Box
-                        minH={{ base: "350px", md: "430px" }}
-                        maxH="540px"
+                        className="snapshot-explorer-files"
                         overflowY="auto"
                       >
                         {directoryPending ? (
-                          <Center minH="320px">
+                          <Center h="100%">
                             <Spinner size="sm" />
                           </Center>
                         ) : directoryError ? (
-                          <Center minH="320px" px={6} textAlign="center">
+                          <Center h="100%" px={6} textAlign="center">
                             <Stack align="center" gap={3}>
                               <Text fontSize="13px" fontWeight="600">
                                 {m.snapshot_explorer_path_missing()}
@@ -570,7 +584,7 @@ export const PlanSnapshotExplorer = ({
                             </Stack>
                           </Center>
                         ) : entries.length === 0 ? (
-                          <Center minH="320px">
+                          <Center h="100%">
                             <Text color="whiteAlpha.400" fontSize="12px">
                               {m.snapshot_explorer_empty_folder()}
                             </Text>

@@ -20,10 +20,17 @@ return to that version's root instead of silently navigating somewhere else.
 
 All layouts use a Time Machine-inspired stack of up to five same-size directory
 windows. Older versions recede behind the active window, while a compact rail
-inside its right edge provides older/newer arrows and sampled timeline ticks. The stack
-keeps Backrest's dark blue visual language rather than reproducing Finder or
-the macOS desktop. Folder rows are keyboard accessible; every file and folder
-retains the existing information, restore, and download actions.
+inside its right edge provides older/newer arrows and sampled timeline ticks.
+The active version uses one continuous surface rather than nested panel colors.
+The task title stays in its lower-left corner and the history/delete controls
+stay in the lower center. Folder rows are keyboard accessible; every file and
+folder retains the existing information, restore, and download actions.
+
+The plan route fills the available viewport above the persistent bottom dock.
+It does not create a page-level scroll area. Only the file list scrolls, and
+only when its entries exceed the active card height. Path controls, file rows,
+entry icons, action menus, and compact restore/information dialogs use one
+rounded-rectangle scale and the same blue-gray surface palette.
 
 A neutral delete icon below the card arms on its first click and becomes red.
 The second click schedules the selected version through the existing Forget

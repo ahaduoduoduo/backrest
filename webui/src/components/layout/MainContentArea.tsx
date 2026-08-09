@@ -8,12 +8,15 @@ interface BreadcrumbItem {
 
 export const MainContentAreaTemplate = ({
   children,
+  fillViewport = false,
 }: {
   breadcrumbs: BreadcrumbItem[];
   children: React.ReactNode;
+  fillViewport?: boolean;
 }) => {
   return (
     <Box
+      className={fillViewport ? "console-content-viewport" : undefined}
       px={{ base: 3, sm: 4, md: 7, xl: 10 }}
       pt={{ base: 4, md: 6 }}
       pb={{ base: "112px", md: "118px" }}

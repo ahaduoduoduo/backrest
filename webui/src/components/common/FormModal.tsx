@@ -66,17 +66,23 @@ export const FormModal: React.FC<FormModalProps> = ({
       scrollBehavior="inside"
     >
       <Portal>
-        <DialogBackdrop />
-        <DialogPositioner>
-          <DialogContent maxW={contentMaxW}>
-            <DialogHeader>
+        <DialogBackdrop className="console-form-modal-backdrop" />
+        <DialogPositioner className="console-form-modal-positioner">
+          <DialogContent className="console-form-modal" maxW={contentMaxW}>
+            <DialogHeader className="console-form-modal-header">
               <DialogTitle>{title}</DialogTitle>
             </DialogHeader>
             <DialogCloseTrigger />
 
-            <DialogBody>{children}</DialogBody>
+            <DialogBody className="console-form-modal-body">
+              {children}
+            </DialogBody>
 
-            {footer && <DialogFooter>{footer}</DialogFooter>}
+            {footer && (
+              <DialogFooter className="console-form-modal-footer">
+                {footer}
+              </DialogFooter>
+            )}
           </DialogContent>
         </DialogPositioner>
       </Portal>

@@ -84,11 +84,10 @@ export const BackupScopeEditor = ({
             const checked = matchCount === preset.patterns.length;
             return (
               <Box
+                className="backup-scope-preset"
                 key={preset.id}
                 borderWidth="1px"
-                borderColor={matchCount > 0 ? "purple.500" : "border"}
-                bg={matchCount > 0 ? "purple.950" : "bg.subtle"}
-                borderRadius="lg"
+                data-active={matchCount > 0 || undefined}
                 p={{ base: 3.5, md: 4 }}
               >
                 <Flex align="flex-start" gap={3}>
@@ -104,7 +103,7 @@ export const BackupScopeEditor = ({
                   <Flex
                     align="center"
                     gap={1}
-                    color={matchCount > 0 ? "purple.300" : "fg.muted"}
+                    color={matchCount > 0 ? "#8fd1f5" : "fg.muted"}
                     fontSize="11px"
                     flexShrink={0}
                     display={{ base: "none", sm: "flex" }}
