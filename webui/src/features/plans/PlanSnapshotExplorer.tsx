@@ -13,7 +13,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FiChevronLeft,
-  FiClock,
   FiFile,
   FiFolder,
   FiHardDrive,
@@ -34,7 +33,6 @@ import { formatBytes } from "../../lib/formatting";
 import { getLocale } from "../../paraglide/runtime";
 import * as m from "../../paraglide/messages";
 import { SnapshotExplorerHeader } from "./SnapshotExplorerHeader";
-import { SnapshotVersionRail } from "./SnapshotVersionRail";
 
 export interface SnapshotVersion {
   id: string;
@@ -129,6 +127,26 @@ const fileDateFormatter = new Intl.DateTimeFormat(undefined, {
   hour: "2-digit",
   minute: "2-digit",
 });
+
+const stackDateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const STACK_CARD_COUNT = 5;
+
+function stackTransform(depth: number): string {
+  const translateY = depth * -18;
+  const translateZ = depth * -44;
+  const scale = 1 - depth * 0.018;
+  return `translate3d(0, ${translateY}px, ${translateZ}px) scale(${scale})`;
+}
+
+function stackOpacity(depth: number): number {
+  return Math.max(0.2, 1 - depth * 0.17);
+}
 
 const ExplorerBreadcrumbs = ({
   path,
@@ -311,6 +329,7 @@ export const PlanSnapshotExplorer = ({
   const [entries, setEntries] = useState<LsEntry[]>([]);
   const [directoryLoading, setDirectoryLoading] = useState(false);
   const [directoryError, setDirectoryError] = useState("");
+  const [loadedDirectoryKey, setLoadedDirectoryKey] = useState("");
   const [direction, setDirection] = useState(1);
   const cache = useRef(new Map<string, LsEntry[]>());
   const reduceMotion = useReducedMotion();
@@ -340,6 +359,7 @@ export const PlanSnapshotExplorer = ({
     setDirectoryError("");
     if (cached) {
       setEntries(cached);
+      setLoadedDirectoryKey(cacheKey);
       setDirectoryLoading(false);
       return;
     }
@@ -358,9 +378,11 @@ export const PlanSnapshotExplorer = ({
         const nextEntries = sortEntries(response.entries, normalizedPath);
         cache.current.set(cacheKey, nextEntries);
         setEntries(nextEntries);
+        setLoadedDirectoryKey(cacheKey);
       })
       .catch((error: unknown) => {
         if (!active) return;
+        setLoadedDirectoryKey(cacheKey);
         setDirectoryError(
           error instanceof Error ? error.message : String(error),
         );
@@ -403,209 +425,216 @@ export const PlanSnapshotExplorer = ({
     );
   }
 
-  const motionDistance =
-    direction > 0
-      ? "translateY(-14px) scale(0.985)"
-      : "translateY(14px) scale(0.985)";
-  const exitDistance =
-    direction > 0
-      ? "translateY(14px) scale(0.985)"
-      : "translateY(-14px) scale(0.985)";
+  const visibleVersions = versions
+    .slice(selectedIndex, selectedIndex + STACK_CARD_COUNT)
+    .map((version, depth) => ({ version, depth }));
+  const activeDirectoryKey = `${selectedVersion.id}\u0000${directoryPath(currentPath)}`;
+  const directoryPending =
+    directoryLoading || loadedDirectoryKey !== activeDirectoryKey;
 
   return (
     <Box
       className="snapshot-explorer"
       position="relative"
-      overflow="hidden"
-      border="1px solid"
-      borderColor="whiteAlpha.100"
-      borderRadius={{ base: "22px", md: "28px" }}
-      bg="#080a0f"
-      px={{ base: 3, md: 6 }}
-      pt={{ base: 4, md: 6 }}
-      pb={{ base: 4, md: 6 }}
+      minW={0}
+      px={{ base: 0, md: 3 }}
+      py={{ base: 2, md: 4 }}
     >
-      <Box className="snapshot-explorer-glow" />
-
-      <SnapshotExplorerHeader
-        versions={versions}
-        selectedIndex={selectedIndex}
-        repoId={repoId}
-        planId={planId}
-        onSelect={selectVersion}
-      />
-
-      <Box
-        position="relative"
-        zIndex={1}
-        display="grid"
-        gridTemplateColumns={{
-          base: "minmax(0, 1fr)",
-          lg: "minmax(0, 1fr) 116px",
-        }}
-        gap={{ base: 0, lg: 5 }}
-        alignItems="start"
-      >
-        <Box position="relative" minW={0} pt={{ base: 0, md: 3 }}>
-          <Box className="snapshot-explorer-layer snapshot-explorer-layer-back" />
-          <Box className="snapshot-explorer-layer snapshot-explorer-layer-mid" />
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.div
-              key={selectedVersion.id}
-              initial={{
-                opacity: 0,
-                transform: reduceMotion ? "none" : motionDistance,
-              }}
-              animate={{ opacity: 1, transform: "translateY(0) scale(1)" }}
-              exit={{
-                opacity: 0,
-                transform: reduceMotion ? "none" : exitDistance,
-              }}
-              transition={{
-                duration: reduceMotion ? 0.16 : 0.24,
-                ease: [0.77, 0, 0.175, 1],
-              }}
-              style={{ position: "relative", zIndex: 3 }}
-            >
-              <Box
-                overflow="hidden"
-                border="1px solid"
-                borderColor="rgba(255,255,255,0.12)"
-                borderRadius={{ base: "17px", md: "20px" }}
-                bg="rgba(14, 17, 23, 0.96)"
-                boxShadow="0 26px 70px rgba(0, 0, 0, 0.34)"
-                backdropFilter="blur(18px)"
-              >
-                <Flex
-                  align="center"
-                  minH="50px"
-                  px={{ base: 2, md: 3 }}
-                  borderBottom="1px solid"
-                  borderColor="whiteAlpha.100"
-                  bg="rgba(255,255,255,0.025)"
+      <Box className="snapshot-time-scene">
+        <Box className="snapshot-time-stage" position="relative" minW={0}>
+          <AnimatePresence initial={false}>
+            {visibleVersions.map(({ version, depth }) => {
+              const activeVersion = depth === 0;
+              const frontTransform = "translate3d(0, 46px, 74px) scale(1.035)";
+              return (
+                <motion.div
+                  key={version.id}
+                  className="snapshot-time-card"
+                  initial={{
+                    opacity: reduceMotion ? 0 : stackOpacity(depth),
+                    transform:
+                      reduceMotion || direction > 0
+                        ? stackTransform(Math.min(depth + 1, STACK_CARD_COUNT))
+                        : frontTransform,
+                  }}
+                  animate={{
+                    opacity: stackOpacity(depth),
+                    transform: stackTransform(depth),
+                  }}
+                  exit={{
+                    opacity: 0,
+                    transform: reduceMotion
+                      ? stackTransform(depth)
+                      : direction > 0
+                        ? frontTransform
+                        : stackTransform(depth + 1),
+                  }}
+                  transition={{
+                    opacity: {
+                      duration: reduceMotion ? 0.16 : 0.24,
+                      ease: [0.23, 1, 0.32, 1],
+                    },
+                    transform: {
+                      duration: reduceMotion ? 0 : 0.24,
+                      ease: [0.77, 0, 0.175, 1],
+                    },
+                  }}
+                  style={{
+                    zIndex: STACK_CARD_COUNT - depth,
+                    pointerEvents: activeVersion ? "auto" : "none",
+                  }}
+                  aria-hidden={activeVersion ? undefined : true}
                 >
-                  {currentPath !== "/" && (
-                    <IconButton
-                      size="xs"
-                      variant="ghost"
-                      flexShrink={0}
-                      aria-label={m.snapshot_explorer_parent()}
-                      onClick={() => setCurrentPath(parentPath(currentPath))}
-                    >
-                      <FiChevronLeft />
-                    </IconButton>
-                  )}
-                  <ExplorerBreadcrumbs
-                    path={currentPath}
-                    onNavigate={setCurrentPath}
-                  />
-                  <Text
-                    ml="auto"
-                    pl={3}
-                    color="whiteAlpha.350"
-                    fontSize="10px"
-                    flexShrink={0}
-                  >
-                    {m.snapshot_explorer_item_count({ count: entries.length })}
-                  </Text>
-                </Flex>
+                  {activeVersion ? (
+                    <Box className="snapshot-time-window" overflow="hidden">
+                      <Flex
+                        align="center"
+                        minH="52px"
+                        px={{ base: 2, md: 3 }}
+                        borderBottom="1px solid"
+                        borderColor="whiteAlpha.080"
+                      >
+                        {currentPath !== "/" && (
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            flexShrink={0}
+                            aria-label={m.snapshot_explorer_parent()}
+                            onClick={() =>
+                              setCurrentPath(parentPath(currentPath))
+                            }
+                          >
+                            <FiChevronLeft />
+                          </IconButton>
+                        )}
+                        <ExplorerBreadcrumbs
+                          path={currentPath}
+                          onNavigate={setCurrentPath}
+                        />
+                        <Box ml="auto" pl={3} flexShrink={0} textAlign="right">
+                          <Text color="#9ed8f6" fontSize="9px">
+                            {stackDateFormatter.format(
+                              selectedVersion.timestampMs,
+                            )}
+                          </Text>
+                          <Text mt="2px" color="whiteAlpha.300" fontSize="8px">
+                            {m.snapshot_explorer_item_count({
+                              count: entries.length,
+                            })}
+                          </Text>
+                        </Box>
+                      </Flex>
 
-                <Flex
-                  display={{ base: "none", md: "flex" }}
-                  minH="34px"
-                  px={4}
-                  align="center"
-                  color="whiteAlpha.300"
-                  fontFamily="mono"
-                  fontSize="9px"
-                  letterSpacing="0.08em"
-                  borderBottom="1px solid"
-                  borderColor="whiteAlpha.070"
-                >
-                  <Text flex="1">{m.snapshot_explorer_column_name()}</Text>
-                  <Text width="166px">
-                    {m.snapshot_explorer_column_modified()}
-                  </Text>
-                  <Text width="82px" textAlign="right">
-                    {m.snapshot_explorer_column_size()}
-                  </Text>
-                  <Box width="32px" />
-                </Flex>
-
-                <Box
-                  minH={{ base: "330px", md: "420px" }}
-                  maxH="520px"
-                  overflowY="auto"
-                >
-                  {directoryLoading ? (
-                    <Center minH="300px">
-                      <Stack align="center" gap={3} color="whiteAlpha.450">
-                        <Spinner size="sm" />
-                        <Text fontSize="11px">
-                          {m.snapshot_explorer_loading()}
+                      <Flex
+                        display={{ base: "none", md: "flex" }}
+                        minH="34px"
+                        px={4}
+                        align="center"
+                        color="whiteAlpha.300"
+                        fontFamily="mono"
+                        fontSize="9px"
+                        letterSpacing="0.08em"
+                        borderBottom="1px solid"
+                        borderColor="whiteAlpha.060"
+                      >
+                        <Text flex="1">
+                          {m.snapshot_explorer_column_name()}
                         </Text>
-                      </Stack>
-                    </Center>
-                  ) : directoryError ? (
-                    <Center minH="300px" px={6} textAlign="center">
-                      <Stack align="center" gap={3}>
-                        <Text fontSize="13px" fontWeight="600">
-                          {m.snapshot_explorer_path_missing()}
+                        <Text width="166px">
+                          {m.snapshot_explorer_column_modified()}
                         </Text>
-                        <Text color="whiteAlpha.420" fontSize="11px">
+                        <Text width="82px" textAlign="right">
+                          {m.snapshot_explorer_column_size()}
+                        </Text>
+                        <Box width="32px" />
+                      </Flex>
+
+                      <Box
+                        minH={{ base: "350px", md: "430px" }}
+                        maxH="540px"
+                        overflowY="auto"
+                      >
+                        {directoryPending ? (
+                          <Center minH="320px">
+                            <Spinner size="sm" />
+                          </Center>
+                        ) : directoryError ? (
+                          <Center minH="320px" px={6} textAlign="center">
+                            <Stack align="center" gap={3}>
+                              <Text fontSize="13px" fontWeight="600">
+                                {m.snapshot_explorer_path_missing()}
+                              </Text>
+                              <Text color="whiteAlpha.420" fontSize="11px">
+                                {currentPath}
+                              </Text>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setCurrentPath("/")}
+                              >
+                                {m.snapshot_explorer_back_to_root()}
+                              </Button>
+                            </Stack>
+                          </Center>
+                        ) : entries.length === 0 ? (
+                          <Center minH="320px">
+                            <Text color="whiteAlpha.400" fontSize="12px">
+                              {m.snapshot_explorer_empty_folder()}
+                            </Text>
+                          </Center>
+                        ) : (
+                          entries.map((entry) => (
+                            <FileRow
+                              key={entry.path}
+                              entry={entry}
+                              version={selectedVersion}
+                              repoId={repoId}
+                              planId={planId}
+                              onOpen={(nextEntry) =>
+                                setCurrentPath(nextEntry.path)
+                              }
+                            />
+                          ))
+                        )}
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box className="snapshot-time-window snapshot-time-window-preview">
+                      <Flex
+                        align="center"
+                        justify="space-between"
+                        minH="52px"
+                        px={{ base: 3, md: 4 }}
+                        gap={3}
+                      >
+                        <Text color="whiteAlpha.500" fontSize="10px">
+                          {stackDateFormatter.format(version.timestampMs)}
+                        </Text>
+                        <Text
+                          color="whiteAlpha.280"
+                          fontSize="9px"
+                          overflow="hidden"
+                          textOverflow="ellipsis"
+                          whiteSpace="nowrap"
+                        >
                           {currentPath}
                         </Text>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setCurrentPath("/")}
-                        >
-                          {m.snapshot_explorer_back_to_root()}
-                        </Button>
-                      </Stack>
-                    </Center>
-                  ) : entries.length === 0 ? (
-                    <Center minH="300px">
-                      <Text color="whiteAlpha.400" fontSize="12px">
-                        {m.snapshot_explorer_empty_folder()}
-                      </Text>
-                    </Center>
-                  ) : (
-                    entries.map((entry) => (
-                      <FileRow
-                        key={entry.path}
-                        entry={entry}
-                        version={selectedVersion}
-                        repoId={repoId}
-                        planId={planId}
-                        onOpen={(nextEntry) => setCurrentPath(nextEntry.path)}
-                      />
-                    ))
+                      </Flex>
+                    </Box>
                   )}
-                </Box>
-              </Box>
-            </motion.div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </Box>
 
-        <Box
-          display={{ base: "none", lg: "block" }}
-          position="relative"
-          zIndex={3}
-          pt={3}
-        >
-          <Flex align="center" gap={2} px={2} mb={2} color="whiteAlpha.360">
-            <FiClock size={12} />
-            <Text fontFamily="mono" fontSize="9px" letterSpacing="0.12em">
-              {m.snapshot_explorer_versions().toUpperCase()}
-            </Text>
-          </Flex>
-          <SnapshotVersionRail
-            versions={versions}
-            selectedIndex={selectedIndex}
-            onSelect={selectVersion}
-          />
-        </Box>
+        <SnapshotExplorerHeader
+          versions={versions}
+          selectedIndex={selectedIndex}
+          repoId={repoId}
+          planId={planId}
+          onSelect={selectVersion}
+        />
       </Box>
     </Box>
   );

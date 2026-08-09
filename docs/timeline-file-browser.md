@@ -19,10 +19,12 @@ an older or newer version therefore requests the same folder in that version.
 When a folder did not exist yet, the browser preserves the path and offers a
 return to that version's root instead of silently navigating somewhere else.
 
-Desktop layouts use a vertical version rail. Narrow layouts use a horizontally
-scrollable version selector and the same older/newer controls. Folder rows are
-keyboard accessible; every file and folder retains the existing information,
-restore, and download actions.
+All layouts use a Time Machine-inspired stack of up to five same-size directory
+windows. Older versions recede behind the active window, while a compact rail
+on the right provides newer/older arrows and sampled timeline ticks. The stack
+keeps Backrest's dark blue visual language rather than reproducing Finder or
+the macOS desktop. Folder rows are keyboard accessible; every file and folder
+retains the existing information, restore, and download actions.
 
 The header also retains Backrest's two-step delete action for the selected
 historical version. The operation is scheduled through the existing Forget
@@ -44,9 +46,10 @@ during back-and-forth comparison.
 ## Motion
 
 Version changes use a 240 ms transform-and-opacity transition with the shared
-`--ease-in-out` curve. Static layers behind the current file window establish
-depth without moving file rows. Reduced-motion clients keep a short opacity
-transition and omit positional movement.
+`--ease-in-out` curve. Moving into the past sends the active window toward the
+viewer while the next window advances from the stack; moving to a newer version
+reverses the movement. Reduced-motion clients keep a short opacity transition
+and apply positional changes immediately.
 
 ## Dashboard task cards
 
@@ -59,4 +62,5 @@ retention policy are omitted; retention remains in the task editor.
 The top-right control starts an idle task or cancels its active Backrest
 operation. Backrest and Restic do not expose a resumable pause operation, so
 the active control is intentionally a stop icon. Clicking the remaining card
-area opens the plan's historical file browser.
+area opens the plan's historical file browser. The summary area uses spacing
+instead of horizontal separators, and task cards do not render a status glow.

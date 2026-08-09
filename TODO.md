@@ -4,6 +4,10 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Replace the flat historical-version selector with a
+  Time Machine-inspired directory-window stack and right-side timeline,
+  simplify task-card decoration, and replace the numbered mobile contents
+  index with compact grouped navigation.
 - [x] 2026-08-09: Replace the plan operation tree with a direct historical
   file browser that keeps the current folder while moving between Restic
   versions, isolate detailed diagnostics in operation history, and redesign

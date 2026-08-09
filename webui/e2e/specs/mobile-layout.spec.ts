@@ -3,7 +3,7 @@ import { devices } from '@playwright/test';
 import { backrestClient, seedInstance, seedPlan, seedRepo } from '../harness/seed';
 
 test.describe('mobile backup console', () => {
-  test('uses the real device viewport, editorial navigation, and a full-screen editor', async ({
+  test('uses the real device viewport, compact navigation, and a full-screen editor', async ({
     browser,
     backrest,
   }) => {
@@ -48,7 +48,7 @@ test.describe('mobile backup console', () => {
 
     await page.getByRole('button', { name: 'Menu' }).click();
     const navigation = page.getByRole('dialog');
-    await expect(navigation.getByText('CONTENT / NAVIGATION')).toBeVisible();
+    await expect(navigation.getByTestId('mobile-add-plan')).toBeVisible();
     await expect(navigation.getByText('nas-config')).toBeVisible();
     await expect
       .poll(async () => {
@@ -67,7 +67,9 @@ test.describe('mobile backup console', () => {
 
     await page.getByRole('button', { name: 'Menu' }).click();
     await expect(navigation).toBeVisible();
-    await navigation.getByRole('button', { name: /Edit Plan nas-config/i }).click();
+    await navigation
+      .getByRole('button', { name: 'Edit Plan nas-config', exact: true })
+      .click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Content' })).toBeVisible();

@@ -60,10 +60,11 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: direct root-directory list
   and readable exclusion controls backed by the unchanged `Plan.paths`,
   `Plan.excludes`, and `Plan.iexcludes` fields.
-- `webui/src/features/plans/PlanSnapshotExplorer.tsx`,
-  `SnapshotExplorerHeader.tsx`, and `SnapshotVersionRail.tsx`: present
-  successful Restic snapshots as a direct folder browser with persistent
-  paths, older/newer navigation, and selected-version deletion.
+- `webui/src/features/plans/PlanSnapshotExplorer.tsx` and
+  `SnapshotExplorerHeader.tsx`: present successful Restic snapshots as a
+  Time Machine-inspired directory-window stack with persistent paths, a
+  sampled right-side timeline, older/newer navigation, and selected-version
+  deletion.
 - `docs/timeline-file-browser.md`: documents snapshot selection, bounded
   repository reads, responsive behavior, motion, and task-card controls.
 - `webui/messages/zh.json`: plain-language Chinese product copy for navigation,
@@ -75,8 +76,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   `webui/src/components/layout/MainContentArea.tsx`: fixed dark application
   shell, page-root neutral glass desktop navigation, responsive navigation,
   spacing, border, and canvas treatment.
-- `webui/src/components/layout/MobileNavigation.tsx`: full-screen mobile
-  contents index for dashboard, plans, repositories, and settings.
+- `webui/src/components/layout/MobileNavigation.tsx`: compact full-screen
+  mobile navigation using the dashboard's rounded dark panels, blue active
+  state, and grouped dashboard, plan, repository, and settings rows.
 - `webui/src/components/common/TwoPaneModal.tsx`: desktop two-pane editor and a
   fixed, opaque phone editor covering the complete viewport.
 - `webui/src/components/ui/toaster.tsx`: viewport-bounded global notifications
