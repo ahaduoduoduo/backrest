@@ -1,6 +1,6 @@
 # Custom Backrest module map
 
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 The fork retains upstream Backrest's Go orchestrator, Restic process runner,
 configuration model, operation log, snapshot browser, and restore operations.
@@ -63,9 +63,12 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/PlanSnapshotExplorer.tsx` and
   `SnapshotExplorerHeader.tsx`: present successful Restic snapshots as a
   Time Machine-inspired directory-window stack with persistent paths, a
-  sampled in-card timeline and older/newer navigation.
+  sampled in-card timeline and older/newer navigation. The active surface owns
+  the only meaningful overflow region: its file list when entries exceed the
+  available viewport height.
 - `webui/src/features/plans/PlanView.tsx`: owns the single task title, file and
-  operation card faces, 3D flip state, and icon-only two-step version deletion.
+  operation card faces, 3D flip state, and icon-only two-step version deletion;
+  the title and closed-path controls remain inside the card footer.
 - `webui/src/components/layout/BottomDock.tsx`: fixed desktop/mobile capsule
   navigation with closed-path Home, Plans, Repositories, and Settings glyphs;
   its shared selection pill moves between items, while task and repository
@@ -87,6 +90,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   floating workspace for task, repository, and settings editing; it retains a
   visible application backdrop and bottom dock on desktop and mobile, with
   consistent navigation, cards, footer, borders, and corner treatment.
+- `webui/src/components/common/FormModal.tsx`: shared compact information and
+  restore dialog with the same dark surface, corner scale, footer, and button
+  treatment as the editor workspace.
 - `webui/src/components/ui/toaster.tsx`: viewport-bounded global notifications
   with wrapped, scrollable long-error content on phone screens.
 - `docs/openlist-115-backup.md`: deployment, plan grouping, excludes,

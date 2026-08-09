@@ -1,9 +1,13 @@
 # Custom Backrest development status
 
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Convert the historical browser to a viewport-filling single
+  surface, move its title and closed-path controls into the card footer, unify
+  path, entry, menu, and modal radii, keep the dock above editors, and replace
+  purple exclusion states with the console blue-gray palette.
 - [x] 2026-08-09: Compress the persistent bottom dock, replace open-stroke
   navigation glyphs, add an interruptible sliding pill, reserve plan-action
   clearance, and restyle plan, repository, and settings editors as floating

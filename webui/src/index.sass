@@ -8,7 +8,6 @@
   --console-text: #f1f3f7
   --console-blue: #61b8ff
   --console-green: #37d785
-  --console-violet: #8b6cff
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1)
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)
   --console-layer-header: 20
@@ -465,6 +464,69 @@ body
 .console-workspace-card-content
   padding: 17px !important
 
+.console-workspace-footer button,
+.console-form-modal-footer button
+  min-height: 40px
+  border-radius: 999px !important
+
+.backup-scope-preset
+  border-color: rgba(255, 255, 255, 0.065) !important
+  border-radius: 17px !important
+  background: rgba(255, 255, 255, 0.018) !important
+
+.backup-scope-preset[data-active="true"]
+  border-color: rgba(99, 185, 232, 0.28) !important
+  background: rgba(36, 91, 126, 0.16) !important
+
+.console-form-modal-backdrop
+  background: rgba(3, 5, 9, 0.54) !important
+  backdrop-filter: blur(8px) saturate(88%)
+
+.console-form-modal-positioner
+  padding: 16px !important
+
+.console-form-modal
+  overflow: hidden
+  border: 1px solid rgba(255, 255, 255, 0.1) !important
+  border-radius: 22px !important
+  background: linear-gradient(150deg, rgba(17, 20, 27, 0.98), rgba(8, 10, 14, 0.99)) !important
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 28px 80px rgba(0, 0, 0, 0.5) !important
+
+.console-form-modal-header,
+.console-form-modal-body,
+.console-form-modal-footer
+  border-color: rgba(255, 255, 255, 0.06) !important
+
+.console-form-modal-footer
+  background: rgba(255, 255, 255, 0.018)
+
+.console-form-modal [data-part="close-trigger"]
+  border-radius: 14px
+
+.snapshot-entry-menu
+  min-width: 190px
+  padding: 6px !important
+  border: 1px solid rgba(255, 255, 255, 0.09) !important
+  border-radius: 18px !important
+  background: rgba(15, 18, 24, 0.96) !important
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 20px 54px rgba(0, 0, 0, 0.46) !important
+  backdrop-filter: blur(16px) saturate(105%)
+
+.snapshot-entry-menu [data-part="item"]
+  min-height: 40px
+  border-radius: 12px
+
+.console-content-viewport
+  box-sizing: border-box
+  height: 100%
+  min-height: 0
+  padding-top: clamp(10px, 2vh, 22px) !important
+  padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important
+
+.console-content-viewport > div
+  height: 100%
+  min-height: 0
+
 .console-dock-menu-heading
   min-height: 52px
   padding: 7px 9px 7px 18px
@@ -503,19 +565,31 @@ body
   font-size: 10px
 
 .plan-history-view
+  display: flex
   width: 100%
-  padding-bottom: calc(66px + env(safe-area-inset-bottom))
+  height: 100%
+  min-height: 0
+  flex-direction: column
+  overflow: hidden
 
 .plan-history-title
-  width: min(1480px, 100%)
-  margin: 0 auto 12px
+  position: absolute
+  z-index: 42
+  bottom: 19px
+  left: 28px
+  width: auto
+  margin: 0
   color: rgba(245, 247, 251, 0.94)
-  font-size: clamp(22px, 2.2vw, 34px)
+  font-size: clamp(17px, 1.5vw, 23px)
   letter-spacing: -0.045em
+  pointer-events: none
 
 .plan-history-flip-stage
+  position: relative
+  min-height: 0
+  flex: 1
   width: min(1480px, 100%)
-  height: clamp(520px, calc(100dvh - 212px), 760px)
+  height: auto
   margin: 0 auto
   perspective: 1200px
 
@@ -534,12 +608,13 @@ body
   transform-style: preserve-3d
 
 .plan-history-face-operations
+  top: 78px
   overflow: hidden
   border: 1px solid rgba(255, 255, 255, 0.1)
-  border-radius: 28px
-  background: rgba(13, 16, 22, 0.84)
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 60px rgba(97, 184, 255, 0.025), 0 32px 86px rgba(0, 0, 0, 0.38)
-  backdrop-filter: blur(30px) saturate(115%)
+  border-radius: 26px
+  background: rgba(13, 16, 22, 0.97)
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.065), 0 28px 72px rgba(0, 0, 0, 0.36)
+  backdrop-filter: blur(14px) saturate(105%)
   transform: rotateY(180deg)
   pointer-events: none
 
@@ -552,17 +627,30 @@ body
 .plan-history-operation-scroll
   height: 100%
   overflow-y: auto
-  padding: 18px
+  padding: 18px 18px 72px
 
 .plan-history-actions
-  margin: 12px auto 0
+  position: absolute
+  z-index: 44
+  bottom: 12px
+  left: 50%
+  margin: 0
+  transform: translate3d(-50%, 0, 0)
 
 .plan-history-action
-  border: 1px solid rgba(255, 255, 255, 0.085) !important
-  background: rgba(255, 255, 255, 0.035) !important
+  width: 44px !important
+  min-width: 44px !important
+  height: 40px !important
+  min-height: 40px !important
+  border: 0 !important
+  border-radius: 14px !important
+  background: rgba(255, 255, 255, 0.045) !important
   color: rgba(241, 243, 247, 0.54) !important
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045)
-  transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 140ms var(--ease-out)
+  transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out), transform 140ms var(--ease-out)
+
+.plan-history-action svg
+  width: 18px
+  height: 18px
 
 .plan-history-action[data-active="true"]
   border-color: rgba(97, 184, 255, 0.22) !important
@@ -595,10 +683,10 @@ body
 
 .snapshot-time-card
   position: absolute
-  top: 54px
-  right: 1.5%
+  top: 78px
+  right: 0
   bottom: 0
-  left: 1.5%
+  left: 0
   transform-origin: top center
   will-change: transform, opacity
 
@@ -607,23 +695,58 @@ body
   overflow: hidden
   border: 1px solid rgba(255, 255, 255, 0.11)
   border-radius: 26px
-  background: rgba(13, 16, 22, 0.82)
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), inset 0 0 70px rgba(97, 184, 255, 0.025), 0 32px 86px rgba(0, 0, 0, 0.42), 0 -8px 34px rgba(97, 184, 255, 0.035)
-  backdrop-filter: blur(30px) saturate(115%)
+  background: rgba(13, 16, 22, 0.97)
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.065), 0 28px 72px rgba(0, 0, 0, 0.38)
+  backdrop-filter: blur(14px) saturate(105%)
 
 .snapshot-time-window-active
+  display: flex
+  flex-direction: column
   padding-right: 58px
+  padding-bottom: 62px
 
 .snapshot-time-window-preview
-  background: rgba(16, 21, 28, 0.62)
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 54px rgba(0, 0, 0, 0.3)
+  background: rgba(13, 16, 22, 0.97)
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 18px 48px rgba(0, 0, 0, 0.3)
+
+.snapshot-window-toolbar,
+.snapshot-window-columns
+  flex-shrink: 0
+
+.snapshot-explorer-files
+  min-height: 0
+  flex: 1
+
+.snapshot-explorer-path
+  scrollbar-width: none
+
+.snapshot-explorer-path::-webkit-scrollbar
+  display: none
+
+.snapshot-path-control
+  min-width: 34px !important
+  min-height: 34px !important
+  border: 0 !important
+  border-radius: 14px !important
+  background: rgba(255, 255, 255, 0.035) !important
+
+.snapshot-entry-icon
+  border-radius: 14px
+
+.snapshot-entry-action
+  min-width: 34px !important
+  min-height: 34px !important
+  padding: 0 !important
+  border: 0 !important
+  border-radius: 14px !important
+  background: transparent !important
 
 .snapshot-time-rail
   position: absolute
   z-index: 30
-  top: 92px
+  top: 112px
   right: 1.9%
-  bottom: 14px
+  bottom: 72px
   width: 52px
   padding: 0 !important
   border-radius: 999px
@@ -664,6 +787,7 @@ body
 .snapshot-time-button,
 .snapshot-time-delete
   border: 1px solid transparent !important
+  border-radius: 14px !important
   background: rgba(255, 255, 255, 0.035) !important
   transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out), transform 140ms var(--ease-out)
 
@@ -673,8 +797,8 @@ body
 
 .snapshot-explorer-row
   margin: 4px 7px
-  border-radius: 13px
-  background: rgba(255, 255, 255, 0.018)
+  border-radius: 14px
+  background: transparent
   transition: background-color 140ms var(--ease-out)
 
 .dashboard-plan-card
@@ -720,6 +844,13 @@ body
 
   .snapshot-explorer-row:hover
     background: rgba(255, 255, 255, 0.055)
+
+  .snapshot-path-control:hover,
+  .snapshot-entry-action:hover
+    background: rgba(255, 255, 255, 0.075) !important
+
+  .snapshot-entry-menu [data-part="item"]:hover
+    background: rgba(99, 185, 232, 0.08)
 
   .console-dock-item:not([data-active="true"]):hover
     background: rgba(255, 255, 255, 0.065)
@@ -789,13 +920,16 @@ body
     pointer-events: auto
 
 @media (min-width: 768px)
+  .plan-history-face-operations
+    top: 86px
+
   .snapshot-time-card
-    top: 66px
+    top: 86px
 
   .snapshot-time-rail
-    top: 110px
+    top: 120px
     right: 2%
-    bottom: 18px
+    bottom: 76px
     width: 58px
 
 @media (max-width: 767px)
@@ -859,15 +993,18 @@ body
     overflow-wrap: anywhere
 
   .plan-history-title
-    width: 90vw
-    margin-bottom: 8px
+    bottom: 16px
+    left: 18px
+    width: auto
+    margin: 0
+    font-size: 18px
 
   .plan-history-flip-stage
-    width: 90vw
-    height: clamp(400px, calc(100dvh - 248px), 650px)
+    width: 100%
+    height: auto
 
   .snapshot-time-card
-    top: 46px
+    top: 72px
     right: 0
     left: 0
 
@@ -876,14 +1013,24 @@ body
 
   .snapshot-time-window-active
     padding-right: 50px
+    padding-bottom: 60px
 
   .snapshot-time-rail
-    top: 82px
+    top: 106px
     right: 4px
-    bottom: 12px
+    bottom: 68px
     width: 46px
 
+  .plan-history-actions
+    bottom: 10px
+
+  .plan-history-action
+    width: 42px !important
+    min-width: 42px !important
+    height: 40px !important
+
   .plan-history-face-operations
+    top: 72px
     border-radius: 22px
 
   .plan-history-operation-scroll

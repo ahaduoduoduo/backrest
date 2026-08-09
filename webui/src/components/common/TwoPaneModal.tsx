@@ -331,6 +331,8 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
                   {m.two_pane_modal_discard_changes()}
                 </Button>
                 <Button
+                  variant="subtle"
+                  colorPalette="blue"
                   size="sm"
                   data-testid={saveTestId}
                   onClick={onSave}

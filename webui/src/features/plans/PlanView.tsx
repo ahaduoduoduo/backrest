@@ -2,7 +2,7 @@ import { create } from "@bufbuild/protobuf";
 import { Box, Flex, Heading, IconButton, Spinner } from "@chakra-ui/react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { FiFolder, FiList, FiTrash2 } from "react-icons/fi";
+import { IoFolder, IoList, IoTrash } from "react-icons/io5";
 import { Plan } from "../../../gen/ts/v1/config_pb";
 import {
   ForgetRequestSchema,
@@ -73,10 +73,6 @@ export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
 
   return (
     <Box className="plan-history-view">
-      <Heading className="plan-history-title" size="xl">
-        {plan.id}
-      </Heading>
-
       <Box className="plan-history-flip-stage">
         <motion.div
           className="plan-history-flipper"
@@ -126,43 +122,45 @@ export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
             </Box>
           </Box>
         </motion.div>
-      </Box>
 
-      <Flex className="plan-history-actions" justify="center" gap={3}>
-        <Tooltip
-          content={showOperations ? m.repo_tab_tree() : m.repo_tab_list()}
-        >
-          <IconButton
-            className="plan-history-action"
-            data-active={showOperations || undefined}
-            data-testid={showOperations ? "view-tab-tree" : "view-tab-list"}
-            variant="ghost"
-            borderRadius="full"
-            minW="46px"
-            minH="46px"
-            aria-label={showOperations ? m.repo_tab_tree() : m.repo_tab_list()}
-            onClick={() => setShowOperations((value) => !value)}
+        <Heading className="plan-history-title" size="xl">
+          {plan.id}
+        </Heading>
+
+        <Flex className="plan-history-actions" justify="center" gap={2}>
+          <Tooltip
+            content={showOperations ? m.repo_tab_tree() : m.repo_tab_list()}
           >
-            {showOperations ? <FiFolder /> : <FiList />}
-          </IconButton>
-        </Tooltip>
-        <Tooltip content={m.operation_tree_view_forget_destructive()}>
-          <IconButton
-            className="plan-history-action plan-history-delete"
-            data-armed={deleteArmed || undefined}
-            variant="ghost"
-            borderRadius="full"
-            minW="46px"
-            minH="46px"
-            aria-label={m.operation_tree_view_forget_destructive()}
-            data-testid="forget-snapshot"
-            disabled={!selectedSnapshotId || deleting || showOperations}
-            onClick={() => void forgetSelectedSnapshot()}
-          >
-            {deleting ? <Spinner size="xs" /> : <FiTrash2 />}
-          </IconButton>
-        </Tooltip>
-      </Flex>
+            <IconButton
+              className="plan-history-action"
+              data-active={showOperations || undefined}
+              data-testid={
+                showOperations ? "view-tab-tree" : "view-tab-list"
+              }
+              variant="ghost"
+              aria-label={
+                showOperations ? m.repo_tab_tree() : m.repo_tab_list()
+              }
+              onClick={() => setShowOperations((value) => !value)}
+            >
+              {showOperations ? <IoFolder /> : <IoList />}
+            </IconButton>
+          </Tooltip>
+          <Tooltip content={m.operation_tree_view_forget_destructive()}>
+            <IconButton
+              className="plan-history-action plan-history-delete"
+              data-armed={deleteArmed || undefined}
+              variant="ghost"
+              aria-label={m.operation_tree_view_forget_destructive()}
+              data-testid="forget-snapshot"
+              disabled={!selectedSnapshotId || deleting || showOperations}
+              onClick={() => void forgetSelectedSnapshot()}
+            >
+              {deleting ? <Spinner size="xs" /> : <IoTrash />}
+            </IconButton>
+          </Tooltip>
+        </Flex>
+      </Box>
     </Box>
   );
 };

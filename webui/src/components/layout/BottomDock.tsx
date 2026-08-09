@@ -241,12 +241,13 @@ export const BottomDock = () => {
         )}
       </AnimatePresence>
 
-      <LayoutGroup id="console-bottom-dock">
-        <Flex
-          as="nav"
-          className="console-bottom-dock"
-          aria-label={m.app_menu()}
-        >
+      <Portal>
+        <LayoutGroup id="console-bottom-dock">
+          <Flex
+            as="nav"
+            className="console-bottom-dock"
+            aria-label={m.app_menu()}
+          >
           <button
             type="button"
             className="console-dock-item"
@@ -305,8 +306,9 @@ export const BottomDock = () => {
             />
             <IoSettingsSharp />
           </button>
-        </Flex>
-      </LayoutGroup>
+          </Flex>
+        </LayoutGroup>
+      </Portal>
     </>
   );
 };

@@ -305,6 +305,8 @@ export const AddPlanModal = ({
         </ConfirmButton>
       )}
       <Button
+        variant="subtle"
+        colorPalette="blue"
         loading={confirmLoading}
         onClick={handleOk}
         data-testid="add-plan-submit"

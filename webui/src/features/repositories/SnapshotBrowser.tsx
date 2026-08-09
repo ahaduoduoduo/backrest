@@ -417,6 +417,7 @@ export const SnapshotEntryActions = ({
         {/* @ts-ignore */}
         <MenuTrigger asChild>
           <Button
+            className="snapshot-entry-action"
             size="xs"
             variant="ghost"
             aria-label={m.snapshot_browser_actions_for_path({
@@ -427,7 +428,7 @@ export const SnapshotEntryActions = ({
           </Button>
         </MenuTrigger>
         {/* @ts-ignore */}
-        <MenuContent>
+        <MenuContent className="snapshot-entry-menu">
           {/* @ts-ignore */}
           <MenuItem value="info" onClick={showInfo}>
             <FiInfo />

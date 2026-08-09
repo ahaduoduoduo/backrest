@@ -772,6 +772,7 @@ export const AddRepoModal = ({
       {!isRemoteOrigin && (
         <>
           <Button
+            colorPalette="blue"
             variant="subtle"
             loading={confirmLoading}
             onClick={handleTest}
@@ -780,6 +781,8 @@ export const AddRepoModal = ({
             {m.add_repo_modal_test_config()}
           </Button>
           <Button
+            variant="subtle"
+            colorPalette="blue"
             loading={confirmLoading}
             onClick={handleOk}
             data-testid="add-repo-submit"

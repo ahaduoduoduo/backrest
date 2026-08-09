@@ -46,6 +46,9 @@ compact top-right control, and stops the active operation from the same place.
 Repository capacity and 30-day health appear at the top of each repository
 page, while runtime paths and the configuration JSON are grouped under System
 Info in Settings.
+The historical browser fills the available viewport without page scrolling;
+its task title and history/delete controls live inside the active version card,
+while only an overflowing file list receives its own scrollbar.
 All 30-day backup strips run chronologically from the oldest date on the left
 to today on the right. A successful retry clears the yearly calendar warning;
 the task strip uses a green cell with an orange recovery outline, while earlier
