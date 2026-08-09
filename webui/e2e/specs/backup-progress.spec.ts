@@ -83,7 +83,7 @@ test.describe('real-time backup progress (operation history)', () => {
     await page.getByTestId('view-tab-list').click();
     // The disabled schedule means anything that appears later arrived through
     // the live operation stream.
-    await expect(page.getByText('No operations found')).toBeVisible();
+    await expect(page.getByText('No operations yet')).toBeVisible();
 
     // 3. Trigger the backup.
     await page.getByTestId('plan-backup-now').click();
