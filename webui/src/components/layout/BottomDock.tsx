@@ -89,9 +89,19 @@ export const BottomDock = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setOpenMenu(null), 120);
   };
+  const dismissModal = () => {
+    if (modalOpen) showModal(null);
+    setModalSection(null);
+  };
   const go = (path: string) => {
+    dismissModal();
     setOpenMenu(null);
     navigate(path);
+  };
+
+  const toggleMenu = (menu: Exclude<DockMenu, null>) => {
+    dismissModal();
+    setOpenMenu(openMenu === menu && !modalOpen ? null : menu);
   };
 
   const editPlan = async (plan: Plan) => {
@@ -121,6 +131,12 @@ export const BottomDock = () => {
     setOpenMenu(null);
   };
   const openSettings = async () => {
+    if (modalOpen && modalSection === "settings") {
+      dismissModal();
+      setOpenMenu(null);
+      return;
+    }
+    dismissModal();
     const { SettingsModal } =
       await import("../../features/settings/SettingsModal");
     setModalSection("settings");
@@ -269,7 +285,7 @@ export const BottomDock = () => {
             aria-expanded={openMenu === "plans"}
             onMouseEnter={() => keepOpen("plans")}
             onMouseLeave={scheduleClose}
-            onClick={() => setOpenMenu(openMenu === "plans" ? null : "plans")}
+            onClick={() => toggleMenu("plans")}
           >
             <DockSelection
               active={activeSection === "plans"}
@@ -285,7 +301,7 @@ export const BottomDock = () => {
             aria-expanded={openMenu === "repos"}
             onMouseEnter={() => keepOpen("repos")}
             onMouseLeave={scheduleClose}
-            onClick={() => setOpenMenu(openMenu === "repos" ? null : "repos")}
+            onClick={() => toggleMenu("repos")}
           >
             <DockSelection
               active={activeSection === "repos"}

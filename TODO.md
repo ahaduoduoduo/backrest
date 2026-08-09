@@ -4,6 +4,10 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Reduce unused space above the historical card, increase its
+  dock clearance, use one continuous card surface, expose the page beneath a
+  translucent dock, equalize the dock selection inset, and let dock navigation
+  dismiss open editors before changing sections.
 - [x] 2026-08-10: Convert the historical browser to a viewport-filling single
   surface, move its title and closed-path controls into the card footer, unify
   path, entry, menu, and modal radii, keep the dock above editors, and replace

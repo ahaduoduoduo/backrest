@@ -20,6 +20,7 @@ interface FormModalProps {
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  modal?: boolean;
   size?:
     | "xs"
     | "sm"
@@ -42,6 +43,7 @@ export const FormModal: React.FC<FormModalProps> = ({
   title,
   children,
   footer,
+  modal = false,
   size = "default",
 }) => {
   // Map size "default" to "md" and "large" to "xl" or "2xl"
@@ -62,6 +64,7 @@ export const FormModal: React.FC<FormModalProps> = ({
       open={isOpen}
       onOpenChange={(e: { open: boolean }) => !e.open && onClose()}
       closeOnInteractOutside={false}
+      modal={modal}
       size={rootSize}
       scrollBehavior="inside"
     >

@@ -63,6 +63,7 @@ export const LoginModal = () => {
       onClose={() => {}} // Non-closable
       title={m.login_title()}
       size="2xl"
+      modal
       footer={
         <Button
           type="submit"
