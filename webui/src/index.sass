@@ -504,7 +504,67 @@ body
 
 .console-form-modal [data-part="close-trigger"]
   border-radius: 14px
+  top: 12px
+  right: 12px
+  width: 34px
+  height: 34px
+  border: 1px solid rgba(255, 255, 255, 0.075) !important
+  background: rgba(255, 255, 255, 0.025) !important
+  color: rgba(241, 243, 247, 0.54) !important
 
+.snapshot-info-lead
+  min-width: 0
+
+.snapshot-info-icon
+  width: 42px
+  height: 42px
+  border-radius: 14px
+  background: rgba(99, 185, 232, 0.1)
+  color: #63b9e8
+
+.snapshot-info-icon svg
+  width: 20px
+  height: 20px
+
+.snapshot-info-name
+  overflow: hidden
+  color: rgba(245, 247, 251, 0.94)
+  font-size: 16px
+  font-weight: 620
+  text-overflow: ellipsis
+  white-space: nowrap
+
+.snapshot-info-kind
+  margin-top: 3px
+  color: rgba(241, 243, 247, 0.38)
+  font-size: 11px
+
+.snapshot-info-details
+  border-top: 1px solid rgba(255, 255, 255, 0.07)
+
+.snapshot-info-row
+  min-width: 0
+  padding: 12px 0
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055)
+
+.snapshot-info-row:last-child
+  border-bottom: 0
+
+.snapshot-info-label
+  width: 76px
+  flex-shrink: 0
+  color: rgba(241, 243, 247, 0.38)
+  font-size: 11px
+
+.snapshot-info-value
+  min-width: 0
+  flex: 1
+  overflow-wrap: anywhere
+  color: rgba(241, 243, 247, 0.82)
+  font-size: 12px
+  text-align: right
+
+.console-action-menu,
 .snapshot-entry-menu
   min-width: 190px
   padding: 6px !important
@@ -514,9 +574,37 @@ body
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 20px 54px rgba(0, 0, 0, 0.46) !important
   backdrop-filter: blur(16px) saturate(105%)
 
+.console-action-menu [data-part="item"],
 .snapshot-entry-menu [data-part="item"]
   min-height: 40px
   border-radius: 12px
+
+.repository-action-menu
+  min-width: 216px
+
+.repository-action-button
+  width: 42px !important
+  min-width: 42px !important
+  height: 42px !important
+  min-height: 42px !important
+  padding: 0 !important
+  border: 1px solid rgba(255, 255, 255, 0.085) !important
+  border-radius: 14px !important
+  background: rgba(255, 255, 255, 0.035) !important
+  color: rgba(241, 243, 247, 0.58) !important
+  transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), transform 140ms var(--ease-out)
+
+.repository-action-button svg
+  width: 18px
+  height: 18px
+
+.repository-refresh-button
+  border-color: rgba(99, 185, 232, 0.16) !important
+  background: rgba(99, 185, 232, 0.095) !important
+  color: #8fd1f5 !important
+
+.repository-action-button:active
+  transform: scale(0.96)
 
 .console-content-viewport
   box-sizing: border-box
@@ -852,8 +940,19 @@ body
   .snapshot-entry-action:hover
     background: rgba(255, 255, 255, 0.075) !important
 
+  .console-action-menu [data-part="item"]:hover,
   .snapshot-entry-menu [data-part="item"]:hover
     background: rgba(99, 185, 232, 0.08)
+
+  .repository-action-button:hover
+    border-color: rgba(255, 255, 255, 0.14) !important
+    background: rgba(255, 255, 255, 0.075) !important
+    color: rgba(241, 243, 247, 0.9) !important
+
+  .repository-refresh-button:hover
+    border-color: rgba(99, 185, 232, 0.25) !important
+    background: rgba(99, 185, 232, 0.14) !important
+    color: #b9e5fc !important
 
   .console-dock-item:not([data-active="true"]):hover
     background: rgba(255, 255, 255, 0.065)

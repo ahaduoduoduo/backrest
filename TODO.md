@@ -4,6 +4,12 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Replace the backup-task archive glyph with a calendar,
+  convert file information from raw JSON to readable metadata, and allow its
+  dialog to close from either the close icon or backdrop.
+- [x] 2026-08-10: Replace the repository's blue split action with compact
+  refresh and overflow icons, then restyle its maintenance menu with the shared
+  historical-file action surface and labeled glyphs.
 - [x] 2026-08-10: Restore visible desktop depth in the historical file stack,
   balance the dashboard's top and bottom-dock spacing, remove the redundant
   calendar heading, and distinguish queued backups with a blue outline.

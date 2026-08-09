@@ -45,7 +45,8 @@ card opens a timeline-based historical file browser, starts idle backups from a
 compact top-right control, and stops the active operation from the same place.
 Repository capacity and 30-day health appear at the top of each repository
 page, while runtime paths and the configuration JSON are grouped under System
-Info in Settings.
+Info in Settings. Repository refresh and maintenance commands use compact icon
+controls and the same rounded dark action menu as the historical file browser.
 The historical browser fills the available viewport without page scrolling;
 its task title and history/delete controls live inside the active version card,
 while only an overflowing file list receives its own scrollbar. Its desktop
@@ -58,7 +59,8 @@ failures remain available in the day details and operation history. In the
 yearly activity wall, a queued backup has a blue outline and only an actively
 running backup uses green.
 Desktop and mobile share a compact translucent bottom navigation capsule. Its
-evenly inset selection pill moves between closed-path icons, while task and
+evenly inset selection pill moves between closed-path icons, with a calendar
+representing scheduled backup tasks, while task and
 repository choices open above it. Task, repository, and settings editors use a
 floating workspace; the dock remains interactive and dismisses the current
 editor before changing sections. The plan editor manages

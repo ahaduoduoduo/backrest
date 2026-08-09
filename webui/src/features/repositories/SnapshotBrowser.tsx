@@ -22,7 +22,7 @@ import { URIAutocomplete } from "../../components/common/URIAutocomplete";
 import { backrestService } from "../../api/client";
 import { ConfirmButton } from "../../components/common/SpinButton";
 import { pathSeparator } from "../../state/buildcfg";
-import { create, toJsonString } from "@bufbuild/protobuf";
+import { create } from "@bufbuild/protobuf";
 import {
   createTreeCollection,
   Flex,
@@ -55,6 +55,7 @@ import {
 import { FormModal } from "../../components/common/FormModal";
 import { Field } from "../../components/ui/field";
 import { alerts } from "../../components/common/Alerts";
+import { getLocale } from "../../paraglide/runtime";
 
 import * as m from "../../paraglide/messages";
 const SnapshotBrowserContext = React.createContext<{
@@ -71,6 +72,42 @@ interface SnapshotNode {
   isLeaf?: boolean;
   entry: LsEntry;
 }
+
+const snapshotInfoDateFormatter = new Intl.DateTimeFormat(undefined, {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const snapshotInfoCopy = () => {
+  const zh = getLocale().toLowerCase().startsWith("zh");
+  return {
+    type: zh ? "类型" : "Type",
+    file: zh ? "文件" : "File",
+  };
+};
+
+const formatSnapshotInfoTime = (value: string): string => {
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp)
+    ? "—"
+    : snapshotInfoDateFormatter.format(timestamp);
+};
+
+const SnapshotInfoRow = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) => (
+  <Flex className="snapshot-info-row" gap={4} align="flex-start">
+    <Text className="snapshot-info-label">{label}</Text>
+    <Text className="snapshot-info-value">{value}</Text>
+  </Flex>
+);
 
 // replaceKeyInTree returns a value only if changes are made.
 const replaceKeyInTree = (
@@ -384,18 +421,52 @@ export const SnapshotEntryActions = ({
   };
 
   const showInfo = () => {
+    const isDirectory = entry.type === "dir" || entry.type === "directory";
+    const copy = snapshotInfoCopy();
     showModal(
       <FormModal
         title={m.snapshot_browser_path_info_for_path({ path: entry.path })}
         isOpen={true}
         onClose={() => showModal(null)}
         footer={null}
+        closeOnInteractOutside
       >
-        <Box as="pre" overflow="auto" p={2} bg="bg.muted" borderRadius="md">
-          {toJsonString(LsEntrySchema, entry, {
-            prettySpaces: 2,
-          })}
-        </Box>
+        <Flex className="snapshot-info-lead" align="center" gap={3}>
+          <Flex
+            className="snapshot-info-icon"
+            align="center"
+            justify="center"
+            flexShrink={0}
+          >
+            {isDirectory ? <FiFolder /> : <FiFile />}
+          </Flex>
+          <Box minW={0}>
+            <Text className="snapshot-info-name">{entry.name || "—"}</Text>
+            <Text className="snapshot-info-kind">
+              {isDirectory ? m.snapshot_explorer_folder() : copy.file}
+            </Text>
+          </Box>
+        </Flex>
+        <Stack className="snapshot-info-details" gap={0} mt={5}>
+          <SnapshotInfoRow
+            label={m.op_row_error_path()}
+            value={entry.path || "—"}
+          />
+          <SnapshotInfoRow
+            label={copy.type}
+            value={isDirectory ? m.snapshot_explorer_folder() : copy.file}
+          />
+          {!isDirectory && (
+            <SnapshotInfoRow
+              label={m.snapshot_explorer_column_size()}
+              value={formatBytes(Number(entry.size))}
+            />
+          )}
+          <SnapshotInfoRow
+            label={m.snapshot_explorer_column_modified()}
+            value={formatSnapshotInfoTime(entry.mtime)}
+          />
+        </Stack>
       </FormModal>,
     );
   };
