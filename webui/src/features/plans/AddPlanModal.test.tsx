@@ -75,12 +75,7 @@ const selectRepo = async (user: ReturnType<typeof newUser>, repoId = "r1") => {
 };
 
 const addPath = async (user: ReturnType<typeof newUser>, path: string) => {
-  await user.click(screen.getByTestId("backup-scope-advanced-trigger"));
-  // The first "Add" button belongs to the paths DynamicList in advanced rules.
-  const addButtons = screen.getAllByRole("button", {
-    name: m.add_plan_modal_field_add(),
-  });
-  await user.click(addButtons[0]);
+  await user.click(screen.getByTestId("add-plan-path-add"));
   const input = await screen.findByPlaceholderText(
     m.add_plan_modal_field_paths(),
   );
@@ -154,7 +149,7 @@ describe("AddPlanModal", () => {
     ).toBeInTheDocument();
   });
 
-  it("saves named backup sources and exclusion presets without editing glob rules", async () => {
+  it("saves arbitrary backup roots and exclusion presets", async () => {
     const config = configWithRepo();
     vi.mocked(backrestService.setConfig).mockImplementation(
       async (c: any) => c,
@@ -165,7 +160,7 @@ describe("AddPlanModal", () => {
     await screen.findByText(m.app_menu_add_plan());
     await typeName(user, config, "guided-plan");
     await selectRepo(user, "r1");
-    await user.click(screen.getByTestId("backup-source-docker"));
+    await addPath(user, "/source/docker");
     await user.click(screen.getByTestId("exclude-preset-git-history"));
     await submit(user);
 

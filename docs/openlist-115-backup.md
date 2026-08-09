@@ -95,9 +95,8 @@ restores host-specific.
 Example paths:
 
 ```text
-/source/docker
-/source/home-assistant
-/source/docker-volumes/telegram-data
+/volume1/docker
+/volume1/web
 /staging
 ```
 
@@ -122,10 +121,8 @@ Example excludes:
 **/__pycache__/**
 **/home-assistant.db-shm
 **/home-assistant.db-wal
-/source/docker/backrest/**
-/source/docker/homeassistant/**
-/source/docker/telegram-data/**
-/source/web-live/data/**
+/volume1/docker/backrest/**
+/volume1/web/live/data/**
 ```
 
 Home Assistant configuration remains included while its live database and
@@ -133,8 +130,11 @@ sidecars are excluded from direct reads. The snapshot hook creates and verifies
 a transaction-consistent Recorder database copy in `/staging/recovery/databases`.
 Backrest operation databases use the same export path. Historical Jellyfin
 database copies such as `.bk`, `.old`, and migration backups remain included.
-Live Proxy channel data is included from `/source/docker/live-proxy`; the old
-copy below `/source/web-live/data` is omitted to avoid duplicate uploads.
+Live Proxy channel data is included from `/volume1/docker/live-proxy`; the old
+copy below `/volume1/web/live/data` is omitted to avoid duplicate uploads. The
+plan editor lists backup roots directly instead of mapping individual services
+to compiled UI switches. Adding a project below `/volume1/docker` or
+`/volume1/web` therefore requires no Backrest code change.
 
 ### Time Machine off-site copy
 

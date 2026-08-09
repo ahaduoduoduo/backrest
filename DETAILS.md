@@ -52,13 +52,12 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/repositories/OpenListRepositoryRate.tsx`: resolves an
   OpenList REST repository name from its URI and displays its effective upload
   rate inside repository settings.
-- `webui/src/features/plans/backupScopeCatalog.ts`: reusable mapping from the
-  deployed Synology mount paths and Restic patterns to concise labels; new
-  plans omit macOS, DSM, and Windows filesystem metadata, preserve historical
-  database copies, and recognize flat service roots plus duplicate source rules.
-- `webui/src/features/plans/BackupScopeEditor.tsx`: guided source and exclusion
-  controls backed by the unchanged `Plan.paths`, `Plan.excludes`, and
-  `Plan.iexcludes` fields.
+- `webui/src/features/plans/backupScopeCatalog.ts`: reusable filesystem and
+  Restic exclusion presets; backup roots remain arbitrary user-configured
+  directories rather than compiled service mappings.
+- `webui/src/features/plans/BackupScopeEditor.tsx`: direct root-directory list
+  and readable exclusion controls backed by the unchanged `Plan.paths`,
+  `Plan.excludes`, and `Plan.iexcludes` fields.
 - `webui/messages/zh.json`: plain-language Chinese product copy for navigation,
   backup-task editing, storage repositories, version browsing, restore, and
   maintenance operations. Destructive maintenance text preserves the

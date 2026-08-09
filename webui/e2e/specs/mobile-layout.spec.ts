@@ -10,14 +10,14 @@ test.describe('mobile backup console', () => {
     await seedInstance(backrest);
     await seedRepo(backrest, 'offsite');
     await seedPlan(backrest, 'nas-config', 'offsite', [
-      '/source/docker',
-      '/source/home-assistant',
+      '/volume1/docker',
+      '/volume1/web',
       '/staging',
     ]);
 
     const client = backrestClient(backrest);
     const config = await client.getConfig({});
-    config.plans[0].excludes = ['**/@eaDir/**', '**/.git/**', '/source/docker/alist/data.db*'];
+    config.plans[0].excludes = ['**/@eaDir/**', '**/.git/**', '/volume1/docker/alist/data.db*'];
     await client.setConfig(config);
 
     const context = await browser.newContext({ ...devices['iPhone 13'], locale: 'en-US' });
@@ -72,7 +72,7 @@ test.describe('mobile backup console', () => {
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Content' })).toBeVisible();
     await dialog.getByRole('button', { name: 'Content' }).click();
-    await expect(dialog.getByText('Backed up', { exact: true })).toBeVisible();
+    await expect(dialog.getByText('Backup directories', { exact: true })).toBeVisible();
 
     const dialogBox = await dialog.boundingBox();
     expect(dialogBox?.x).toBe(0);

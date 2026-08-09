@@ -49,12 +49,13 @@ to today on the right. A successful retry clears the yearly calendar warning;
 the task strip uses a green cell with an orange recovery outline, while earlier
 failures remain available in the day details and operation history.
 The mobile navigation remains a full-screen numbered contents page. The plan
-editor maps Synology mounts and standard Restic exclude patterns to named
-switches while retaining exact paths and glob rules under an advanced section.
-New plans skip Finder-generated `.DS_Store` files by default.
+editor manages backup roots as a direct directory list, so new projects below
+an existing root require no compiled service mapping. Standard filesystem
+exclusions remain readable presets, with exact glob rules under an advanced
+section. New plans skip Finder-generated `.DS_Store` files by default.
 The deployed Synology layout keeps service data under top-level
-`/volume1/docker/<service>` directories; dedicated Home Assistant and Telegram
-sources exclude their duplicate paths beneath the shared Docker root.
+`/volume1/docker/<service>` directories and backs up that root directly, so
+Home Assistant, Telegram, and later services require no separate source entry.
 The Chinese interface uses task-oriented terms throughout: backup tasks,
 storage repositories, backup versions, file browsing, old-version deletion,
 space reclamation, and integrity checks. Restic command names remain in
