@@ -4,6 +4,8 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Give the bottom-dock selection pill one geometric reference
+  so its top, bottom, and outer horizontal margins are all six pixels.
 - [x] 2026-08-10: Increase bottom-dock transparency and restore the historical
   version stack's original 18-pixel depth separation without expanding the
   compact mobile card reserve.
