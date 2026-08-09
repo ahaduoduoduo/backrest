@@ -48,7 +48,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   success-first protection rule used by yearly and 30-day backup calendars.
 - `webui/src/features/repositories/RepoView.tsx`: repository file browser,
   operations, storage statistics, maintenance actions, and a top-level 30-day
-  capacity and backup-health summary.
+  capacity and backup-health summary. Refresh and advanced maintenance actions
+  use compact icon controls and the same rounded dark action menu as historical
+  file entries.
 - `webui/src/features/settings/SettingsModal.tsx`: instance, authentication,
   multihost, and read-only system information including runtime paths and the
   saved configuration JSON.
@@ -72,7 +74,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   operation card faces, 3D flip state, and icon-only two-step version deletion;
   the title and closed-path controls remain inside the card footer.
 - `webui/src/components/layout/BottomDock.tsx`: fixed desktop/mobile capsule
-  navigation with closed-path Home, Plans, Repositories, and Settings glyphs;
+  navigation with closed-path Home, calendar-based backup Plans,
+  Repositories, and Settings glyphs;
   its evenly inset shared selection pill moves between items, task and
   repository submenus support pointer hover and touch click, and navigation
   dismisses an open editor before changing sections.
@@ -96,7 +99,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   treatment.
 - `webui/src/components/common/FormModal.tsx`: shared compact information and
   restore dialog with the same dark surface, corner scale, footer, and button
-  treatment as the editor workspace.
+  treatment as the editor workspace. It exposes per-dialog outside-click
+  behavior and a visible close control; file metadata uses readable rows rather
+  than raw protocol JSON.
 - `webui/src/components/ui/toaster.tsx`: viewport-bounded global notifications
   with wrapped, scrollable long-error content on phone screens.
 - `docs/openlist-115-backup.md`: deployment, plan grouping, excludes,

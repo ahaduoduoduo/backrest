@@ -29,6 +29,9 @@ The active version uses one continuous surface rather than nested panel colors.
 The task title stays in its lower-left corner and the history/delete controls
 stay in the lower center. Folder rows are keyboard accessible; every file and
 folder retains the existing information, restore, and download actions.
+File information is presented as readable name, type, path, size, and modified
+time fields. Its compact dialog has a visible close control and also dismisses
+when the user selects the backdrop.
 
 The plan route fills the available viewport above the persistent bottom dock.
 Its compact version stack uses the same solid surface as the active file list,

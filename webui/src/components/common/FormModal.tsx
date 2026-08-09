@@ -1,8 +1,6 @@
 import React from "react";
 import {
-  Dialog,
   DialogBody,
-  DialogCloseTrigger,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -12,7 +10,7 @@ import {
   DialogPositioner,
   Portal,
 } from "@chakra-ui/react";
-import { Button } from "../ui/button";
+import { DialogCloseTrigger } from "../ui/dialog";
 
 interface FormModalProps {
   isOpen: boolean;
@@ -21,6 +19,7 @@ interface FormModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   modal?: boolean;
+  closeOnInteractOutside?: boolean;
   size?:
     | "xs"
     | "sm"
@@ -44,6 +43,7 @@ export const FormModal: React.FC<FormModalProps> = ({
   children,
   footer,
   modal = false,
+  closeOnInteractOutside = false,
   size = "default",
 }) => {
   // Map size "default" to "md" and "large" to "xl" or "2xl"
@@ -63,7 +63,7 @@ export const FormModal: React.FC<FormModalProps> = ({
     <DialogRoot
       open={isOpen}
       onOpenChange={(e: { open: boolean }) => !e.open && onClose()}
-      closeOnInteractOutside={false}
+      closeOnInteractOutside={closeOnInteractOutside}
       modal={modal}
       size={rootSize}
       scrollBehavior="inside"

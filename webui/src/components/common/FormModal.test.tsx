@@ -3,10 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { FormModal } from "./FormModal";
 import { renderWithProviders } from "../../test/render";
 
-// NOTE: FormModal hardcodes closeOnInteractOutside={false} on the underlying
-// Chakra/Zag DialogRoot. This was verified manually (temporarily flipping the
-// prop to true in a throwaway copy and confirming the difference), but it is
-// NOT covered by an automated test here: Zag's dismissable-layer wires
+// NOTE: FormModal keeps outside-click dismissal opt-in. It is not covered by
+// an automated test here: Zag's dismissable-layer wires
 // outside-click detection through a raf-deferred effect plus a
 // document-level capture-phase pointerdown listener that is itself attached
 // on a setTimeout(0), and in this jsdom/vitest setup the dismiss path never
@@ -54,9 +52,7 @@ describe("FormModal", () => {
     );
 
     await screen.findByText("Closable");
-    // DialogCloseTrigger (Chakra's Zag-based dialog close button, rendered
-    // via asChild) doesn't surface an accessible name/icon in this jsdom
-    // render, so target it by the part attribute Zag stamps onto the node.
+    // Target the close primitive by the part attribute Zag stamps onto it.
     const closeButton = document.querySelector(
       "[data-part='close-trigger']",
     ) as HTMLElement;

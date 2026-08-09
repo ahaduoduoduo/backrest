@@ -6,20 +6,14 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import {
-  FiEdit2,
-  FiPlus,
-} from "react-icons/fi";
-import { IoArchive, IoHome, IoServer, IoSettingsSharp } from "react-icons/io5";
+import { FiEdit2, FiPlus } from "react-icons/fi";
+import { IoCalendar, IoHome, IoServer, IoSettingsSharp } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router";
 import type { Plan, Repo } from "../../../gen/ts/v1/config_pb";
 import { useConfig } from "../../app/provider";
 import { repositoryLocation } from "../../lib/repositoryLocation";
 import * as m from "../../paraglide/messages";
-import {
-  useModalPresence,
-  useShowModal,
-} from "../common/ModalManager";
+import { useModalPresence, useShowModal } from "../common/ModalManager";
 
 type DockMenu = "plans" | "repos" | null;
 type DockSection = "home" | "plans" | "repos" | "settings";
@@ -144,7 +138,9 @@ export const BottomDock = () => {
     setOpenMenu(null);
   };
 
-  const routeSection: DockSection | null = location.pathname.startsWith("/plan/")
+  const routeSection: DockSection | null = location.pathname.startsWith(
+    "/plan/",
+  )
     ? "plans"
     : location.pathname.startsWith("/repo/") ||
         location.pathname.startsWith("/peer/")
@@ -264,64 +260,64 @@ export const BottomDock = () => {
             className="console-bottom-dock"
             aria-label={m.app_menu()}
           >
-          <button
-            type="button"
-            className="console-dock-item"
-            data-active={activeSection === "home" || undefined}
-            aria-label={m.app_menu_dashboard()}
-            onClick={() => go("/")}
-          >
-            <DockSelection
-              active={activeSection === "home"}
-              reduceMotion={reduceMotion}
-            />
-            <IoHome />
-          </button>
-          <button
-            type="button"
-            className="console-dock-item"
-            data-active={activeSection === "plans" || undefined}
-            aria-label={m.app_menu_plans()}
-            aria-expanded={openMenu === "plans"}
-            onMouseEnter={() => keepOpen("plans")}
-            onMouseLeave={scheduleClose}
-            onClick={() => toggleMenu("plans")}
-          >
-            <DockSelection
-              active={activeSection === "plans"}
-              reduceMotion={reduceMotion}
-            />
-            <IoArchive />
-          </button>
-          <button
-            type="button"
-            className="console-dock-item"
-            data-active={activeSection === "repos" || undefined}
-            aria-label={m.app_menu_repos()}
-            aria-expanded={openMenu === "repos"}
-            onMouseEnter={() => keepOpen("repos")}
-            onMouseLeave={scheduleClose}
-            onClick={() => toggleMenu("repos")}
-          >
-            <DockSelection
-              active={activeSection === "repos"}
-              reduceMotion={reduceMotion}
-            />
-            <IoServer />
-          </button>
-          <button
-            type="button"
-            className="console-dock-item"
-            data-active={activeSection === "settings" || undefined}
-            aria-label={m.app_menu_settings()}
-            onClick={() => void openSettings()}
-          >
-            <DockSelection
-              active={activeSection === "settings"}
-              reduceMotion={reduceMotion}
-            />
-            <IoSettingsSharp />
-          </button>
+            <button
+              type="button"
+              className="console-dock-item"
+              data-active={activeSection === "home" || undefined}
+              aria-label={m.app_menu_dashboard()}
+              onClick={() => go("/")}
+            >
+              <DockSelection
+                active={activeSection === "home"}
+                reduceMotion={reduceMotion}
+              />
+              <IoHome />
+            </button>
+            <button
+              type="button"
+              className="console-dock-item"
+              data-active={activeSection === "plans" || undefined}
+              aria-label={m.app_menu_plans()}
+              aria-expanded={openMenu === "plans"}
+              onMouseEnter={() => keepOpen("plans")}
+              onMouseLeave={scheduleClose}
+              onClick={() => toggleMenu("plans")}
+            >
+              <DockSelection
+                active={activeSection === "plans"}
+                reduceMotion={reduceMotion}
+              />
+              <IoCalendar />
+            </button>
+            <button
+              type="button"
+              className="console-dock-item"
+              data-active={activeSection === "repos" || undefined}
+              aria-label={m.app_menu_repos()}
+              aria-expanded={openMenu === "repos"}
+              onMouseEnter={() => keepOpen("repos")}
+              onMouseLeave={scheduleClose}
+              onClick={() => toggleMenu("repos")}
+            >
+              <DockSelection
+                active={activeSection === "repos"}
+                reduceMotion={reduceMotion}
+              />
+              <IoServer />
+            </button>
+            <button
+              type="button"
+              className="console-dock-item"
+              data-active={activeSection === "settings" || undefined}
+              aria-label={m.app_menu_settings()}
+              onClick={() => void openSettings()}
+            >
+              <DockSelection
+                active={activeSection === "settings"}
+                reduceMotion={reduceMotion}
+              />
+              <IoSettingsSharp />
+            </button>
           </Flex>
         </LayoutGroup>
       </Portal>

@@ -5,12 +5,20 @@ import {
   Flex,
   Heading,
   Box,
-  Group,
   IconButton,
   SimpleGrid,
   Text,
 } from "@chakra-ui/react";
-import { FiChevronDown } from "react-icons/fi";
+import {
+  FiArchive,
+  FiBarChart2,
+  FiClock,
+  FiMoreHorizontal,
+  FiRefreshCw,
+  FiShield,
+  FiTerminal,
+  FiUnlock,
+} from "react-icons/fi";
 import {
   Tabs,
   TabsRoot,
@@ -21,6 +29,7 @@ import {
 import {
   MenuContent,
   MenuItem,
+  MenuItemText,
   MenuRoot,
   MenuTrigger,
 } from "../../components/ui/menu";
@@ -139,8 +148,7 @@ const useRepositorySummary = (repoId: string) => {
         .then((response) => {
           if (!disposed) {
             setSummary(
-              response.repoSummaries.find((item) => item.id === repoId) ??
-                null,
+              response.repoSummaries.find((item) => item.id === repoId) ?? null,
             );
           }
         })
@@ -267,21 +275,27 @@ export const RepoView = ({
         <Heading size="xl">{repo.id}</Heading>
         <Box flex="1" />
 
-        <Group attached>
-          <SpinButton type="primary" onClickAsync={handleIndexNow}>
-            {m.repo_button_index()}
-          </SpinButton>
-          <MenuRoot>
+        <Flex className="repository-actions" align="center" gap="7px">
+          <Tooltip content={m.repo_button_index()} portalled>
+            <SpinButton
+              className="repository-action-button repository-refresh-button"
+              aria-label={m.repo_button_index()}
+              onClickAsync={handleIndexNow}
+            >
+              <FiRefreshCw />
+            </SpinButton>
+          </Tooltip>
+          <MenuRoot positioning={{ placement: "bottom-end", gutter: 8 }}>
             <MenuTrigger asChild>
               <IconButton
-                variant="subtle"
-                colorPalette="blue"
+                className="repository-action-button"
+                variant="ghost"
                 aria-label={m.plan_view_more_actions()}
               >
-                <FiChevronDown />
+                <FiMoreHorizontal />
               </IconButton>
             </MenuTrigger>
-            <MenuContent>
+            <MenuContent className="console-action-menu repository-action-menu">
               <MenuItem
                 value="run-command"
                 onClick={async () => {
@@ -290,28 +304,34 @@ export const RepoView = ({
                   showModal(<RunCommandModal repo={repo} />);
                 }}
               >
-                {m.op_type_run_command()}
+                <FiTerminal />
+                <MenuItemText>{m.op_type_run_command()}</MenuItemText>
               </MenuItem>
               <MenuItem value="unlock" onClick={handleUnlockNow}>
-                {m.repo_button_unlock()}
+                <FiUnlock />
+                <MenuItemText>{m.repo_button_unlock()}</MenuItemText>
               </MenuItem>
               <MenuItem value="prune" onClick={handlePruneNow}>
-                {m.repo_button_prune()}
+                <FiArchive />
+                <MenuItemText>{m.repo_button_prune()}</MenuItemText>
               </MenuItem>
               {repoInConfig.forgetPolicy && (
                 <MenuItem value="forget" onClick={handleForgetNow}>
-                  {m.repo_button_forget()}
+                  <FiClock />
+                  <MenuItemText>{m.repo_button_forget()}</MenuItemText>
                 </MenuItem>
               )}
               <MenuItem value="check" onClick={handleCheckNow}>
-                {m.repo_button_check()}
+                <FiShield />
+                <MenuItemText>{m.repo_button_check()}</MenuItemText>
               </MenuItem>
               <MenuItem value="stats" onClick={handleStatsNow}>
-                {m.repo_button_stats()}
+                <FiBarChart2 />
+                <MenuItemText>{m.repo_button_stats()}</MenuItemText>
               </MenuItem>
             </MenuContent>
           </MenuRoot>
-        </Group>
+        </Flex>
       </Flex>
 
       {summary && <RepositoryOverview summary={summary} />}
