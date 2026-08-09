@@ -9,11 +9,7 @@ import {
   useBreakpointValue,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Operation,
-  OperationSchema,
-  OperationStatus,
-} from "../../../gen/ts/v1/operations_pb";
+import { Operation, OperationSchema } from "../../../gen/ts/v1/operations_pb";
 import { authenticatedFetch } from "../../api/client";
 import { operationsStream } from "../../api/oplog";
 import type { OpenListUsage } from "../../api/openlist";
@@ -21,28 +17,19 @@ import { Tooltip } from "../../components/ui/tooltip";
 import { formatBytes } from "../../lib/formatting";
 import { getLocale } from "../../paraglide/runtime";
 import { backendUrl } from "../../state/buildcfg";
-import { backupDayOutcome } from "./backupDayOutcome";
+import {
+  activityAddDays as addDays,
+  activityDateKey as dateKey,
+  type ActivityDay,
+  activityStartOfDay as startOfDay,
+  backupActivityDayAppearance,
+  summarizeBackupActivity,
+} from "./backupActivitySummary";
 
 const ACTIVITY_OPERATION_LIMIT = 5000;
 const ACTIVITY_REQUEST_TIMEOUT_MS = 4000;
 const YEAR_DAYS = 365;
 const MOBILE_WALL_DAYS = 112;
-
-interface ActivityDay {
-  bytesAdded: number;
-  bytesProcessed: number;
-  success: number;
-  warning: number;
-  failed: number;
-  running: number;
-  pending: number;
-}
-
-interface ActivitySummary {
-  days: Map<string, ActivityDay>;
-  bytesAdded: number;
-  backupDays: number;
-}
 
 const activityCopy = () => {
   const zh = getLocale().toLowerCase().startsWith("zh");
@@ -52,7 +39,7 @@ const activityCopy = () => {
     year: zh ? "最近一年" : "Past year",
     weeks: zh ? "最近 16 周" : "Past 16 weeks",
     protected: zh ? "已备份" : "Backed up",
-    added: zh ? "备份大小" : "Backup size",
+    added: zh ? "远端备份" : "Remote backup",
     todayUpload: zh ? "今日上传" : "Uploaded today",
     monthUpload: zh ? "本月上传" : "Uploaded this month",
     days: zh ? "备份天数" : "Backup days",
@@ -62,108 +49,12 @@ const activityCopy = () => {
     failed: zh ? "异常" : "failed",
     running: zh ? "进行中" : "running",
     pending: zh ? "等待开始" : "waiting to start",
-    dayBackupSize: zh ? "备份大小" : "Backup size",
-    dayUpload: zh ? "上传量" : "Uploaded",
+    dayUpload: zh ? "今日新增" : "Added today",
     weekdays: zh
       ? ["", "一", "", "三", "", "五", ""]
       : ["", "Mon", "", "Wed", "", "Fri", ""],
   };
 };
-
-function startOfDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function addDays(date: Date, amount: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + amount);
-  return next;
-}
-
-function dateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function backupMetrics(operation: Operation): {
-  bytesAdded: number;
-  bytesProcessed: number;
-} {
-  if (operation.op.case !== "operationBackup") {
-    return { bytesAdded: 0, bytesProcessed: 0 };
-  }
-  const entry = operation.op.value.lastStatus?.entry;
-  if (entry?.case !== "summary") {
-    return { bytesAdded: 0, bytesProcessed: 0 };
-  }
-  return {
-    bytesAdded: Number(entry.value.dataAdded),
-    bytesProcessed: Number(entry.value.totalBytesProcessed),
-  };
-}
-
-function summarizeActivity(operations: Operation[]): ActivitySummary {
-  const today = startOfDay(new Date());
-  const firstDay = addDays(today, -(YEAR_DAYS - 1));
-  const days = new Map<string, ActivityDay>();
-
-  for (const operation of operations) {
-    if (operation.op.case !== "operationBackup" || operation.op.value.dryRun) {
-      continue;
-    }
-
-    const date = startOfDay(new Date(Number(operation.unixTimeStartMs)));
-    if (date < firstDay || date > today) continue;
-
-    const key = dateKey(date);
-    const day = days.get(key) ?? {
-      bytesAdded: 0,
-      bytesProcessed: 0,
-      success: 0,
-      warning: 0,
-      failed: 0,
-      running: 0,
-      pending: 0,
-    };
-    const metrics = backupMetrics(operation);
-    day.bytesAdded += metrics.bytesAdded;
-    day.bytesProcessed += metrics.bytesProcessed;
-
-    switch (operation.status) {
-      case OperationStatus.STATUS_SUCCESS:
-        day.success += 1;
-        break;
-      case OperationStatus.STATUS_WARNING:
-        day.warning += 1;
-        break;
-      case OperationStatus.STATUS_INPROGRESS:
-        day.running += 1;
-        break;
-      case OperationStatus.STATUS_PENDING:
-        day.pending += 1;
-        break;
-      case OperationStatus.STATUS_ERROR:
-      case OperationStatus.STATUS_SYSTEM_CANCELLED:
-      case OperationStatus.STATUS_USER_CANCELLED:
-        day.failed += 1;
-        break;
-    }
-    days.set(key, day);
-  }
-
-  return {
-    days,
-    bytesAdded: Array.from(days.values()).reduce(
-      (total, day) => total + day.bytesAdded,
-      0,
-    ),
-    backupDays: Array.from(days.values()).filter(
-      (day) => day.success + day.warning > 0,
-    ).length,
-  };
-}
 
 function mergeOperations(
   current: Operation[],
@@ -389,14 +280,6 @@ const ActivityDayTooltip = ({
       >
         <Flex align="center" justify="space-between" gap={5}>
           <Text color="#98a1af" fontSize="11px">
-            {copy.dayBackupSize}
-          </Text>
-          <Text fontSize="11px" fontVariantNumeric="tabular-nums">
-            {formatBytes(day?.bytesProcessed ?? 0)}
-          </Text>
-        </Flex>
-        <Flex align="center" justify="space-between" gap={5}>
-          <Text color="#98a1af" fontSize="11px">
             {copy.dayUpload}
           </Text>
           <Text fontSize="11px" fontVariantNumeric="tabular-nums">
@@ -423,7 +306,10 @@ export const BackupActivityOverview = ({
   const copy = activityCopy();
   const { operations, loaded } = useBackupOperations(planIds);
   const [activeDayKey, setActiveDayKey] = useState<string | null>(null);
-  const summary = useMemo(() => summarizeActivity(operations), [operations]);
+  const summary = useMemo(
+    () => summarizeBackupActivity(operations),
+    [operations],
+  );
   const visibleDays = useBreakpointValue({
     base: MOBILE_WALL_DAYS,
     md: YEAR_DAYS,
@@ -482,7 +368,6 @@ export const BackupActivityOverview = ({
 
   const describeDay = (date: Date, day: ActivityDay | undefined) => {
     const details = [
-      `${copy.dayBackupSize} ${formatBytes(day?.bytesProcessed ?? 0)}`,
       `${copy.dayUpload} ${formatBytes(day?.bytesAdded ?? 0)}`,
       !day ? copy.noBackup : "",
     ].filter(Boolean);
@@ -601,13 +486,26 @@ export const BackupActivityOverview = ({
                 const key = dateKey(date);
                 const day = summary.days.get(key);
                 const level = activityLevel(day, thresholds);
-                const outcome = backupDayOutcome({
-                  success: day?.success,
-                  warning: day?.warning,
-                  inprogress: day?.running,
-                  error: day?.failed,
-                });
+                const outcome = backupActivityDayAppearance(day);
                 const future = date > startOfDay(new Date());
+                const activityBackground =
+                  outcome === "error"
+                    ? "#d84f59"
+                    : outcome === "inprogress"
+                      ? "#37d785"
+                      : outcome === "warning"
+                        ? "#f39a4a"
+                        : LEVEL_COLORS[level];
+                const activityOutline =
+                  outcome === "partial-error"
+                    ? "inset 0 0 0 1px rgba(239, 90, 99, 0.98), 0 0 8px rgba(239, 90, 99, 0.3)"
+                    : outcome === "partial-inprogress"
+                      ? "inset 0 0 0 1px rgba(55, 215, 133, 0.98), 0 0 8px rgba(55, 215, 133, 0.34)"
+                      : outcome === "recovered" || outcome === "partial-warning"
+                        ? "inset 0 0 0 1px rgba(255, 164, 92, 0.96), 0 0 8px rgba(255, 164, 92, 0.26)"
+                        : outcome === "pending"
+                          ? "inset 0 0 0 1px rgba(99, 185, 232, 0.98), 0 0 8px rgba(99, 185, 232, 0.26)"
+                          : undefined;
                 return (
                   <Tooltip
                     key={key}
@@ -655,7 +553,7 @@ export const BackupActivityOverview = ({
                       aspectRatio="1"
                       minW={0}
                       borderRadius={{ base: "3px", md: "4px" }}
-                      bg={LEVEL_COLORS[level]}
+                      bg={activityBackground}
                       opacity={future ? 0.25 : 1}
                       cursor={future ? "default" : "pointer"}
                       touchAction="manipulation"
@@ -670,15 +568,7 @@ export const BackupActivityOverview = ({
                           setActiveDayKey(key);
                         }
                       }}
-                      boxShadow={
-                        outcome === "error"
-                          ? "inset 0 0 0 1px rgba(255, 164, 92, 0.9)"
-                          : outcome === "inprogress"
-                            ? "inset 0 0 0 1px rgba(55, 215, 133, 0.98), 0 0 8px rgba(55, 215, 133, 0.34)"
-                            : outcome === "empty" && (day?.pending ?? 0) > 0
-                              ? "inset 0 0 0 1px rgba(99, 185, 232, 0.98), 0 0 8px rgba(99, 185, 232, 0.26)"
-                              : undefined
-                      }
+                      boxShadow={activityOutline}
                     />
                   </Tooltip>
                 );

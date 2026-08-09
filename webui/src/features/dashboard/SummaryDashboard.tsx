@@ -88,7 +88,7 @@ export const SummaryDashboard = () => {
   }
 
   const plans = summaryData.planSummaries;
-  const protectedBytes = summaryData.repoSummaries.reduce(
+  const protectedBytes = summaryData.planSummaries.reduce(
     (total, summary) => total + Number(summary.protectedBytes),
     0,
   );

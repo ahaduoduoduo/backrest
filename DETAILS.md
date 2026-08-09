@@ -30,13 +30,16 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
   backup activity wall combining Backrest operation metrics with current 115
-  day and month upload traffic. Each day exposes Restic's processed bytes and
-  repository-added bytes through a hover/tap detail panel; a successful retry
-  resolves the calendar day's state without deleting earlier error details,
-  a queued backup uses the console-blue outline while an actively running
-  backup remains green, and operation queries do not read repository data.
+  day and month upload traffic. The metric strip labels accumulated Restic
+  additions as remote backup data, while each day exposes its uncompressed
+  addition and final per-plan status through a hover/tap detail panel.
+- `webui/src/features/dashboard/backupActivitySummary.ts`: groups operations by
+  local day and plan, sums additions from all plans, resolves each plan from its
+  last started operation, and derives solid or outlined calendar states for
+  failure, progress, queued work, and successful recovery.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
-  activity data and the backup-task grid.
+  activity data and the backup-task grid; protected bytes are the sum of every
+  plan's latest usable snapshot rather than the latest plan in each repository.
 - `webui/src/features/dashboard/PlanCard.tsx`: renders the calendar-aligned task
   summary, start/stop control, next-run treatment, repository addition, and
   direct navigation to historical files.
@@ -44,8 +47,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   status strips in chronological order, from the oldest date on the left to
   today on the right, with per-day backup-size and mixed-outcome details; a
   recovered failure uses a green cell with an orange outline.
-- `webui/src/features/dashboard/backupDayOutcome.ts`: defines the shared
-  success-first protection rule used by yearly and 30-day backup calendars.
+- `webui/src/features/dashboard/backupDayOutcome.ts`: defines the
+  success-first protection rule used by each plan's 30-day history strip.
 - `webui/src/features/repositories/RepoView.tsx`: repository file browser,
   operations, storage statistics, maintenance actions, and a top-level 30-day
   capacity and backup-health summary. Refresh and advanced maintenance actions
