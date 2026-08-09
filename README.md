@@ -48,11 +48,15 @@ page, while runtime paths and the configuration JSON are grouped under System
 Info in Settings.
 The historical browser fills the available viewport without page scrolling;
 its task title and history/delete controls live inside the active version card,
-while only an overflowing file list receives its own scrollbar.
+while only an overflowing file list receives its own scrollbar. Its desktop
+stack compensates for tall-card perspective so older versions remain visibly
+layered behind the active surface.
 All 30-day backup strips run chronologically from the oldest date on the left
 to today on the right. A successful retry clears the yearly calendar warning;
 the task strip uses a green cell with an orange recovery outline, while earlier
-failures remain available in the day details and operation history.
+failures remain available in the day details and operation history. In the
+yearly activity wall, a queued backup has a blue outline and only an actively
+running backup uses green.
 Desktop and mobile share a compact translucent bottom navigation capsule. Its
 evenly inset selection pill moves between closed-path icons, while task and
 repository choices open above it. Task, repository, and settings editors use a

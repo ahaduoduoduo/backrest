@@ -94,7 +94,12 @@ export const SummaryDashboard = () => {
   );
 
   return (
-    <Stack gap={{ base: 4, md: 5 }} width="full">
+    <Stack
+      gap={{ base: 4, md: 5 }}
+      width="full"
+      minH={{ base: "auto", md: "calc(100dvh - 112px)" }}
+      justify={{ base: "flex-start", md: "space-between" }}
+    >
       <BackupActivityOverview
         protectedBytes={protectedBytes}
         planIds={plans.map((plan) => plan.id)}

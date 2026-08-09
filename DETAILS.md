@@ -33,7 +33,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   day and month upload traffic. Each day exposes Restic's processed bytes and
   repository-added bytes through a hover/tap detail panel; a successful retry
   resolves the calendar day's state without deleting earlier error details,
-  and operation queries do not read repository data.
+  a queued backup uses the console-blue outline while an actively running
+  backup remains green, and operation queries do not read repository data.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
   activity data and the backup-task grid.
 - `webui/src/features/dashboard/PlanCard.tsx`: renders the calendar-aligned task
@@ -63,9 +64,10 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/PlanSnapshotExplorer.tsx` and
   `SnapshotExplorerHeader.tsx`: present successful Restic snapshots as a
   Time Machine-inspired directory-window stack with persistent paths, a
-  sampled in-card timeline and older/newer navigation. The active surface owns
-  the only meaningful overflow region: its file list when entries exceed the
-  available viewport height.
+  sampled in-card timeline and older/newer navigation. Desktop uses additional
+  vertical separation to compensate for perspective projection on tall cards;
+  the active surface owns the only meaningful overflow region: its file list
+  when entries exceed the available viewport height.
 - `webui/src/features/plans/PlanView.tsx`: owns the single task title, file and
   operation card faces, 3D flip state, and icon-only two-step version deletion;
   the title and closed-path controls remain inside the card footer.
@@ -85,8 +87,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   unreferenced storage space.
 - `webui/src/index.sass`, `webui/src/app/App.tsx`, and
   `webui/src/components/layout/MainContentArea.tsx`: headerless dark application
-  shell, full-width page sizing, bottom-dock clearance, glass surfaces, and
-  responsive canvas treatment.
+  shell, full-width page sizing, balanced desktop spacing around the dashboard
+  and bottom dock, glass surfaces, and responsive canvas treatment.
 - `webui/src/components/common/TwoPaneModal.tsx` and `SectionCard.tsx`: shared
   floating workspace for task, repository, and settings editing; it retains a
   visible application backdrop and interactive bottom dock on desktop and

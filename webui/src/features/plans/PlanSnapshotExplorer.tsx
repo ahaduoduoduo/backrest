@@ -8,16 +8,12 @@ import {
   Spinner,
   Stack,
   Text,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FiHardDrive } from "react-icons/fi";
-import {
-  IoChevronBack,
-  IoDocument,
-  IoFolder,
-  IoHome,
-} from "react-icons/io5";
+import { IoChevronBack, IoDocument, IoFolder, IoHome } from "react-icons/io5";
 import { Operation, OperationStatus } from "../../../gen/ts/v1/operations_pb";
 import { ResticSnapshot } from "../../../gen/ts/v1/restic_pb";
 import {
@@ -137,8 +133,8 @@ const stackDateFormatter = new Intl.DateTimeFormat(undefined, {
 
 const STACK_CARD_COUNT = 5;
 
-function stackTransform(depth: number): string {
-  const translateY = depth * -18;
+function stackTransform(depth: number, verticalStep: number): string {
+  const translateY = depth * -verticalStep;
   const translateZ = depth * -44;
   const scale = 1 - depth * 0.018;
   return `translate3d(0, ${translateY}px, ${translateZ}px) scale(${scale})`;
@@ -242,14 +238,14 @@ const FileRow = ({
           }
         }}
       >
-      <Flex
-        className="snapshot-entry-icon"
-        width="32px"
+        <Flex
+          className="snapshot-entry-icon"
+          width="32px"
           height="32px"
           align="center"
           justify="center"
           flexShrink={0}
-        bg={isDirectory ? "rgba(97, 184, 255, 0.1)" : "whiteAlpha.050"}
+          bg={isDirectory ? "rgba(97, 184, 255, 0.1)" : "whiteAlpha.050"}
           color={isDirectory ? "#63b9e8" : "whiteAlpha.650"}
         >
           {isDirectory ? <IoFolder /> : <IoDocument />}
@@ -341,6 +337,7 @@ export const PlanSnapshotExplorer = ({
   const [direction, setDirection] = useState(1);
   const cache = useRef(new Map<string, LsEntry[]>());
   const reduceMotion = useReducedMotion();
+  const stackVerticalStep = useBreakpointValue({ base: 18, md: 40 }) ?? 18;
 
   const selectedIndex = Math.max(
     0,
@@ -460,20 +457,23 @@ export const PlanSnapshotExplorer = ({
                     opacity: reduceMotion ? 0 : stackOpacity(depth),
                     transform:
                       reduceMotion || direction > 0
-                        ? stackTransform(Math.min(depth + 1, STACK_CARD_COUNT))
+                        ? stackTransform(
+                            Math.min(depth + 1, STACK_CARD_COUNT),
+                            stackVerticalStep,
+                          )
                         : frontTransform,
                   }}
                   animate={{
                     opacity: stackOpacity(depth),
-                    transform: stackTransform(depth),
+                    transform: stackTransform(depth, stackVerticalStep),
                   }}
                   exit={{
                     opacity: 0,
                     transform: reduceMotion
-                      ? stackTransform(depth)
+                      ? stackTransform(depth, stackVerticalStep)
                       : direction > 0
                         ? frontTransform
-                        : stackTransform(depth + 1),
+                        : stackTransform(depth + 1, stackVerticalStep),
                   }}
                   transition={{
                     opacity: {
@@ -557,10 +557,7 @@ export const PlanSnapshotExplorer = ({
                         <Box width="32px" />
                       </Flex>
 
-                      <Box
-                        className="snapshot-explorer-files"
-                        overflowY="auto"
-                      >
+                      <Box className="snapshot-explorer-files" overflowY="auto">
                         {directoryPending ? (
                           <Center h="100%">
                             <Spinner size="sm" />

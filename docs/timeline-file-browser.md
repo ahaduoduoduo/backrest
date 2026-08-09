@@ -1,6 +1,6 @@
 # Historical file browser
 
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 The plan page opens directly into historical files. A single icon below the
 version card flips the same surface to the complete operation record for
@@ -19,9 +19,12 @@ When a folder did not exist yet, the browser preserves the path and offers a
 return to that version's root instead of silently navigating somewhere else.
 
 All layouts use a Time Machine-inspired stack of up to five same-size directory
-windows with 18 pixels of vertical separation per depth. Older versions recede
-behind the active window, while a compact rail inside its right edge provides
-older/newer arrows and sampled timeline ticks.
+windows. Mobile keeps 18 pixels of vertical movement per depth. Desktop uses
+40 pixels because its taller card and perspective projection otherwise cancel
+most of that movement; the visible edge separation remains compact rather than
+becoming a 40-pixel gap. Older versions recede behind the active window, while
+a compact rail inside its right edge provides older/newer arrows and sampled
+timeline ticks.
 The active version uses one continuous surface rather than nested panel colors.
 The task title stays in its lower-left corner and the history/delete controls
 stay in the lower center. Folder rows are keyboard accessible; every file and
