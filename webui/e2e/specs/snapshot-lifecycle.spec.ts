@@ -214,7 +214,7 @@ test.describe('snapshot lifecycle', () => {
 
     // --- Browser: open the plan's direct historical file view. ------------
     await page.goto(`${backrest.url}/#/plan/my-plan`);
-    const versionButtons = page.locator('.snapshot-version-button');
+    const versionButtons = page.getByTestId('snapshot-version');
     await expect(versionButtons).toHaveCount(2, { timeout: 30_000 });
 
     // Versions are sorted newest-first; select the older version and use the

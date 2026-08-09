@@ -97,6 +97,7 @@ export const SnapshotExplorerHeader = ({
               key={version.id}
               type="button"
               className="snapshot-timeline-tick"
+              data-testid="snapshot-version"
               data-selected={selected || undefined}
               style={{ top: `${position}%` }}
               aria-label={dateFormatter.format(version.timestampMs)}

@@ -67,7 +67,9 @@ test.describe('mobile backup console', () => {
 
     await page.getByRole('button', { name: 'Menu' }).click();
     await expect(navigation).toBeVisible();
-    await navigation.getByRole('button', { name: /Edit Plan nas-config/i }).click();
+    await navigation
+      .getByRole('button', { name: 'Edit Plan nas-config', exact: true })
+      .click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Content' })).toBeVisible();
