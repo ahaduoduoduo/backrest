@@ -24,6 +24,11 @@ scrollable version selector and the same older/newer controls. Folder rows are
 keyboard accessible; every file and folder retains the existing information,
 restore, and download actions.
 
+The header also retains Backrest's two-step delete action for the selected
+historical version. The operation is scheduled through the existing Forget
+API, and the live version list removes it once the snapshot index is marked as
+forgotten.
+
 ## Repository reads
 
 Opening the page reads the version list from Backrest's local operation log.

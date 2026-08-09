@@ -13,7 +13,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FiChevronLeft,
-  FiChevronRight,
   FiClock,
   FiFile,
   FiFolder,
@@ -34,6 +33,7 @@ import { SnapshotEntryActions } from "../repositories/SnapshotBrowser";
 import { formatBytes } from "../../lib/formatting";
 import { getLocale } from "../../paraglide/runtime";
 import * as m from "../../paraglide/messages";
+import { SnapshotExplorerHeader } from "./SnapshotExplorerHeader";
 import { SnapshotVersionRail } from "./SnapshotVersionRail";
 
 export interface SnapshotVersion {
@@ -121,21 +121,6 @@ function sortEntries(entries: LsEntry[], parent: string): LsEntry[] {
       });
     });
 }
-
-const versionDateFormatter = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-const fullVersionDateFormatter = new Intl.DateTimeFormat(undefined, {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 const fileDateFormatter = new Intl.DateTimeFormat(undefined, {
   year: "numeric",
@@ -442,86 +427,13 @@ export const PlanSnapshotExplorer = ({
     >
       <Box className="snapshot-explorer-glow" />
 
-      <Flex
-        position="relative"
-        zIndex={2}
-        align={{ base: "flex-start", md: "flex-end" }}
-        justify="space-between"
-        direction={{ base: "column", md: "row" }}
-        gap={4}
-        mb={{ base: 4, md: 6 }}
-      >
-        <Box>
-          <Text
-            color="#63b9e8"
-            fontFamily="mono"
-            fontSize="9px"
-            letterSpacing="0.17em"
-          >
-            {m.snapshot_explorer_eyebrow().toUpperCase()}
-          </Text>
-          <Text
-            mt={2}
-            fontSize={{ base: "27px", md: "36px" }}
-            fontWeight="430"
-            lineHeight="1"
-            letterSpacing="-0.05em"
-          >
-            {fullVersionDateFormatter.format(selectedVersion.timestampMs)}
-          </Text>
-          <Text mt={2} color="whiteAlpha.420" fontSize="11px">
-            {m.snapshot_explorer_version_position({
-              current: selectedIndex + 1,
-              total: versions.length,
-            })}
-          </Text>
-        </Box>
-        <Flex gap={2} align="center">
-          <IconButton
-            variant="outline"
-            size="sm"
-            aria-label={m.snapshot_explorer_newer()}
-            disabled={selectedIndex === 0}
-            onClick={() => selectVersion(selectedIndex - 1)}
-          >
-            <FiChevronLeft />
-          </IconButton>
-          <IconButton
-            variant="outline"
-            size="sm"
-            aria-label={m.snapshot_explorer_older()}
-            disabled={selectedIndex === versions.length - 1}
-            onClick={() => selectVersion(selectedIndex + 1)}
-          >
-            <FiChevronRight />
-          </IconButton>
-        </Flex>
-      </Flex>
-
-      <Flex
-        display={{ base: "flex", lg: "none" }}
-        position="relative"
-        zIndex={2}
-        gap={2}
-        overflowX="auto"
-        pb={3}
-        mb={2}
-      >
-        {versions.map((version, index) => (
-          <Button
-            key={version.id}
-            size="xs"
-            variant={index === selectedIndex ? "subtle" : "outline"}
-            colorPalette="blue"
-            flexShrink={0}
-            onClick={() => selectVersion(index)}
-          >
-            {index === 0
-              ? m.snapshot_explorer_latest()
-              : versionDateFormatter.format(version.timestampMs)}
-          </Button>
-        ))}
-      </Flex>
+      <SnapshotExplorerHeader
+        versions={versions}
+        selectedIndex={selectedIndex}
+        repoId={repoId}
+        planId={planId}
+        onSelect={selectVersion}
+      />
 
       <Box
         position="relative"

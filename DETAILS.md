@@ -60,9 +60,10 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: direct root-directory list
   and readable exclusion controls backed by the unchanged `Plan.paths`,
   `Plan.excludes`, and `Plan.iexcludes` fields.
-- `webui/src/features/plans/PlanSnapshotExplorer.tsx` and
-  `SnapshotVersionRail.tsx`: present successful Restic snapshots as a direct
-  folder browser with persistent paths and older/newer version navigation.
+- `webui/src/features/plans/PlanSnapshotExplorer.tsx`,
+  `SnapshotExplorerHeader.tsx`, and `SnapshotVersionRail.tsx`: present
+  successful Restic snapshots as a direct folder browser with persistent
+  paths, older/newer navigation, and selected-version deletion.
 - `docs/timeline-file-browser.md`: documents snapshot selection, bounded
   repository reads, responsive behavior, motion, and task-card controls.
 - `webui/messages/zh.json`: plain-language Chinese product copy for navigation,

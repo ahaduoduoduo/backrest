@@ -192,7 +192,7 @@ test.describe('snapshot lifecycle', () => {
     expect(content).toBe('download me');
   });
 
-  test('forgets a snapshot from the Tree View and it disappears', async ({ page, backrest }) => {
+  test('forgets the selected historical version and it disappears', async ({ page, backrest }) => {
     test.setTimeout(180_000);
 
     // --- Setup: two real backups so forgetting one leaves the repo sane. ---
@@ -212,36 +212,26 @@ test.describe('snapshot lifecycle', () => {
     expect(idsBefore.length).toBe(2);
     const [olderId, newerId] = idsBefore;
 
-    // --- Browser: open the plan (defaults to Tree View). -------------------
+    // --- Browser: open the plan's direct historical file view. ------------
     await page.goto(`${backrest.url}/#/plan/my-plan`);
-    await page.getByRole('tab', { name: 'Tree View' }).click();
+    const versionButtons = page.locator('.snapshot-version-button');
+    await expect(versionButtons).toHaveCount(2, { timeout: 30_000 });
 
-    // Backup/snapshot flows render as tree leaves whose text starts with
-    // "Backup <date>" (the flow's display type is its first op — the backup —
-    // via displayInfoForFlow, and formatTime starts with a digit). Branch nodes
-    // are month/day labels; the post-forget "Forget" leaf won't match either.
-    const snapshotLeaves = page.getByRole('treeitem').filter({ hasText: /^Backup \d/ });
-    await expect(snapshotLeaves).toHaveCount(2, { timeout: 30_000 });
-
-    // Tree leaves are sorted newest-first, so the last one is the older
-    // snapshot. Selecting it reveals its BackupView panel on the right.
-    await snapshotLeaves.last().click();
-
-    // The forget control lives in OperationTreeView's BackupView panel: a
-    // destructive ConfirmButton labelled "Forget (Destructive)" that arms to
-    // "Confirm forget?" on first click.
-    const forgetBtn = page.getByRole('button', { name: 'Forget (Destructive)' });
+    // Versions are sorted newest-first; select the older version and use the
+    // header's two-step destructive control.
+    await versionButtons.last().click();
+    const forgetBtn = page.getByTestId('forget-snapshot');
     await expect(forgetBtn).toBeVisible({ timeout: 20_000 });
     await forgetBtn.click();
-    await page.getByRole('button', { name: 'Confirm forget?' }).click();
+    await forgetBtn.click();
 
     // --- Assert (no reload): the forgotten snapshot flow disappears. -------
     // A single-snapshot forget marks the OperationIndexSnapshot forgot=true and
     // DELETES its own transient OperationForget (see taskforgetsnapshot.go), so
     // — unlike a retention-policy forget — no persistent "Forget" row remains.
-    // The observable UI signal is the flow aggregator hiding the forgotten flow,
-    // so the older Backup leaf drops out of the tree (2 -> 1).
-    await expect(snapshotLeaves).toHaveCount(1, { timeout: 60_000 });
+    // The live snapshot index marks the version forgotten, so it drops from
+    // the version rail without a page reload.
+    await expect(versionButtons).toHaveCount(1, { timeout: 60_000 });
 
     // --- Ground truth via the API: exactly the older snapshot is gone. -----
     const deadline = Date.now() + 60_000;
