@@ -1,6 +1,6 @@
 import { create } from "@bufbuild/protobuf";
-import { Box, Button, Flex, IconButton, Text } from "@chakra-ui/react";
-import { FiChevronLeft, FiChevronRight, FiTrash2 } from "react-icons/fi";
+import { Box, Flex, IconButton } from "@chakra-ui/react";
+import { FiChevronDown, FiChevronUp, FiTrash2 } from "react-icons/fi";
 import { ForgetRequestSchema } from "../../../gen/ts/v1/service_pb";
 import { backrestService } from "../../api/client";
 import { alerts } from "../../components/common/Alerts";
@@ -13,20 +13,22 @@ interface VersionHeaderItem {
   timestampMs: number;
 }
 
-const compactFormatter = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-const fullFormatter = new Intl.DateTimeFormat(undefined, {
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
   year: "numeric",
-  month: "long",
+  month: "short",
   day: "numeric",
   hour: "2-digit",
   minute: "2-digit",
 });
+
+function timelineIndexes(total: number, selected: number): number[] {
+  if (total <= 12) return Array.from({ length: total }, (_, index) => index);
+  const indexes = new Set<number>([0, total - 1, selected]);
+  for (let step = 1; step < 10; step += 1) {
+    indexes.add(Math.round((step / 10) * (total - 1)));
+  }
+  return Array.from(indexes).sort((left, right) => left - right);
+}
 
 export const SnapshotExplorerHeader = ({
   versions,
@@ -42,6 +44,7 @@ export const SnapshotExplorerHeader = ({
   onSelect: (index: number) => void;
 }) => {
   const selectedVersion = versions[selectedIndex];
+  const visibleIndexes = timelineIndexes(versions.length, selectedIndex);
 
   const forgetSelectedVersion = async () => {
     try {
@@ -63,111 +66,78 @@ export const SnapshotExplorerHeader = ({
   };
 
   return (
-    <>
-      <Flex
-        position="relative"
-        zIndex={2}
-        align={{ base: "flex-start", md: "flex-end" }}
-        justify="space-between"
-        direction={{ base: "column", md: "row" }}
-        gap={4}
-        mb={{ base: 4, md: 6 }}
+    <Flex
+      className="snapshot-time-rail"
+      direction="column"
+      align="center"
+      minW={{ base: "46px", md: "64px" }}
+      py={2}
+    >
+      <IconButton
+        className="snapshot-time-button"
+        variant="ghost"
+        minH="44px"
+        minW="44px"
+        borderRadius="full"
+        aria-label={m.snapshot_explorer_newer()}
+        disabled={selectedIndex === 0}
+        onClick={() => onSelect(selectedIndex - 1)}
       >
-        <Box>
-          <Text
-            color="#63b9e8"
-            fontFamily="mono"
-            fontSize="9px"
-            letterSpacing="0.17em"
-          >
-            {m.snapshot_explorer_eyebrow().toUpperCase()}
-          </Text>
-          <Text
-            mt={2}
-            fontSize={{ base: "27px", md: "36px" }}
-            fontWeight="430"
-            lineHeight="1"
-            letterSpacing="-0.05em"
-          >
-            {fullFormatter.format(selectedVersion.timestampMs)}
-          </Text>
-          <Text mt={2} color="whiteAlpha.420" fontSize="11px">
-            {m.snapshot_explorer_version_position({
-              current: selectedIndex + 1,
-              total: versions.length,
-            })}
-          </Text>
-        </Box>
-        <Flex gap={2} align="center">
-          <Tooltip
-            content={m.operation_tree_view_forget_destructive()}
-            portalled
-          >
-            <ConfirmButton
-              variant="outline"
-              size="sm"
-              minH={{ base: "44px", md: "36px" }}
-              minW={{ base: "44px", md: "36px" }}
-              px="10px"
-              colorPalette="red"
-              aria-label={m.operation_tree_view_forget_destructive()}
-              confirmTitle={m.operation_tree_view_confirm_forget()}
-              confirmTimeout={3000}
-              onClickAsync={forgetSelectedVersion}
-              data-testid="forget-snapshot"
-            >
-              <FiTrash2 />
-            </ConfirmButton>
-          </Tooltip>
-          <IconButton
-            variant="outline"
-            size="sm"
-            minH={{ base: "44px", md: "36px" }}
-            minW={{ base: "44px", md: "36px" }}
-            aria-label={m.snapshot_explorer_newer()}
-            disabled={selectedIndex === 0}
-            onClick={() => onSelect(selectedIndex - 1)}
-          >
-            <FiChevronLeft />
-          </IconButton>
-          <IconButton
-            variant="outline"
-            size="sm"
-            minH={{ base: "44px", md: "36px" }}
-            minW={{ base: "44px", md: "36px" }}
-            aria-label={m.snapshot_explorer_older()}
-            disabled={selectedIndex === versions.length - 1}
-            onClick={() => onSelect(selectedIndex + 1)}
-          >
-            <FiChevronRight />
-          </IconButton>
-        </Flex>
-      </Flex>
+        <FiChevronUp />
+      </IconButton>
 
-      <Flex
-        display={{ base: "flex", lg: "none" }}
-        position="relative"
-        zIndex={2}
-        gap={2}
-        overflowX="auto"
-        pb={3}
-        mb={2}
+      <Box className="snapshot-timeline" flex="1" minH="220px" my={3}>
+        {visibleIndexes.map((index) => {
+          const version = versions[index];
+          const selected = index === selectedIndex;
+          const position =
+            versions.length <= 1 ? 0 : (index / (versions.length - 1)) * 100;
+          return (
+            <button
+              key={version.id}
+              type="button"
+              className="snapshot-timeline-tick"
+              data-selected={selected || undefined}
+              style={{ top: `${position}%` }}
+              aria-label={dateFormatter.format(version.timestampMs)}
+              aria-current={selected ? "true" : undefined}
+              onClick={() => onSelect(index)}
+            />
+          );
+        })}
+      </Box>
+
+      <IconButton
+        className="snapshot-time-button"
+        variant="ghost"
+        minH="44px"
+        minW="44px"
+        borderRadius="full"
+        aria-label={m.snapshot_explorer_older()}
+        disabled={selectedIndex === versions.length - 1}
+        onClick={() => onSelect(selectedIndex + 1)}
       >
-        {versions.map((version, index) => (
-          <Button
-            key={version.id}
-            size="xs"
-            variant={index === selectedIndex ? "subtle" : "outline"}
-            colorPalette="blue"
-            flexShrink={0}
-            onClick={() => onSelect(index)}
-          >
-            {index === 0
-              ? m.snapshot_explorer_latest()
-              : compactFormatter.format(version.timestampMs)}
-          </Button>
-        ))}
-      </Flex>
-    </>
+        <FiChevronDown />
+      </IconButton>
+
+      <Tooltip content={m.operation_tree_view_forget_destructive()} portalled>
+        <ConfirmButton
+          className="snapshot-time-delete"
+          variant="ghost"
+          minH="44px"
+          minW="44px"
+          mt={2}
+          borderRadius="full"
+          colorPalette="red"
+          aria-label={m.operation_tree_view_forget_destructive()}
+          confirmTitle={m.operation_tree_view_confirm_forget()}
+          confirmTimeout={3000}
+          onClickAsync={forgetSelectedVersion}
+          data-testid="forget-snapshot"
+        >
+          <FiTrash2 />
+        </ConfirmButton>
+      </Tooltip>
+    </Flex>
   );
 };

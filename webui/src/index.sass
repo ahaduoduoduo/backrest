@@ -236,70 +236,151 @@ body
   background: rgba(255, 255, 255, 0.05) !important
   color: #f1f3f7
 
+.mobile-navigation-group
+  overflow: hidden
+  border: 1px solid rgba(255, 255, 255, 0.075)
+  border-radius: 18px
+  background: rgba(255, 255, 255, 0.018)
+
+.mobile-navigation-row
+  position: relative
+  width: 100%
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055)
+  color: rgba(241, 243, 247, 0.82)
+  transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out)
+
+.mobile-navigation-row:last-child
+  border-bottom: 0
+
+.mobile-navigation-row[data-active="true"]
+  background: rgba(99, 185, 232, 0.085)
+  color: #e8f6ff
+
+.mobile-navigation-row[data-active="true"]::before
+  position: absolute
+  top: 14px
+  bottom: 14px
+  left: 0
+  width: 2px
+  border-radius: 0 999px 999px 0
+  background: #63b9e8
+  content: ""
+
+.mobile-navigation-icon
+  border: 1px solid rgba(255, 255, 255, 0.06)
+  background: rgba(255, 255, 255, 0.035)
+  color: rgba(241, 243, 247, 0.58)
+
+.mobile-navigation-row[data-active="true"] .mobile-navigation-icon
+  border-color: rgba(99, 185, 232, 0.2)
+  background: rgba(99, 185, 232, 0.11)
+  color: #63b9e8
+
+.mobile-navigation-chevron
+  flex-shrink: 0
+  color: rgba(255, 255, 255, 0.2)
+
+.mobile-navigation-add,
+.mobile-navigation-edit
+  color: rgba(241, 243, 247, 0.52) !important
+  transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out), transform 140ms var(--ease-out)
+
+.mobile-navigation-add
+  border: 1px solid rgba(255, 255, 255, 0.07) !important
+  background: rgba(255, 255, 255, 0.025) !important
+
+.mobile-navigation-add:active,
+.mobile-navigation-edit:active
+  transform: scale(0.96)
+
 .console-main
   background: transparent !important
   min-width: 0
 
-.snapshot-explorer-glow
+.snapshot-explorer
+  perspective: 1100px
+
+.snapshot-time-scene
+  display: grid
+  grid-template-columns: minmax(0, 1fr) 48px
+  gap: 8px
+  overflow: hidden
+  padding: 14px 10px 14px 12px
+  border: 1px solid rgba(255, 255, 255, 0.075)
+  border-radius: 26px
+  background: linear-gradient(180deg, rgba(16, 23, 31, 0.76), rgba(8, 10, 14, 0.38))
+
+.snapshot-time-stage
+  isolation: isolate
+  perspective: 1100px
+  height: 470px
+
+.snapshot-time-card
   position: absolute
-  z-index: 0
-  top: -28%
-  right: -18%
-  width: 74%
-  height: 76%
-  border-radius: 50%
-  background: radial-gradient(circle, rgba(97, 184, 255, 0.12), rgba(77, 86, 255, 0.055) 38%, transparent 70%)
-  filter: blur(24px)
-  pointer-events: none
+  top: 58px
+  right: 0
+  bottom: 0
+  left: 0
+  transform-origin: top center
+  will-change: transform, opacity
 
-.snapshot-explorer-layer
-  position: absolute
-  inset: 12px 18px -12px
-  border: 1px solid rgba(255, 255, 255, 0.07)
-  border-radius: 20px
-  background: rgba(17, 20, 28, 0.5)
-  pointer-events: none
+.snapshot-time-window
+  height: 100%
+  overflow: hidden
+  border: 1px solid rgba(255, 255, 255, 0.13)
+  border-radius: 22px
+  background: rgba(13, 16, 22, 0.985)
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 28px 74px rgba(0, 0, 0, 0.38)
+  backdrop-filter: blur(18px)
 
-.snapshot-explorer-layer-back
-  opacity: 0.28
-  transform: translateY(-18px) scale(0.94)
+.snapshot-time-window-preview
+  background: linear-gradient(180deg, rgba(22, 29, 38, 0.98), rgba(11, 14, 19, 0.97))
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24)
 
-.snapshot-explorer-layer-mid
-  opacity: 0.5
-  transform: translateY(-9px) scale(0.97)
-
-.snapshot-version-rail
+.snapshot-time-rail
   position: relative
+  z-index: 30
 
-.snapshot-version-rail::before
+.snapshot-timeline
+  position: relative
+  width: 26px
+
+.snapshot-timeline::before
   position: absolute
-  top: 24px
-  bottom: 24px
-  left: 11px
+  top: 0
+  bottom: 0
+  left: 50%
   width: 1px
-  background: linear-gradient(to bottom, rgba(99, 185, 232, 0.52), rgba(255, 255, 255, 0.08))
+  background: linear-gradient(to bottom, rgba(158, 216, 246, 0.52), rgba(255, 255, 255, 0.09))
   content: ""
-  pointer-events: none
 
-.snapshot-version-button
-  position: relative
-  z-index: 1
-  border-radius: 12px !important
-  transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), transform 160ms var(--ease-out)
+.snapshot-timeline-tick
+  position: absolute
+  left: 50%
+  width: 10px
+  height: 2px
+  padding: 0
+  border: 0 !important
+  border-radius: 999px
+  background: rgba(255, 255, 255, 0.3)
+  cursor: pointer
+  transform: translate3d(-50%, -50%, 0)
+  transition: width 150ms var(--ease-out), height 150ms var(--ease-out), background-color 150ms var(--ease-out)
 
-.snapshot-version-button[data-selected="true"]
-  background: rgba(97, 184, 255, 0.1) !important
-
-.snapshot-version-dot
-  border: 1px solid rgba(255, 255, 255, 0.34)
-  background: #11151c
-  box-shadow: 0 0 0 3px #080a0f
-  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out)
-
-.snapshot-version-button[data-selected="true"] .snapshot-version-dot
-  border-color: #bce7ff
+.snapshot-timeline-tick[data-selected="true"]
+  width: 24px
+  height: 3px
   background: #63b9e8
-  box-shadow: 0 0 0 3px #080a0f, 0 0 16px rgba(99, 185, 232, 0.62)
+
+.snapshot-time-button,
+.snapshot-time-delete
+  border: 1px solid transparent !important
+  background: rgba(255, 255, 255, 0.035) !important
+  transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out), transform 140ms var(--ease-out)
+
+.snapshot-time-button:active,
+.snapshot-time-delete:active
+  transform: scale(0.96)
 
 .snapshot-explorer-row
   transition: background-color 140ms var(--ease-out)
@@ -307,33 +388,6 @@ body
 .dashboard-plan-card
   isolation: isolate
   transition: transform 180ms var(--ease-out), border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out)
-
-.dashboard-plan-card-glow
-  position: absolute
-  z-index: 0
-  top: -44px
-  right: -52px
-  width: 180px
-  height: 180px
-  border-radius: 50%
-  opacity: 0.16
-  filter: blur(34px)
-  pointer-events: none
-
-.dashboard-plan-card-glow[data-state="ok"]
-  background: #63b9e8
-
-.dashboard-plan-card-glow[data-state="run"]
-  background: #37d785
-
-.dashboard-plan-card-glow[data-state="warn"]
-  background: #f3a35c
-
-.dashboard-plan-card-glow[data-state="err"]
-  background: #f26060
-
-.dashboard-plan-card-glow[data-state="idle"]
-  background: rgba(255, 255, 255, 0.24)
 
 .dashboard-plan-open:focus-visible
   outline: 2px solid #8bd4fb
@@ -363,11 +417,25 @@ body
     box-shadow: 0 18px 48px rgba(0, 0, 0, 0.2) !important
     transform: translateY(-2px)
 
-  .snapshot-version-button:hover
-    transform: translateX(-2px)
+  .snapshot-time-button:hover,
+  .snapshot-time-delete:hover
+    border-color: rgba(255, 255, 255, 0.12) !important
+    background: rgba(255, 255, 255, 0.075) !important
+
+  .snapshot-timeline-tick:hover
+    width: 20px
+    background: rgba(158, 216, 246, 0.78)
 
   .snapshot-explorer-row:hover
     background: rgba(255, 255, 255, 0.035)
+
+  .mobile-navigation-row:hover
+    background: rgba(255, 255, 255, 0.035)
+
+  .mobile-navigation-add:hover,
+  .mobile-navigation-edit:hover
+    background: rgba(255, 255, 255, 0.065) !important
+    color: rgba(255, 255, 255, 0.9) !important
 
 @media (prefers-reduced-motion: reduce)
   .backup-activity-day
@@ -382,11 +450,22 @@ body
   .dashboard-plan-card:hover
     transform: none
 
-  .snapshot-version-button
-    transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out)
-
-  .snapshot-version-button:hover
+  .snapshot-time-button:hover,
+  .snapshot-time-delete:hover
     transform: none
+
+@media (min-width: 768px)
+  .snapshot-time-scene
+    grid-template-columns: minmax(0, 1fr) 64px
+    gap: 14px
+    padding: 18px 16px 18px 22px
+    border-radius: 30px
+
+  .snapshot-time-stage
+    height: 590px
+
+  .snapshot-time-card
+    top: 72px
 
 @media (max-width: 767px)
   .backup-console

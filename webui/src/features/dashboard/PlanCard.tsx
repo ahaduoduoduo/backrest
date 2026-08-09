@@ -344,7 +344,6 @@ export const PlanCard = ({
         aria-label={m.dashboard_card_open_plan({ plan: summary.id })}
         onClick={() => navigate(`/plan/${summary.id}`)}
       />
-      <Box className="dashboard-plan-card-glow" data-state={state} />
       <Card.Body
         position="relative"
         zIndex={1}
@@ -412,7 +411,6 @@ export const PlanCard = ({
               height="7px"
               borderRadius="full"
               bg={STATE_COLORS[state]}
-              boxShadow={`0 0 14px ${STATE_COLORS[state]}`}
             />
             <Text color="whiteAlpha.520" fontSize="11px">
               {STATE_LABEL[state]()}
@@ -423,14 +421,8 @@ export const PlanCard = ({
         {running && <BackupProgress progress={live.progress} />}
 
         {!running && (
-          <Flex
-            mt={6}
-            borderTop="1px solid"
-            borderBottom="1px solid"
-            borderColor="whiteAlpha.080"
-            minH="76px"
-          >
-            <Flex align="center" gap={3} flex="1" minW={0} py={3} pr={3}>
+          <Flex mt={6} minH="76px" gap={{ base: 5, md: 7 }}>
+            <Flex align="center" gap={3} flex="1" minW={0} py={2}>
               <Flex
                 width="30px"
                 height="30px"
@@ -457,14 +449,7 @@ export const PlanCard = ({
                 )}
               </Box>
             </Flex>
-            <Box
-              width="1px"
-              alignSelf="stretch"
-              my={3}
-              bg="whiteAlpha.080"
-              flexShrink={0}
-            />
-            <Box width="42%" minW="112px" py={3} pl={4}>
+            <Box width="42%" minW="112px" py={2}>
               <Text color="whiteAlpha.330" fontSize="9px">
                 {m.dashboard_card_last_upload()}
               </Text>
