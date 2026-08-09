@@ -36,7 +36,7 @@ test.describe('mobile backup console', () => {
     await expect(activityCard).toBeVisible();
     await expect(page.getByText('Offsite backup')).toBeVisible();
     await expect(page.getByText('Backup activity')).toBeVisible();
-    await expect(page.getByText('Backed up')).toBeVisible();
+    await expect(activityCard.getByText('Backed up', { exact: true })).toBeVisible();
 
     const backupNow = page.getByRole('button', { name: 'Backup Now' });
     await expect(backupNow).toBeVisible();
@@ -72,7 +72,7 @@ test.describe('mobile backup console', () => {
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Content' })).toBeVisible();
     await dialog.getByRole('button', { name: 'Content' }).click();
-    await expect(dialog.getByText('Backed up')).toBeVisible();
+    await expect(dialog.getByText('Backed up', { exact: true })).toBeVisible();
 
     const dialogBox = await dialog.boundingBox();
     expect(dialogBox?.x).toBe(0);
