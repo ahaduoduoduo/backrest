@@ -29,6 +29,27 @@ describe("backupScopeCatalog", () => {
     expect(getPresetMatchCount(preset, rules)).toBe(1);
   });
 
+  it("recursively excludes Node dependencies and package-manager caches", () => {
+    const preset = EXCLUDE_PRESETS.find(
+      (candidate) => candidate.id === "generated-files",
+    )!;
+
+    expect(preset.patterns).toEqual(
+      expect.arrayContaining([
+        "**/node_modules/**",
+        "**/.npm/**",
+        "**/.pnpm-store/**",
+        "**/pnpm-store/**",
+        "**/.yarn/cache/**",
+        "**/.yarn/unplugged/**",
+        "**/.bun/install/cache/**",
+        "**/bower_components/**",
+        "**/*node-modules*/**",
+        "**/*pnpm-store*/**",
+      ]),
+    );
+  });
+
   it("keeps deployment-specific paths out of compiled presets", () => {
     expect(EXCLUDE_PRESETS.flatMap((preset) => preset.patterns)).not.toEqual(
       expect.arrayContaining([
