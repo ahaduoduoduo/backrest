@@ -4,6 +4,10 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Compress the persistent bottom dock, replace open-stroke
+  navigation glyphs, add an interruptible sliding pill, reserve plan-action
+  clearance, and restyle plan, repository, and settings editors as floating
+  workspaces that leave the dock visible.
 - [x] 2026-08-09: Remove the Playwright end-to-end suite, browser binaries,
   harness, package scripts, and GitHub Actions job; retain WebUI unit tests,
   TypeScript checks, and Linux Go validation.

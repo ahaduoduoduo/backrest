@@ -50,11 +50,14 @@ All 30-day backup strips run chronologically from the oldest date on the left
 to today on the right. A successful retry clears the yearly calendar warning;
 the task strip uses a green cell with an orange recovery outline, while earlier
 failures remain available in the day details and operation history.
-The mobile navigation remains a full-screen numbered contents page. The plan
-editor manages backup roots as a direct directory list, so new projects below
-an existing root require no compiled service mapping. Standard filesystem
-exclusions remain readable presets, with exact glob rules under an advanced
-section. New plans skip Finder-generated `.DS_Store` files by default.
+Desktop and mobile share a compact bottom navigation capsule. Its selection
+pill moves between closed-path icons, while task and repository choices open
+above it. Task, repository, and settings editors use a floating workspace that
+leaves the application and bottom navigation visible. The plan editor manages
+backup roots as a direct directory list, so new projects below an existing root
+require no compiled service mapping. Standard filesystem exclusions remain
+readable presets, with exact glob rules under an advanced section. New plans
+skip Finder-generated `.DS_Store` files by default.
 The deployed Synology layout keeps service data under top-level
 `/volume1/docker/<service>` directories and backs up that root directly, so
 Home Assistant, Telegram, and later services require no separate source entry.
@@ -78,11 +81,10 @@ Backup sources and exclusion rules remain in each plan editor rather than the
 dashboard summary.
 
 The fork's default CI targets the deployed Linux amd64 Docker path. It retains
-Go race tests, WebUI unit and type checks, and browser coverage for backup,
-restore, history, authentication, and mobile behavior. Upstream-only Windows,
-rclone-repository, and SFTP-repository checks remain available in the source
-tree but are excluded from the default fork workflow. Multi-platform release
-previews run only when manually requested.
+Go race tests, WebUI unit tests, and TypeScript checks. Browser E2E tooling and
+jobs are intentionally absent. Upstream-only Windows, rclone-repository, and
+SFTP-repository jobs are excluded from the default fork workflow.
+Multi-platform release previews run only when manually requested.
 
 ## Key Features
 

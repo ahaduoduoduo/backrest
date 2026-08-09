@@ -52,16 +52,23 @@ and apply positional changes immediately.
 
 The operation face uses a 240 ms Y-axis flip for spatial consistency. Reduced
 motion replaces the rotation with a 160 ms cross-fade. Bottom-dock submenus use
-a 180 ms transform-and-opacity transition.
+a 180 ms transform-and-opacity transition. The selected navigation pill uses
+an interruptible `0.5 s`, `0.2`-bounce spring so rapid changes continue from
+their current position; reduced-motion clients receive a 160 ms opacity change
+without positional movement.
 
 ## Application navigation
 
 The application has no persistent header, breadcrumb row, or navigation
-drawer. A glass capsule stays at the bottom on desktop and mobile with Home,
-Plans, Repositories, and Settings icons. Plans and Repositories expose their
-items above the capsule on hover or click. Repository location labels come
-from the Restic backend URI, so network backends are shown as remote storage
-even when the current Backrest instance manages them.
+drawer. A compact, lightly blurred capsule stays at the bottom on desktop and
+mobile with closed-path Home, Plans, Repositories, and Settings icons. Plans
+and Repositories expose their items above the capsule on hover or click. The
+plan file browser reserves a bottom safe area so its operation and delete
+buttons never compete with the navigation capsule. Task, repository, and
+settings editors appear as rounded floating workspaces above the current page;
+their backdrop and bottom navigation remain visible. Repository location
+labels come from the Restic backend URI, so network backends are shown as
+remote storage even when the current Backrest instance manages them.
 
 ## Dashboard task cards
 
