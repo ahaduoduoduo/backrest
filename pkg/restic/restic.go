@@ -25,8 +25,15 @@ import (
 var errAlreadyInitialized = errors.New("repo already initialized")
 var ErrPartialBackup = errors.New("incomplete backup")
 var ErrBackupFailed = errors.New("backup failed")
+var ErrUploadQuotaExceeded = errors.New("upload quota exceeded")
 var ErrRestoreFailed = errors.New("restore failed")
 var ErrRepoNotFound = errors.New("repo does not exist")
+
+const uploadQuotaExceededMarker = "restic upload quota reached"
+
+func isUploadQuotaExceeded(err error) bool {
+	return err != nil && strings.Contains(strings.ToLower(err.Error()), uploadQuotaExceededMarker)
+}
 
 type Repo struct {
 	cmd string
@@ -326,7 +333,11 @@ func (r *Repo) Backup(ctx context.Context, paths []string, progressCallback func
 	args = append(args, paths...)
 	opts = append(slices.Clone(opts), WithEnv("RESTIC_PROGRESS_FPS=2"))
 
-	return runCommandWithProgress(ctx, r, args, progressCallback, ErrBackupFailed, opts...)
+	summary, err := runCommandWithProgress(ctx, r, args, progressCallback, ErrBackupFailed, opts...)
+	if isUploadQuotaExceeded(err) {
+		return summary, fmt.Errorf("%w: %v", ErrUploadQuotaExceeded, err)
+	}
+	return summary, err
 }
 
 func (r *Repo) Restore(ctx context.Context, snapshot string, callback func(*RestoreProgressEntry), opts ...GenericOption) (*RestoreProgressEntry, error) {
@@ -378,7 +389,6 @@ func (r *Repo) Forget(ctx context.Context, policy *RetentionPolicy, opts ...Gene
 
 	return merged, nil
 }
-
 
 func (r *Repo) ForgetSnapshot(ctx context.Context, snapshotId string, opts ...GenericOption) error {
 	args := []string{"forget", "--json", snapshotId}

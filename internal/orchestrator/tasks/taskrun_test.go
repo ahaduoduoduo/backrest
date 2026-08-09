@@ -245,6 +245,8 @@ func TestBackupTaskRun(t *testing.T) {
 		wantHooks     []v1.Hook_Condition
 		wantNotHooks  []v1.Hook_Condition
 		wantScheduled []string // expected scheduled task types
+		wantStatus    v1.OperationStatus
+		wantWaiting   bool
 	}{
 		{
 			name: "successful backup with retention",
@@ -319,6 +321,24 @@ func TestBackupTaskRun(t *testing.T) {
 			},
 		},
 		{
+			name: "upload quota waits for next run",
+			fake: &fakeRepoOrchestrator{
+				backupErr: fmt.Errorf("remote stopped upload: %w", restic.ErrUploadQuotaExceeded),
+			},
+			plan:        &v1.Plan{Id: "plan1", Repo: "repo1"},
+			wantStatus:  v1.OperationStatus_STATUS_SUCCESS,
+			wantWaiting: true,
+			wantHooks: []v1.Hook_Condition{
+				v1.Hook_CONDITION_SNAPSHOT_START,
+				v1.Hook_CONDITION_SNAPSHOT_END,
+			},
+			wantNotHooks: []v1.Hook_Condition{
+				v1.Hook_CONDITION_SNAPSHOT_ERROR,
+				v1.Hook_CONDITION_ANY_ERROR,
+				v1.Hook_CONDITION_SNAPSHOT_SUCCESS,
+			},
+		},
+		{
 			name:    "unlock error",
 			fake:    &fakeRepoOrchestrator{unlockErr: fmt.Errorf("unlock failed")},
 			plan:    &v1.Plan{Id: "plan1", Repo: "repo1"},
@@ -372,6 +392,10 @@ func TestBackupTaskRun(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
+			if tc.wantStatus != v1.OperationStatus_STATUS_UNKNOWN {
+				assert.Equal(t, tc.wantStatus, st.Op.Status)
+			}
+			assert.Equal(t, tc.wantWaiting, st.Op.GetOperationBackup().GetWaitingForResume())
 
 			for _, cond := range tc.wantHooks {
 				assert.True(t, hookContains(runner.hookCalls, cond), "expected hook %v", cond)

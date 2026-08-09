@@ -29,6 +29,10 @@ purpose-built dark console and an authenticated OpenList traffic view. Restic
 uses OpenList's native REST endpoint directly; rclone, WebDAV, and S3 adapters
 are not part of this path.
 
+When OpenList closes the daily upload window, the operation is recorded as a
+blue “waiting to resume” result instead of a failed backup. Packs accepted
+before the limit remain in the Restic repository and are reused by the next run.
+
 The console reads 115 upload usage through the Backrest backend, so OpenList
 credentials are never sent to the browser. Source selection, excludes,
 snapshot browsing, historical versions, single-file restore, retention, check,

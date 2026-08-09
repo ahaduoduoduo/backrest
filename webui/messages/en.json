@@ -392,6 +392,8 @@
   "dashboard_card_bytes_added_30d": "Bytes Added (30d)",
   "dashboard_card_next_backup": "Next Scheduled Backup",
   "dashboard_card_none_scheduled": "None Scheduled",
+  "dashboard_card_waiting_resume": "Waiting to resume",
+  "op_row_waiting_resume_detail": "The daily upload quota was reached. Uploaded data is saved and will be reused when the next backup resumes.",
   "dashboard_card_bytes_scanned_avg": "Bytes Scanned Avg",
   "dashboard_card_bytes_added_avg": "Bytes Added Avg",
   "dashboard_remote_hosts_title": "Remote Hosts",

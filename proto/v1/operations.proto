@@ -90,6 +90,7 @@ message OperationBackup {
   BackupProgressEntry last_status = 3;
   repeated BackupProgressError errors = 4;
   bool dry_run = 5; // indicates this was a dry run backup (no snapshot created)
+  bool waiting_for_resume = 6; // upload quota ended this run before a snapshot could be finalized
 }
 
 // OperationIndexSnapshot tracks that a snapshot was detected by backrest. 

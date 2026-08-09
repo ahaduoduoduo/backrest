@@ -250,6 +250,7 @@ export const PlanCard = ({
   const [actionPending, setActionPending] = useState(false);
   const latestStatus = summary.recentBackups?.status[0];
   const latestTimestamp = Number(summary.recentBackups?.timestampMs[0] ?? 0);
+  const waitingForResume = summary.recentBackups?.waitingForResume[0] === true;
   const reportedState = planState(latestStatus);
   const running = reportedState === "run" || manualRunning;
   const state: PlanState = running ? "run" : reportedState;
@@ -323,9 +324,11 @@ export const PlanCard = ({
     : m.plan_button_backup();
   const primaryText = running
     ? m.dashboard_state_label_run()
-    : latestTimestamp
-      ? agoText(latestTimestamp)
-      : m.dashboard_state_label_idle();
+    : waitingForResume
+      ? m.dashboard_card_waiting_resume()
+      : latestTimestamp
+        ? agoText(latestTimestamp)
+        : m.dashboard_state_label_idle();
 
   return (
     <Card.Root

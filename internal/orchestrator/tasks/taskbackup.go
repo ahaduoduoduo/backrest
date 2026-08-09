@@ -217,6 +217,18 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 	var conditions []v1.Hook_Condition
 
 	if err != nil {
+		if errors.Is(err, restic.ErrUploadQuotaExceeded) {
+			backupOp.OperationBackup.WaitingForResume = true
+			op.Status = v1.OperationStatus_STATUS_SUCCESS
+			op.DisplayMessage = "Daily upload quota reached. Uploaded data is preserved and will be reused by the next backup."
+			l.Info("backup waiting for the next upload window", zap.String("plan", plan.Id), zap.Duration("duration", time.Since(startTime)))
+			if hookErr := runner.ExecuteHooks(ctx, []v1.Hook_Condition{
+				v1.Hook_CONDITION_SNAPSHOT_END,
+			}, vars); hookErr != nil {
+				return fmt.Errorf("snapshot end hook: %w", hookErr)
+			}
+			return nil
+		}
 		vars.Error = err.Error()
 		if !errors.Is(err, restic.ErrPartialBackup) {
 			runner.ExecuteHooks(ctx, []v1.Hook_Condition{
