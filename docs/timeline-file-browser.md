@@ -67,7 +67,8 @@ motion replaces the rotation with a 160 ms cross-fade. Bottom-dock submenus use
 a 180 ms transform-and-opacity transition. The selected navigation pill uses
 an interruptible `0.5 s`, `0.2`-bounce spring so rapid changes continue from
 their current position; reduced-motion clients receive a 160 ms opacity change
-without positional movement.
+without positional movement. Its outer dock padding defines the same six-pixel
+visual margin on all four sides.
 
 ## Application navigation
 
