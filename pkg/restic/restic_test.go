@@ -18,6 +18,17 @@ import (
 	"github.com/garethgeorge/backrest/test/helpers"
 )
 
+func TestIsUploadQuotaExceeded(t *testing.T) {
+	t.Parallel()
+
+	if !isUploadQuotaExceeded(errors.New("unexpected HTTP response (429): restic upload quota reached")) {
+		t.Fatal("expected the OpenList quota marker to be detected")
+	}
+	if isUploadQuotaExceeded(errors.New("unexpected HTTP response (429): too many requests")) {
+		t.Fatal("generic HTTP throttling must remain a backup error")
+	}
+}
+
 func TestResticInit(t *testing.T) {
 	t.Parallel()
 	repo := t.TempDir()

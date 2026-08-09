@@ -4,6 +4,8 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Treat OpenList daily upload exhaustion as a blue
+  waiting-to-resume result while preserving uploaded Restic packs for reuse.
 - [x] 2026-08-10: Replace the backup-task archive glyph with a calendar,
   convert file information from raw JSON to readable metadata, and allow its
   dialog to close from either the close icon or backdrop.

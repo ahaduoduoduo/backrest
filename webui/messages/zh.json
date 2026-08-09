@@ -219,6 +219,8 @@
   "dashboard_card_bytes_added_30d": "已添加字节数 (30d)",
   "dashboard_card_next_backup": "下次备份",
   "dashboard_card_none_scheduled": "未设置自动备份",
+  "dashboard_card_waiting_resume": "等待续传",
+  "op_row_waiting_resume_detail": "今日上传额度已用完，已上传的数据会保留，并在下次备份时继续复用。",
   "dashboard_card_bytes_scanned_avg": "平均扫描字节数",
   "dashboard_card_bytes_added_avg": "平均添加字节数",
   "dashboard_remote_hosts_title": "远程主机",

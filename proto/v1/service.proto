@@ -245,6 +245,7 @@ message SummaryDashboardResponse {
     repeated int64 duration_ms = 3;
     repeated OperationStatus status = 4;
     repeated int64 bytes_added = 5;
+    repeated bool waiting_for_resume = 6;
   }
 
   message DayStatusBucket {

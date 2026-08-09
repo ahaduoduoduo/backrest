@@ -1741,14 +1741,15 @@ func (x *SummaryDashboardResponse_Summary) GetHistoryLast_30Days() []*SummaryDas
 }
 
 type SummaryDashboardResponse_BackupChart struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FlowId        []int64                `protobuf:"varint,1,rep,packed,name=flow_id,json=flowId,proto3" json:"flow_id,omitempty"`
-	TimestampMs   []int64                `protobuf:"varint,2,rep,packed,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
-	DurationMs    []int64                `protobuf:"varint,3,rep,packed,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
-	Status        []OperationStatus      `protobuf:"varint,4,rep,packed,name=status,proto3,enum=v1.OperationStatus" json:"status,omitempty"`
-	BytesAdded    []int64                `protobuf:"varint,5,rep,packed,name=bytes_added,json=bytesAdded,proto3" json:"bytes_added,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	FlowId           []int64                `protobuf:"varint,1,rep,packed,name=flow_id,json=flowId,proto3" json:"flow_id,omitempty"`
+	TimestampMs      []int64                `protobuf:"varint,2,rep,packed,name=timestamp_ms,json=timestampMs,proto3" json:"timestamp_ms,omitempty"`
+	DurationMs       []int64                `protobuf:"varint,3,rep,packed,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	Status           []OperationStatus      `protobuf:"varint,4,rep,packed,name=status,proto3,enum=v1.OperationStatus" json:"status,omitempty"`
+	BytesAdded       []int64                `protobuf:"varint,5,rep,packed,name=bytes_added,json=bytesAdded,proto3" json:"bytes_added,omitempty"`
+	WaitingForResume []bool                 `protobuf:"varint,6,rep,packed,name=waiting_for_resume,json=waitingForResume,proto3" json:"waiting_for_resume,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *SummaryDashboardResponse_BackupChart) Reset() {
@@ -1812,6 +1813,13 @@ func (x *SummaryDashboardResponse_BackupChart) GetStatus() []OperationStatus {
 func (x *SummaryDashboardResponse_BackupChart) GetBytesAdded() []int64 {
 	if x != nil {
 		return x.BytesAdded
+	}
+	return nil
+}
+
+func (x *SummaryDashboardResponse_BackupChart) GetWaitingForResume() []bool {
+	if x != nil {
+		return x.WaitingForResume
 	}
 	return nil
 }
@@ -2066,7 +2074,7 @@ const file_v1_service_proto_rawDesc = "" +
 	"\x11RemoveRepoRequest\x12\x17\n" +
 	"\arepo_id\x18\x01 \x01(\tR\x06repoId\";\n" +
 	"\x16CancelOperationRequest\x12!\n" +
-	"\foperation_id\x18\x01 \x01(\x03R\voperationId\"\xaf\v\n" +
+	"\foperation_id\x18\x01 \x01(\x03R\voperationId\"\xdd\v\n" +
 	"\x18SummaryDashboardResponse\x12K\n" +
 	"\x0erepo_summaries\x18\x01 \x03(\v2$.v1.SummaryDashboardResponse.SummaryR\rrepoSummaries\x12K\n" +
 	"\x0eplan_summaries\x18\x02 \x03(\v2$.v1.SummaryDashboardResponse.SummaryR\rplanSummaries\x12\x1f\n" +
@@ -2088,7 +2096,7 @@ const file_v1_service_proto_rawDesc = "" +
 	" \x01(\x03R\x10nextBackupTimeMs\x12O\n" +
 	"\x0erecent_backups\x18\v \x01(\v2(.v1.SummaryDashboardResponse.BackupChartR\rrecentBackups\x12'\n" +
 	"\x0fprotected_bytes\x18\f \x01(\x03R\x0eprotectedBytes\x12\\\n" +
-	"\x13history_last_30days\x18\r \x03(\v2,.v1.SummaryDashboardResponse.DayStatusBucketR\x11historyLast30days\x1a\xb8\x01\n" +
+	"\x13history_last_30days\x18\r \x03(\v2,.v1.SummaryDashboardResponse.DayStatusBucketR\x11historyLast30days\x1a\xe6\x01\n" +
 	"\vBackupChart\x12\x17\n" +
 	"\aflow_id\x18\x01 \x03(\x03R\x06flowId\x12!\n" +
 	"\ftimestamp_ms\x18\x02 \x03(\x03R\vtimestampMs\x12\x1f\n" +
@@ -2096,7 +2104,8 @@ const file_v1_service_proto_rawDesc = "" +
 	"durationMs\x12+\n" +
 	"\x06status\x18\x04 \x03(\x0e2\x13.v1.OperationStatusR\x06status\x12\x1f\n" +
 	"\vbytes_added\x18\x05 \x03(\x03R\n" +
-	"bytesAdded\x1a\xe6\x01\n" +
+	"bytesAdded\x12,\n" +
+	"\x12waiting_for_resume\x18\x06 \x03(\bR\x10waitingForResume\x1a\xe6\x01\n" +
 	"\x0fDayStatusBucket\x12!\n" +
 	"\ftimestamp_ms\x18\x01 \x01(\x03R\vtimestampMs\x12\x1f\n" +
 	"\vbytes_added\x18\x02 \x01(\x03R\n" +

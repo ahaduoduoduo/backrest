@@ -635,12 +635,13 @@ func (*OperationEvent_UpdatedOperations) isOperationEvent_Event() {}
 func (*OperationEvent_DeletedOperations) isOperationEvent_Event() {}
 
 type OperationBackup struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	LastStatus    *BackupProgressEntry   `protobuf:"bytes,3,opt,name=last_status,json=lastStatus,proto3" json:"last_status,omitempty"`
-	Errors        []*BackupProgressError `protobuf:"bytes,4,rep,name=errors,proto3" json:"errors,omitempty"`
-	DryRun        bool                   `protobuf:"varint,5,opt,name=dry_run,json=dryRun,proto3" json:"dry_run,omitempty"` // indicates this was a dry run backup (no snapshot created)
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	LastStatus       *BackupProgressEntry   `protobuf:"bytes,3,opt,name=last_status,json=lastStatus,proto3" json:"last_status,omitempty"`
+	Errors           []*BackupProgressError `protobuf:"bytes,4,rep,name=errors,proto3" json:"errors,omitempty"`
+	DryRun           bool                   `protobuf:"varint,5,opt,name=dry_run,json=dryRun,proto3" json:"dry_run,omitempty"`                                 // indicates this was a dry run backup (no snapshot created)
+	WaitingForResume bool                   `protobuf:"varint,6,opt,name=waiting_for_resume,json=waitingForResume,proto3" json:"waiting_for_resume,omitempty"` // upload quota ended this run before a snapshot could be finalized
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *OperationBackup) Reset() {
@@ -690,6 +691,13 @@ func (x *OperationBackup) GetErrors() []*BackupProgressError {
 func (x *OperationBackup) GetDryRun() bool {
 	if x != nil {
 		return x.DryRun
+	}
+	return false
+}
+
+func (x *OperationBackup) GetWaitingForResume() bool {
+	if x != nil {
+		return x.WaitingForResume
 	}
 	return false
 }
@@ -1192,12 +1200,13 @@ const file_v1_operations_proto_rawDesc = "" +
 	"\x12created_operations\x18\x02 \x01(\v2\x11.v1.OperationListH\x00R\x11createdOperations\x12B\n" +
 	"\x12updated_operations\x18\x03 \x01(\v2\x11.v1.OperationListH\x00R\x11updatedOperations\x12A\n" +
 	"\x12deleted_operations\x18\x04 \x01(\v2\x10.types.Int64ListH\x00R\x11deletedOperationsB\a\n" +
-	"\x05event\"\x95\x01\n" +
+	"\x05event\"\xc3\x01\n" +
 	"\x0fOperationBackup\x128\n" +
 	"\vlast_status\x18\x03 \x01(\v2\x17.v1.BackupProgressEntryR\n" +
 	"lastStatus\x12/\n" +
 	"\x06errors\x18\x04 \x03(\v2\x17.v1.BackupProgressErrorR\x06errors\x12\x17\n" +
-	"\adry_run\x18\x05 \x01(\bR\x06dryRun\"`\n" +
+	"\adry_run\x18\x05 \x01(\bR\x06dryRun\x12,\n" +
+	"\x12waiting_for_resume\x18\x06 \x01(\bR\x10waitingForResume\"`\n" +
 	"\x16OperationIndexSnapshot\x12.\n" +
 	"\bsnapshot\x18\x02 \x01(\v2\x12.v1.ResticSnapshotR\bsnapshot\x12\x16\n" +
 	"\x06forgot\x18\x03 \x01(\bR\x06forgot\"j\n" +

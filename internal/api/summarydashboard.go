@@ -230,6 +230,7 @@ func (a *summaryAcc) observe(op *v1.Operation, backupOp *v1.OperationBackup) {
 		a.backupChart.DurationMs = append(a.backupChart.DurationMs, duration)
 		a.backupChart.Status = append(a.backupChart.Status, op.Status)
 		a.backupChart.BytesAdded = append(a.backupChart.BytesAdded, summary.GetDataAdded())
+		a.backupChart.WaitingForResume = append(a.backupChart.WaitingForResume, backupOp.WaitingForResume)
 	}
 }
 

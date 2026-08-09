@@ -255,6 +255,9 @@ export const OperationRow = ({
       expandedBodyItems.push("details");
     }
     const backupOp = operation.op.value;
+    if (backupOp.waitingForResume) {
+      displayMessage = m.op_row_waiting_resume_detail();
+    }
     bodyItems.push({
       key: "details",
       label: m.op_row_backup_details(),
@@ -444,7 +447,7 @@ export const OperationRow = ({
           )}
         </Flex>
 
-        {operation.displayMessage && (
+        {displayMessage && (
           <Box mt={2}>
             <Box
               pl={3}
@@ -458,7 +461,7 @@ export const OperationRow = ({
                     {nameForStatus(operation.status)}:{" "}
                   </Text>
                 )}
-                {operation.displayMessage}
+                {displayMessage}
               </Text>
             </Box>
           </Box>
