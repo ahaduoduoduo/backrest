@@ -72,9 +72,6 @@ jobs:
 
   test-e2e-web:
     runs-on: ubuntu-latest
-    env:
-      # Not RCLONE_*: rclone reads RCLONE_VERSION as its --version flag.
-      E2E_RCLONE_VERSION: v1.69.1
     steps:
       - uses: actions/checkout@v4
 
@@ -123,31 +120,11 @@ jobs:
       - name: Install playwright chromium
         run: cd webui && pnpm exec playwright install --with-deps chromium
 
-      # restic's rclone backend spawns the `rclone` binary; the rclone-repo
-      # e2e spec skips itself if rclone is absent, so provision it for coverage.
-      - name: Cache rclone
-        id: cache-rclone
-        uses: actions/cache@v4
-        with:
-          path: webui/e2e/.cache/rclone-bin
-          key: rclone-${{ env.E2E_RCLONE_VERSION }}
-
-      - name: Install rclone
-        run: |
-          dest="$PWD/webui/e2e/.cache/rclone-bin"
-          if [ ! -x "$dest/rclone" ]; then
-            mkdir -p "$dest"
-            zip="rclone-${E2E_RCLONE_VERSION}-linux-amd64"
-            curl -fsSL "https://downloads.rclone.org/${E2E_RCLONE_VERSION}/${zip}.zip" -o /tmp/rclone.zip
-            unzip -j -o /tmp/rclone.zip "${zip}/rclone" -d "$dest"
-            chmod +x "$dest/rclone"
-          fi
-          echo "$dest" >> "$GITHUB_PATH"
-
       - name: Run e2e tests
         run: |
           cd webui
-          E2E_SKIP_WEBUI_BUILD=1 E2E_BACKREST_BIN=$PWD/e2e/.cache/backrest pnpm run e2e
+          E2E_SKIP_WEBUI_BUILD=1 E2E_BACKREST_BIN=$PWD/e2e/.cache/backrest \
+            pnpm run e2e -- --grep-invert 'rclone-backed repo|sftp-backed repository'
 
       - name: Upload playwright report
         uses: actions/upload-artifact@v4
@@ -157,75 +134,3 @@ jobs:
           path: |
             webui/playwright-report/
             webui/test-results/
-
-  test-win:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: "1.24"
-
-      - name: Create Fake WebUI Sources
-        run: |
-          New-Item -Path .\webui\dist-windows\index.html -ItemType File -Force
-
-      - name: Resolve latest restic version
-        shell: powershell
-        id: restic-version
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-           $headers = @{
-             Authorization = "Bearer $env:GITHUB_TOKEN"
-             Accept = "application/vnd.github+json"
-             "X-GitHub-Api-Version" = "2022-11-28"
-           }
-           $latest = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/restic/restic/releases/latest"
-           $tag = $latest.tag_name
-           if ($tag.StartsWith("v")) {
-             $tag = $tag.Substring(1)
-           }
-           echo "RESTIC_VERSION=$tag" >> $env:GITHUB_ENV
-
-      - name: Cache restic
-        id: cache-restic
-        uses: actions/cache@v3
-        with:
-          path: restic-bin
-          key: restic-windows-${{ env.RESTIC_VERSION }}
-
-      - name: Download restic
-        if: steps.cache-restic.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-           $tag = $env:RESTIC_VERSION
-           $url = "https://github.com/restic/restic/releases/download/v$tag/restic_${tag}_windows_amd64.zip"
-           $output = "restic.zip"
-           $dest = "restic-bin"
-           
-           New-Item -ItemType Directory -Force -Path $dest
-
-           Write-Host "Downloading $url..."
-           Invoke-WebRequest -Uri $url -OutFile $output
-           Expand-Archive $output -DestinationPath temp_extract -Force
-           
-           $extracted = Get-ChildItem -Recurse -Path temp_extract -Filter "restic*.exe" | Select-Object -First 1
-           if ($extracted) {
-               Move-Item $extracted.FullName -Destination "$dest\restic.exe" -Force
-           } else {
-               Write-Error "Could not find restic.exe"
-           }
-           Remove-Item -Recurse -Force temp_extract
-           Remove-Item -Force $output
-
-      - name: Add restic to PATH
-        run: echo "$PWD\restic-bin" >> $env:GITHUB_PATH
-
-      - name: Build
-        run: go build ./...
-
-      - name: Test
-        run: go test ./...

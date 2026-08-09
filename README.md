@@ -64,6 +64,13 @@ rebuilding the embedded Go binary. Setup and request routing are documented in
 Backup sources and exclusion rules remain in each plan editor rather than the
 dashboard summary.
 
+The fork's default CI targets the deployed Linux amd64 Docker path. It retains
+Go race tests, WebUI unit and type checks, and browser coverage for backup,
+restore, history, authentication, and mobile behavior. Upstream-only Windows,
+rclone-repository, and SFTP-repository checks remain available in the source
+tree but are excluded from the default fork workflow. Multi-platform release
+previews run only when manually requested.
+
 ## Key Features
 
 - **Web Interface**: Access locally or remotely (perfect for NAS deployments)
