@@ -1,100 +1,38 @@
-import React, { useEffect, useState } from "react";
-import { Plan } from "../../../gen/ts/v1/config_pb";
-import { Button } from "../../components/ui/button";
-import { Flex, Heading, Text, Box, Group, IconButton } from "@chakra-ui/react";
-import { FiChevronDown } from "react-icons/fi";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-  TabsRoot,
-} from "../../components/ui/tabs";
-import {
-  MenuContent,
-  MenuItem,
-  MenuRoot,
-  MenuTrigger,
-} from "../../components/ui/menu";
-import { Tooltip } from "../../components/ui/tooltip";
-import { alerts } from "../../components/common/Alerts";
-import { MAX_OPERATION_HISTORY } from "../../constants";
-import { backrestService } from "../../api/client";
-import {
-  ClearHistoryRequestSchema,
-  DoRepoTaskRequest_Task,
-  DoRepoTaskRequestSchema,
-  GetOperationsRequestSchema,
-  BackupRequestSchema,
-} from "../../../gen/ts/v1/service_pb";
-import { SpinButton } from "../../components/common/SpinButton";
-import { useShowModal } from "../../components/common/ModalManager";
 import { create } from "@bufbuild/protobuf";
+import { Box, Flex, Heading, IconButton, Spinner } from "@chakra-ui/react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { FiFolder, FiList, FiTrash2 } from "react-icons/fi";
+import { Plan } from "../../../gen/ts/v1/config_pb";
+import {
+  ForgetRequestSchema,
+  GetOperationsRequestSchema,
+} from "../../../gen/ts/v1/service_pb";
+import { backrestService } from "../../api/client";
+import { alerts } from "../../components/common/Alerts";
+import { Tooltip } from "../../components/ui/tooltip";
+import { MAX_OPERATION_HISTORY } from "../../constants";
+import * as m from "../../paraglide/messages";
 import { useConfig } from "../../app/provider";
 import { OperationListView } from "../operations/OperationListView";
 import { PlanSnapshotExplorer } from "./PlanSnapshotExplorer";
-import * as m from "../../paraglide/messages";
 
 export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
-  const [config, _] = useConfig();
-  const showModal = useShowModal();
-  const repo = config?.repos.find((r) => r.id === plan.repo);
+  const [config] = useConfig();
+  const repo = config?.repos.find((candidate) => candidate.id === plan.repo);
+  const reduceMotion = useReducedMotion();
+  const [showOperations, setShowOperations] = useState(false);
+  const [selectedSnapshotId, setSelectedSnapshotId] = useState("");
+  const [deleteArmed, setDeleteArmed] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const deleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleBackupNow = async () => {
-    try {
-      await backrestService.backup(
-        create(BackupRequestSchema, { value: plan.id }),
-      );
-      alerts.success(m.plan_backup_scheduled());
-    } catch (e: any) {
-      alerts.error(m.plan_error_backup() + e.message);
-    }
-  };
-
-  const handleDryRunBackup = async () => {
-    try {
-      await backrestService.backup(
-        create(BackupRequestSchema, { value: plan.id, dryRun: true }),
-      );
-      alerts.success(m.plan_dry_run_scheduled());
-    } catch (e: any) {
-      alerts.error(m.plan_dry_run_error() + e.message);
-    }
-  };
-
-  const handleUnlockNow = async () => {
-    try {
-      alerts.info(m.repo_info_unlocking());
-      await backrestService.doRepoTask(
-        create(DoRepoTaskRequestSchema, {
-          repoId: plan.repo!,
-          task: DoRepoTaskRequest_Task.UNLOCK,
-        }),
-      );
-      alerts.success(m.repo_success_unlocked());
-    } catch (e: any) {
-      alerts.error(m.repo_error_unlock() + e.message);
-    }
-  };
-
-  const handleClearErrorHistory = async () => {
-    try {
-      alerts.info(m.plan_clearing_history());
-      await backrestService.clearHistory(
-        create(ClearHistoryRequestSchema, {
-          selector: {
-            planId: plan.id,
-            repoGuid: repo!.guid,
-            originalInstanceKeyid: "",
-          },
-          onlyFailed: true,
-        }),
-      );
-      alerts.success(m.plan_history_cleared());
-    } catch (e: any) {
-      alerts.error(m.plan_error_clear_history() + e.message);
-    }
-  };
+  useEffect(
+    () => () => {
+      if (deleteTimer.current) clearTimeout(deleteTimer.current);
+    },
+    [],
+  );
 
   if (!repo) {
     return (
@@ -104,105 +42,75 @@ export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
     );
   }
 
+  const forgetSelectedSnapshot = async () => {
+    if (!selectedSnapshotId || deleting) return;
+    if (!deleteArmed) {
+      setDeleteArmed(true);
+      deleteTimer.current = setTimeout(() => setDeleteArmed(false), 3000);
+      return;
+    }
+    setDeleteArmed(false);
+    setDeleting(true);
+    try {
+      await backrestService.forget(
+        create(ForgetRequestSchema, {
+          planId: plan.id,
+          repoId: repo.id,
+          snapshotId: selectedSnapshotId,
+        }),
+      );
+      alerts.success(m.operation_tree_view_snapshot_forget_scheduled());
+    } catch (error: unknown) {
+      alerts.error(
+        m.operation_tree_view_failed_to_forget_snapshot_e({
+          e: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
-    <Box>
-      <Flex gap={4} align="center" wrap="wrap" mb={4}>
-        <Heading size="xl">{plan.id}</Heading>
-        <Box flex="1" />
+    <Box className="plan-history-view">
+      <Heading className="plan-history-title" size="xl">
+        {plan.id}
+      </Heading>
 
-        <Group attached>
-          <SpinButton
-            type="primary"
-            onClickAsync={handleBackupNow}
-            data-testid="plan-backup-now"
-          >
-            {m.plan_button_backup()}
-          </SpinButton>
-          <MenuRoot>
-            <MenuTrigger asChild>
-              <IconButton
-                variant="subtle"
-                colorPalette="blue"
-                aria-label={m.plan_view_more_actions()}
-              >
-                <FiChevronDown />
-              </IconButton>
-            </MenuTrigger>
-            <MenuContent>
-              <MenuItem value="dry-run-backup" onClick={handleDryRunBackup}>
-                {m.op_type_dry_run_backup()}
-              </MenuItem>
-              <MenuItem
-                value="run-command"
-                onClick={async () => {
-                  const { RunCommandModal } =
-                    await import("../operations/RunCommandModal");
-                  showModal(<RunCommandModal repo={repo} />);
-                }}
-              >
-                {m.op_type_run_command()}
-              </MenuItem>
-              <MenuItem value="unlock" onClick={handleUnlockNow}>
-                {m.repo_button_unlock()}
-              </MenuItem>
-              <MenuItem value="clear-history" onClick={handleClearErrorHistory}>
-                {m.plan_button_clear_history()}
-              </MenuItem>
-            </MenuContent>
-          </MenuRoot>
-        </Group>
-      </Flex>
-
-      <TabsRoot defaultValue="files" lazyMount>
-        <TabsList>
-          <TabsTrigger value="files" data-testid="view-tab-tree">
-            {m.repo_tab_tree()}
-          </TabsTrigger>
-          <TabsTrigger value="operations" data-testid="view-tab-list">
-            {m.repo_tab_list()}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="files" pt={{ base: 4, md: 6 }}>
-          <PlanSnapshotExplorer
-            repoId={repo.id}
-            repoGuid={repo.guid}
-            planId={plan.id!}
-            instanceId={config?.instance}
-            maxHistory={BigInt(MAX_OPERATION_HISTORY)}
-          />
-        </TabsContent>
-
-        <TabsContent value="operations" pt={{ base: 4, md: 6 }}>
+      <Box className="plan-history-flip-stage">
+        <motion.div
+          className="plan-history-flipper"
+          animate={{
+            opacity: 1,
+            transform: reduceMotion
+              ? "perspective(1200px) rotateY(0deg)"
+              : `perspective(1200px) rotateY(${showOperations ? 180 : 0}deg)`,
+          }}
+          transition={{
+            duration: reduceMotion ? 0.16 : 0.24,
+            ease: [0.77, 0, 0.175, 1],
+          }}
+          data-flipped={showOperations || undefined}
+        >
           <Box
-            border="1px solid"
-            borderColor="whiteAlpha.100"
-            borderRadius={{ base: "22px", md: "28px" }}
-            bg="#0c0e12"
-            overflow="hidden"
+            className="plan-history-face plan-history-face-files"
+            aria-hidden={showOperations || undefined}
           >
-            <Box
-              px={{ base: 4, md: 7 }}
-              py={{ base: 5, md: 6 }}
-              borderBottom="1px solid"
-              borderColor="whiteAlpha.100"
-            >
-              <Text
-                color="orange.300"
-                fontFamily="mono"
-                fontSize="9px"
-                letterSpacing="0.17em"
-              >
-                {m.plan_operations_eyebrow().toUpperCase()}
-              </Text>
-              <Heading mt={2} size="lg" letterSpacing="-0.035em">
-                {m.repo_history_title()}
-              </Heading>
-              <Text mt={2} color="whiteAlpha.450" fontSize="12px">
-                {m.plan_operations_description()}
-              </Text>
-            </Box>
-            <Box px={{ base: 3, md: 5 }} py={{ base: 4, md: 5 }}>
+            <PlanSnapshotExplorer
+              repoId={repo.id}
+              repoGuid={repo.guid}
+              planId={plan.id!}
+              instanceId={config?.instance}
+              maxHistory={BigInt(MAX_OPERATION_HISTORY)}
+              onVersionChange={setSelectedSnapshotId}
+            />
+          </Box>
+
+          <Box
+            className="plan-history-face plan-history-face-operations"
+            aria-hidden={!showOperations || undefined}
+          >
+            <Box className="plan-history-operation-scroll">
               <OperationListView
                 req={create(GetOperationsRequestSchema, {
                   selector: {
@@ -212,13 +120,49 @@ export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
                   },
                   lastN: BigInt(MAX_OPERATION_HISTORY),
                 })}
-                showDelete={true}
-                displayHooksInline={true}
+                showDelete
+                displayHooksInline
               />
             </Box>
           </Box>
-        </TabsContent>
-      </TabsRoot>
+        </motion.div>
+      </Box>
+
+      <Flex className="plan-history-actions" justify="center" gap={3}>
+        <Tooltip
+          content={showOperations ? m.repo_tab_tree() : m.repo_tab_list()}
+        >
+          <IconButton
+            className="plan-history-action"
+            data-active={showOperations || undefined}
+            data-testid={showOperations ? "view-tab-tree" : "view-tab-list"}
+            variant="ghost"
+            borderRadius="full"
+            minW="46px"
+            minH="46px"
+            aria-label={showOperations ? m.repo_tab_tree() : m.repo_tab_list()}
+            onClick={() => setShowOperations((value) => !value)}
+          >
+            {showOperations ? <FiFolder /> : <FiList />}
+          </IconButton>
+        </Tooltip>
+        <Tooltip content={m.operation_tree_view_forget_destructive()}>
+          <IconButton
+            className="plan-history-action plan-history-delete"
+            data-armed={deleteArmed || undefined}
+            variant="ghost"
+            borderRadius="full"
+            minW="46px"
+            minH="46px"
+            aria-label={m.operation_tree_view_forget_destructive()}
+            data-testid="forget-snapshot"
+            disabled={!selectedSnapshotId || deleting || showOperations}
+            onClick={() => void forgetSelectedSnapshot()}
+          >
+            {deleting ? <Spinner size="xs" /> : <FiTrash2 />}
+          </IconButton>
+        </Tooltip>
+      </Flex>
     </Box>
   );
 };

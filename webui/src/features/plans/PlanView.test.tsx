@@ -1,29 +1,24 @@
+import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import * as m from "../../paraglide/messages";
-import { PlanView } from "./PlanView";
-import { renderWithProviders } from "../../test/render";
-import {
-  makeConfig,
-  makeRepo,
-  makePlan,
-  connectError,
-  Code,
-} from "../../test/proto";
 import { backrestService } from "../../api/client";
-import { alerts } from "../../components/common/Alerts";
-import { DoRepoTaskRequest_Task } from "../../../gen/ts/v1/service_pb";
+import * as m from "../../paraglide/messages";
+import { makeConfig, makePlan, makeRepo } from "../../test/proto";
+import { renderWithProviders } from "../../test/render";
+import { PlanView } from "./PlanView";
 
-// The tree/list views pull in Chakra TreeView/Splitter machinery that isn't
-// relevant to the action-button behavior under test here, and jsdom lacks
-// several of the DOM primitives Zag.js leans on for those widgets. Stub them
-// to trivial placeholders per the harness's allowance for mocking modules
-// from within the test file (source is not edited).
 vi.mock("../operations/OperationListView", () => ({
   OperationListView: () => <div data-testid="operation-list-view-stub" />,
 }));
 vi.mock("./PlanSnapshotExplorer", () => ({
-  PlanSnapshotExplorer: () => <div data-testid="snapshot-explorer-stub" />,
+  PlanSnapshotExplorer: ({
+    onVersionChange,
+  }: {
+    onVersionChange?: (id: string) => void;
+  }) => {
+    React.useEffect(() => onVersionChange?.("snapshot-id"), [onVersionChange]);
+    return <div data-testid="snapshot-explorer-stub" />;
+  },
 }));
 
 const config = makeConfig({
@@ -32,122 +27,49 @@ const config = makeConfig({
 });
 const plan = config.plans[0];
 
-const openMenu = async (
-  user: ReturnType<typeof renderWithProviders>["user"],
-) => {
-  const trigger = await screen.findByRole("button", { name: "More actions" });
-  await user.click(trigger);
-};
-
 describe("PlanView", () => {
-  it("renders the plan heading and backup button", async () => {
+  it("renders one plan title without a backup-now control", async () => {
     renderWithProviders(<PlanView plan={plan} />, { config });
 
     expect(await screen.findByText("test-plan")).toBeInTheDocument();
+    expect(screen.getByTestId("snapshot-explorer-stub")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: m.plan_button_backup() }),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: m.plan_button_backup() }),
+    ).not.toBeInTheDocument();
   });
 
-  it("triggers a backup and shows a success toast when Backup Now is clicked", async () => {
-    vi.mocked(backrestService.backup).mockResolvedValue({} as any);
-    const successSpy = vi.spyOn(alerts, "success");
-
-    const { user } = renderWithProviders(<PlanView plan={plan} />, { config });
-
-    const backupButton = await screen.findByRole("button", {
-      name: m.plan_button_backup(),
+  it("flips between historical files and operation history", async () => {
+    const { user, container } = renderWithProviders(<PlanView plan={plan} />, {
+      config,
     });
-    await user.click(backupButton);
+    const flipper = container.querySelector(".plan-history-flipper");
 
-    await waitFor(() => {
-      expect(backrestService.backup).toHaveBeenCalledWith(
-        expect.objectContaining({ value: "test-plan" }),
-      );
-    });
-    expect(successSpy).toHaveBeenCalledWith(m.plan_backup_scheduled());
+    expect(flipper).not.toHaveAttribute("data-flipped");
+    await user.click(screen.getByRole("button", { name: m.repo_tab_list() }));
+    expect(flipper).toHaveAttribute("data-flipped", "true");
+    await user.click(screen.getByRole("button", { name: m.repo_tab_tree() }));
+    expect(flipper).not.toHaveAttribute("data-flipped");
   });
 
-  it("shows an error toast when the backup call is rejected", async () => {
-    vi.mocked(backrestService.backup).mockRejectedValue(
-      connectError(Code.Internal, "boom"),
-    );
-    const errorSpy = vi.spyOn(alerts, "error");
-
+  it("requires two clicks before deleting the selected version", async () => {
+    vi.mocked(backrestService.forget).mockResolvedValue({} as never);
     const { user } = renderWithProviders(<PlanView plan={plan} />, { config });
+    const deleteButton = await screen.findByTestId("forget-snapshot");
+    await waitFor(() => expect(deleteButton).not.toBeDisabled());
 
-    const backupButton = await screen.findByRole("button", {
-      name: m.plan_button_backup(),
-    });
-    await user.click(backupButton);
+    await user.click(deleteButton);
+    expect(deleteButton).toHaveAttribute("data-armed", "true");
+    expect(backrestService.forget).not.toHaveBeenCalled();
 
-    await waitFor(() => expect(errorSpy).toHaveBeenCalled());
-    const [content] = errorSpy.mock.calls[errorSpy.mock.calls.length - 1];
-    expect(String(content)).toContain(m.plan_error_backup());
-  });
-
-  it("triggers a dry-run backup from the menu with dryRun set", async () => {
-    vi.mocked(backrestService.backup).mockResolvedValue({} as any);
-    const successSpy = vi.spyOn(alerts, "success");
-
-    const { user } = renderWithProviders(<PlanView plan={plan} />, { config });
-
-    await openMenu(user);
-    const dryRunItem = await screen.findByText(m.op_type_dry_run_backup());
-    await user.click(dryRunItem);
-
-    await waitFor(() => {
-      expect(backrestService.backup).toHaveBeenCalledWith(
-        expect.objectContaining({ value: "test-plan", dryRun: true }),
-      );
-    });
-    expect(successSpy).toHaveBeenCalledWith(m.plan_dry_run_scheduled());
-  });
-
-  it("unlocks the repo via the menu and calls doRepoTask with UNLOCK", async () => {
-    vi.mocked(backrestService.doRepoTask).mockResolvedValue({} as any);
-    const successSpy = vi.spyOn(alerts, "success");
-
-    const { user } = renderWithProviders(<PlanView plan={plan} />, { config });
-
-    await openMenu(user);
-    const unlockItem = await screen.findByText(m.repo_button_unlock());
-    await user.click(unlockItem);
-
-    await waitFor(() => {
-      expect(backrestService.doRepoTask).toHaveBeenCalledWith(
+    await user.click(deleteButton);
+    await waitFor(() =>
+      expect(backrestService.forget).toHaveBeenCalledWith(
         expect.objectContaining({
+          planId: "test-plan",
           repoId: "test-repo",
-          task: DoRepoTaskRequest_Task.UNLOCK,
+          snapshotId: "snapshot-id",
         }),
-      );
-    });
-    expect(successSpy).toHaveBeenCalledWith(m.repo_success_unlocked());
-  });
-
-  it("clears error history via the menu with the plan/repo selector", async () => {
-    vi.mocked(backrestService.clearHistory).mockResolvedValue({} as any);
-    const successSpy = vi.spyOn(alerts, "success");
-
-    const { user } = renderWithProviders(<PlanView plan={plan} />, { config });
-
-    await openMenu(user);
-    const clearHistoryItem = await screen.findByText(
-      m.plan_button_clear_history(),
+      ),
     );
-    await user.click(clearHistoryItem);
-
-    await waitFor(() => {
-      expect(backrestService.clearHistory).toHaveBeenCalledWith(
-        expect.objectContaining({
-          selector: expect.objectContaining({
-            planId: "test-plan",
-            repoGuid: "test-repo-guid",
-          }),
-          onlyFailed: true,
-        }),
-      );
-    });
-    expect(successSpy).toHaveBeenCalledWith(m.plan_history_cleared());
   });
 });

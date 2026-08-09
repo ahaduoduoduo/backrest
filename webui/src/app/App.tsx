@@ -79,6 +79,7 @@ import {
 } from "react-router";
 import { MainContentAreaTemplate } from "../components/layout/MainContentArea";
 import { MobileNavigation } from "../components/layout/MobileNavigation";
+import { BottomDock } from "../components/layout/BottomDock";
 import { create } from "@bufbuild/protobuf";
 import {
   PeerState,
@@ -1028,161 +1029,67 @@ const DesktopNavTrigger = () => {
 };
 
 export const App: React.FC = () => {
-  const navigate = useNavigate();
-  const [config, setConfig] = useConfig();
-
   return (
-    <Flex className="backup-console" direction="column" h="100vh">
-      {/* HEADER */}
-      <Flex
-        as="header"
-        className="console-header"
-        align="center"
-        px={{ base: 3, lg: 6 }}
-        h={{ base: "56px", md: "68px" }}
-        bg="rgba(7, 8, 11, 0.86)"
-        borderBottom="1px solid"
-        borderColor="whiteAlpha.100"
-        backdropFilter="blur(18px)"
-        color="white"
-        flexShrink={0}
+    <Flex className="backup-console" direction="column" h="100dvh">
+      <Box
+        className="console-main"
+        flex="1"
+        minW={0}
+        overflowY="auto"
+        overflowX="hidden"
+        bg="#07080b"
       >
-        <Box display={{ base: "block", lg: "none" }} mr={2}>
-          <MobileNavTrigger />
-        </Box>
-        <Box display={{ base: "none", lg: "block" }} mr={3}>
-          <DesktopNavTrigger />
-        </Box>
-        <Flex
-          as="a"
-          cursor="pointer"
-          onClick={() => navigate("/")}
-          mr={{ base: 2, md: 6 }}
-          align="center"
-          gap={{ base: 2, md: 3 }}
-        >
-          <img src={LogoSvg} style={{ height: "25px" }} />
-          <Text
-            className="console-wordmark"
-            display={{ base: "none", md: "block" }}
+        <AuthenticationBoundary>
+          <Suspense
+            fallback={
+              <Box p={10}>
+                <Spinner />
+              </Box>
+            }
           >
-            BACKREST
-          </Text>
-        </Flex>
-
-        <Flex
-          align="baseline"
-          gap={4}
-          minW={0}
-          display={{ base: "none", md: "flex" }}
-        >
-          <Link
-            href="https://github.com/garethgeorge/backrest"
-            target="_blank"
-            color="whiteAlpha.700"
-            fontSize="xs"
-            display={{ base: "none", lg: "block" }}
-          >
-            {uiBuildVersion}
-          </Link>
-          <Box fontSize="xs">
-            <ActivityBar />
-          </Box>
-        </Flex>
-
-        <Flex ml="auto" align="center" gap={4}>
-          <Text
-            fontSize="xs"
-            color="whiteAlpha.600"
-            display={{ base: "none", lg: "block" }}
-          >
-            {config && config.instance ? config.instance : undefined}
-          </Text>
-          {config && !config.auth?.disabled && (
-            <Button
-              variant="ghost"
-              size={{ base: "xs", md: "sm" }}
-              color="white"
-              _hover={{ bg: "whiteAlpha.200" }}
-              onClick={() => {
-                setAuthToken("");
-                window.location.reload();
-              }}
-            >
-              {m.app_logout()}
-            </Button>
-          )}
-        </Flex>
-      </Flex>
-
-      {/* MAIN LAYOUT */}
-      <Flex flex="1" overflow="hidden">
-        {/* CONTENT AREA */}
-        <Box
-          className="console-main"
-          flex="1"
-          minW={0}
-          overflowY="auto"
-          overflowX="hidden"
-          bg="#07080b"
-        >
-          <AuthenticationBoundary>
-            <Suspense
-              fallback={
-                <Box p={10}>
-                  <Spinner />
-                </Box>
-              }
-            >
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <MainContentAreaTemplate
-                      breadcrumbs={[{ title: m.app_breadcrumb_summary() }]}
-                    >
-                      <SummaryDashboard />
-                    </MainContentAreaTemplate>
-                  }
-                />
-                <Route
-                  path="/getting-started"
-                  element={
-                    <MainContentAreaTemplate
-                      breadcrumbs={[
-                        { title: m.app_breadcrumb_getting_started() },
-                      ]}
-                    >
-                      <GettingStartedGuide />
-                    </MainContentAreaTemplate>
-                  }
-                />
-                <Route path="/plan/:planId" element={<PlanViewContainer />} />
-                <Route path="/repo/:repoId" element={<RepoViewContainer />} />
-                <Route
-                  path="/peer/:peerInstanceId/repo/:repoId"
-                  element={<RemoteRepoViewContainer />}
-                />
-                <Route
-                  path="/peer/:peerInstanceId/plan/:planId"
-                  element={<RemotePlanViewContainer />}
-                />
-                <Route
-                  path="/*"
-                  element={
-                    <MainContentAreaTemplate breadcrumbs={[]}>
-                      <EmptyState
-                        title="404"
-                        description={m.app_page_not_found()}
-                      />
-                    </MainContentAreaTemplate>
-                  }
-                />
-              </Routes>
-            </Suspense>
-          </AuthenticationBoundary>
-        </Box>
-      </Flex>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <MainContentAreaTemplate breadcrumbs={[]}>
+                    <SummaryDashboard />
+                  </MainContentAreaTemplate>
+                }
+              />
+              <Route
+                path="/getting-started"
+                element={
+                  <MainContentAreaTemplate breadcrumbs={[]}>
+                    <GettingStartedGuide />
+                  </MainContentAreaTemplate>
+                }
+              />
+              <Route path="/plan/:planId" element={<PlanViewContainer />} />
+              <Route path="/repo/:repoId" element={<RepoViewContainer />} />
+              <Route
+                path="/peer/:peerInstanceId/repo/:repoId"
+                element={<RemoteRepoViewContainer />}
+              />
+              <Route
+                path="/peer/:peerInstanceId/plan/:planId"
+                element={<RemotePlanViewContainer />}
+              />
+              <Route
+                path="/*"
+                element={
+                  <MainContentAreaTemplate breadcrumbs={[]}>
+                    <EmptyState
+                      title="404"
+                      description={m.app_page_not_found()}
+                    />
+                  </MainContentAreaTemplate>
+                }
+              />
+            </Routes>
+          </Suspense>
+          <BottomDock />
+        </AuthenticationBoundary>
+      </Box>
     </Flex>
   );
 };

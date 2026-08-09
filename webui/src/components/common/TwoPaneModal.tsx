@@ -26,6 +26,7 @@ interface TwoPaneModalProps {
   // Header
   title: string;
   subtitle?: string;
+  headerStart?: React.ReactNode;
   headerIcon?: React.ReactElement;
   headerExtra?: React.ReactNode;
 
@@ -55,6 +56,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
   onClose,
   title,
   subtitle,
+  headerStart,
   headerIcon,
   headerExtra,
   sections,
@@ -146,6 +148,7 @@ export const TwoPaneModal: React.FC<TwoPaneModalProps> = ({
               borderColor="border"
               flexShrink={0}
             >
+              {headerStart}
               {headerIcon && (
                 <Flex
                   w={7}
