@@ -32,7 +32,7 @@ import { useShowModal } from "../../components/common/ModalManager";
 import { create } from "@bufbuild/protobuf";
 import { useConfig } from "../../app/provider";
 import { OperationListView } from "../operations/OperationListView";
-import { OperationTreeView } from "../operations/OperationTreeView";
+import { PlanSnapshotExplorer } from "./PlanSnapshotExplorer";
 import * as m from "../../paraglide/messages";
 
 export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
@@ -153,45 +153,70 @@ export const PlanView = ({ plan }: React.PropsWithChildren<{ plan: Plan }>) => {
         </Group>
       </Flex>
 
-      <TabsRoot defaultValue="tree" lazyMount>
+      <TabsRoot defaultValue="files" lazyMount>
         <TabsList>
-          <TabsTrigger value="tree" data-testid="view-tab-tree">
+          <TabsTrigger value="files" data-testid="view-tab-tree">
             {m.repo_tab_tree()}
           </TabsTrigger>
-          <TabsTrigger value="list" data-testid="view-tab-list">
+          <TabsTrigger value="operations" data-testid="view-tab-list">
             {m.repo_tab_list()}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="tree">
-          <OperationTreeView
-            req={create(GetOperationsRequestSchema, {
-              selector: {
-                instanceId: config?.instance,
-                repoGuid: repo.guid,
-                planId: plan.id!,
-              },
-              lastN: BigInt(MAX_OPERATION_HISTORY),
-            })}
-            isPlanView={true}
+        <TabsContent value="files" pt={{ base: 4, md: 6 }}>
+          <PlanSnapshotExplorer
+            repoId={repo.id}
+            repoGuid={repo.guid}
+            planId={plan.id!}
+            instanceId={config?.instance}
+            maxHistory={BigInt(MAX_OPERATION_HISTORY)}
           />
         </TabsContent>
 
-        <TabsContent value="list">
-          <Heading size="md" mb={4}>
-            {m.repo_history_title()}
-          </Heading>
-          <OperationListView
-            req={create(GetOperationsRequestSchema, {
-              selector: {
-                instanceId: config?.instance,
-                repoGuid: repo.guid,
-                planId: plan.id!,
-              },
-              lastN: BigInt(MAX_OPERATION_HISTORY),
-            })}
-            showDelete={true}
-          />
+        <TabsContent value="operations" pt={{ base: 4, md: 6 }}>
+          <Box
+            border="1px solid"
+            borderColor="whiteAlpha.100"
+            borderRadius={{ base: "22px", md: "28px" }}
+            bg="#0c0e12"
+            overflow="hidden"
+          >
+            <Box
+              px={{ base: 4, md: 7 }}
+              py={{ base: 5, md: 6 }}
+              borderBottom="1px solid"
+              borderColor="whiteAlpha.100"
+            >
+              <Text
+                color="orange.300"
+                fontFamily="mono"
+                fontSize="9px"
+                letterSpacing="0.17em"
+              >
+                {m.plan_operations_eyebrow().toUpperCase()}
+              </Text>
+              <Heading mt={2} size="lg" letterSpacing="-0.035em">
+                {m.repo_history_title()}
+              </Heading>
+              <Text mt={2} color="whiteAlpha.450" fontSize="12px">
+                {m.plan_operations_description()}
+              </Text>
+            </Box>
+            <Box px={{ base: 3, md: 5 }} py={{ base: 4, md: 5 }}>
+              <OperationListView
+                req={create(GetOperationsRequestSchema, {
+                  selector: {
+                    instanceId: config?.instance,
+                    repoGuid: repo.guid,
+                    planId: plan.id!,
+                  },
+                  lastN: BigInt(MAX_OPERATION_HISTORY),
+                })}
+                showDelete={true}
+                displayHooksInline={true}
+              />
+            </Box>
+          </Box>
         </TabsContent>
       </TabsRoot>
     </Box>

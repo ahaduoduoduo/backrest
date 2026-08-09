@@ -42,9 +42,9 @@ const CELL_STYLE: Record<CellKind, { bg: string; dim: boolean }> = {
   idle: { bg: "bg.muted", dim: false },
   // The schedule expected a backup that never came: clearly visible neutral fill.
   overdue: { bg: "bg.emphasized", dim: false },
-  inprogress: { bg: "blue.400", dim: false },
-  ok: { bg: "green.500", dim: false },
-  recovered: { bg: "green.500", dim: false },
+  inprogress: { bg: "#37d785", dim: false },
+  ok: { bg: "#397da4", dim: false },
+  recovered: { bg: "#397da4", dim: false },
   warn: { bg: "orange.400", dim: false },
   err: { bg: "red.500", dim: false },
   other: { bg: "bg.muted", dim: false },
@@ -150,27 +150,13 @@ export function toCells(
   });
 }
 
-function summaryText(cells: DayCell[]): string {
-  const active = cells.filter((c) => c.kind !== "beforeStart");
-  if (active.length === 0) return m.dashboard_history_no_data();
-  const missed = active.filter((c) => c.kind === "overdue").length;
-  const issues = active.filter(
-    (c) => c.kind === "recovered" || c.kind === "warn" || c.kind === "err",
-  ).length;
-  if (missed === 0 && issues === 0) return m.dashboard_history_all_backed_up();
-  const parts: string[] = [];
-  if (missed) parts.push(m.dashboard_history_missed({ count: missed }));
-  if (issues) parts.push(m.dashboard_history_issues({ count: issues }));
-  return m.dashboard_history_summary({ details: parts.join(" · ") });
-}
-
 // ─── Per-day hover tooltip ────────────────────────────────────────────────────
 
 const CAT_COLOR: Record<StatusCat, string> = {
-  inprogress: "blue.400",
+  inprogress: "#37d785",
   err: "red.400",
   warn: "orange.400",
-  ok: "green.400",
+  ok: "#63b9e8",
 };
 
 const CAT_LABEL: Record<StatusCat, (p: { count: number }) => string> = {
@@ -271,10 +257,7 @@ export const HistoryStrip = ({
   const cells = toCells(buckets);
 
   return (
-    <Box mt={4}>
-      <Text fontSize="13px" fontWeight="520" mb={2} color="fg.default">
-        {summaryText(cells)}
-      </Text>
+    <Box mt={5}>
       <Flex gap="3px" w="full">
         {cells.map((c, i) => {
           const style = CELL_STYLE[c.kind];
@@ -310,9 +293,9 @@ export const HistoryStrip = ({
       {/* Legend */}
       <Flex gap="14px" mt={2} flexWrap="wrap">
         {[
-          { label: m.dashboard_state_label_ok(), color: "green.500" },
+          { label: m.dashboard_state_label_ok(), color: "#397da4" },
           { label: m.dashboard_history_legend_issue(), color: "orange.400" },
-          { label: m.dashboard_history_legend_inprogress(), color: "blue.400" },
+          { label: m.dashboard_history_legend_inprogress(), color: "#37d785" },
           {
             label: m.dashboard_history_legend_missed(),
             color: "bg.emphasized",

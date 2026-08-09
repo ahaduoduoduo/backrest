@@ -7,22 +7,18 @@ import { test, expect } from '../harness/fixtures';
 import { backrestClient, seedInstance, seedRepo } from '../harness/seed';
 
 /**
- * Real-time backup progress in the operations Tree View.
+ * Real-time backup progress in the detailed operation history.
  *
  * Seeds an instance/repo/plan whose backup source is incompressible
  * (crypto-random) data, rate-limited via a restic backup flag so the backup
  * runs long enough (~10-15s) to observe live progress. The test stays on the
- * plan view's DEFAULT tab — the Tree View — and, without ever reloading the
- * page, watches the backup stream in:
+ * plan view's Operation History tab and, without ever reloading the page,
+ * watches the backup stream in:
  *
- *   1. a tree leaf ("Backup <time>") appears for the running flow and its
- *      subtitle streams "<pct>% processed" (fed by OperationBackup.lastStatus
- *      events),
- *   2. selecting it opens the details panel whose operation-row reports
- *      data-status="in progress",
- *   3. the details panel's streamed "Bytes Done/Total" progress line CHANGES
+ *   1. the Backup operation row appears and reports data-status="in progress",
+ *   2. the streamed "Bytes Done/Total" progress line CHANGES
  *      between two samples — the "real time" part,
- *   4. the same tree node / details row then transitions to
+ *   3. the same row then transitions to
  *      data-status="success" with snapshot evidence.
  */
 
@@ -38,8 +34,8 @@ const DATA_TOTAL_MB = 256;
 const DATA_FILE_MB = 64;
 const UPLOAD_LIMIT_MIB_S = 20;
 
-test.describe('real-time backup progress (tree view)', () => {
-  test('backup streams live progress into the tree view without reload', async ({
+test.describe('real-time backup progress (operation history)', () => {
+  test('backup streams live progress into operation history without reload', async ({
     page,
     backrest,
   }) => {
@@ -80,43 +76,27 @@ test.describe('real-time backup progress (tree view)', () => {
     );
     await client.setConfig(config);
 
-    // 2. Open the plan view BEFORE any backup exists. The default tab is the
-    //    Tree View; we never switch tabs and never reload from here on.
+    // 2. Open the plan before any backup exists, then enter detailed operation
+    //    history. The page is never reloaded from here on.
     await page.goto(`${backrest.url}/#/plan/my-plan`);
     await expect(page.getByTestId('plan-backup-now')).toBeVisible();
-    // Sanity: no operations yet (seedPlan disables the schedule), so the tree
-    // shows its empty state — anything that appears later arrived by streaming.
-    await expect(page.getByText('No operations found')).toBeVisible();
+    await page.getByTestId('view-tab-list').click();
+    // The disabled schedule means anything that appears later arrived through
+    // the live operation stream.
+    await expect(page.getByText('No operations yet')).toBeVisible();
 
     // 3. Trigger the backup.
     await page.getByTestId('plan-backup-now').click();
 
-    // 4a. A tree leaf for the running backup appears. Leaves are Chakra/Ark
-    //     tree-view "item" parts labelled "<op type> <time>"; branch nodes
-    //     (month/day groupings) are "branch" parts, so scoping to
-    //     data-part="item" pins the leaf itself, not its ancestors.
-    const backupLeaf = page
-      .locator('[data-scope="tree-view"][data-part="item"]')
-      .filter({ hasText: 'Backup' });
-    await expect(backupLeaf).toBeVisible({ timeout: 30_000 });
-
-    // The tree leaf itself streams progress: once the first restic status
-    // event lands, the leaf's subtitle shows "<pct>% processed, <done>/<total>".
-    // Wait for it BEFORE selecting the node: it proves the operation is past
-    // "pending", and the details row auto-expands its "Backup Details" section
-    // only when it mounts already in-progress (the accordion's default-expanded
-    // state is fixed at mount, so selecting during the brief pending window
-    // would leave the progress details permanently collapsed).
-    await expect(backupLeaf).toContainText(/% processed/, { timeout: 30_000 });
-
-    // 4b. Select the tree node: the details panel renders the flow's
-    //     operations; the Backup operation-row reports "in progress".
-    await backupLeaf.click();
+    // 4a. The Backup row arrives through the live stream and reports its
+    //     in-progress state directly in the diagnostics list.
     const backupRow = page.locator('[data-testid="operation-row"][data-op-type="Backup"]');
     await expect(backupRow).toBeVisible({ timeout: 15_000 });
-    await expect(backupRow).toHaveAttribute('data-status', 'in progress');
+    await expect(backupRow).toHaveAttribute('data-status', 'in progress', {
+      timeout: 30_000,
+    });
 
-    // 4c. Real-time check: the details panel's "Bytes Done/Total" line (fed by
+    // 4b. Real-time check: the details panel's "Bytes Done/Total" line (fed by
     //     streamed OperationBackup.lastStatus events) must CHANGE between two
     //     samples — all without reloading.
     const sampleProgress = async (): Promise<string | null> => {
@@ -159,13 +139,10 @@ test.describe('real-time backup progress (tree view)', () => {
       )
       .not.toBe(firstSample);
 
-    // 4d. Still without reload, the same row and tree node reach success.
+    // 4c. Still without reload, the same row reaches success.
     await expect(backupRow).toHaveAttribute('data-status', 'success', {
       timeout: 90_000,
     });
-    // The leaf's live subtitle is replaced by the completion summary
-    // ("<bytes> in <duration>"), so the streamed percent line is gone.
-    await expect(backupLeaf).not.toContainText(/% processed/);
 
     // 5. Snapshot evidence in the same details panel: the flow gains an
     //    indexed-snapshot operation with its snapshot id.

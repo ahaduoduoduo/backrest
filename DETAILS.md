@@ -35,8 +35,10 @@ configuration model, operation log, snapshot browser, and restore operations.
   resolves the calendar day's state without deleting earlier error details,
   and operation queries do not read repository data.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
-  activity data and backup-task cards, including a plan-level manual backup
-  action that reports active progress and refreshes the card after completion.
+  activity data and the backup-task grid.
+- `webui/src/features/dashboard/PlanCard.tsx`: renders the calendar-aligned task
+  summary, start/stop control, next-run treatment, repository addition, and
+  direct navigation to historical files.
 - `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
   status strips in chronological order, from the oldest date on the left to
   today on the right, with per-day backup-size and mixed-outcome details; a
@@ -58,6 +60,12 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: direct root-directory list
   and readable exclusion controls backed by the unchanged `Plan.paths`,
   `Plan.excludes`, and `Plan.iexcludes` fields.
+- `webui/src/features/plans/PlanSnapshotExplorer.tsx`,
+  `SnapshotExplorerHeader.tsx`, and `SnapshotVersionRail.tsx`: present
+  successful Restic snapshots as a direct folder browser with persistent
+  paths, older/newer navigation, and selected-version deletion.
+- `docs/timeline-file-browser.md`: documents snapshot selection, bounded
+  repository reads, responsive behavior, motion, and task-card controls.
 - `webui/messages/zh.json`: plain-language Chinese product copy for navigation,
   backup-task editing, storage repositories, version browsing, restore, and
   maintenance operations. Destructive maintenance text preserves the

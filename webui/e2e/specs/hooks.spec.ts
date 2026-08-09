@@ -10,8 +10,8 @@ import type { Page } from '@playwright/test';
  *
  * The plan (including its hook) is built entirely through the Add Plan dialog's
  * HooksFormList UI — "Add Hook" menu -> Command, condition select, command
- * textarea. Backups are triggered with the "Backup now" button and observed on
- * the List View, mirroring add-plan-backup.spec.ts.
+ * textarea. Backups are triggered with the "Backup now" button and observed in
+ * Operation History, mirroring add-plan-backup.spec.ts.
  *
  * Backend note (internal/hook): a COMMAND hook runs its script in `sh` (stdin),
  * so `echo done > <file>` writes a marker file, and `exit 1` fails the hook. A
@@ -117,7 +117,7 @@ test.describe('backup hooks', () => {
     await (await navigationItem(page, 'sidebar-item-plan-hook-plan')).click();
     await expect(page).toHaveURL(/#\/plan\/hook-plan$/);
     await page.getByTestId('plan-backup-now').click();
-    await page.getByRole('tab', { name: 'List View' }).click();
+    await page.getByTestId('view-tab-list').click();
 
     // The backup itself succeeds. (A future-dated *scheduled* backup row also
     // exists and stays pending, so scope by data-status.)
@@ -126,17 +126,9 @@ test.describe('backup hooks', () => {
     );
     await expect(backupRow).toBeVisible({ timeout: 90_000 });
 
-    // (a) The Run Hook operation reaches success. In List View, hook operations
-    // render nested under their parent Backup row inside a "Hooks Triggered"
-    // accordion. A *successful* hook's accordion is collapsed and its rows are
-    // not mounted until it is expanded, so open it first, then assert on the
-    // nested Run Hook row (attribute-based: the row stays in the DOM once
-    // mounted, even while the accordion animates).
-    const hooksTrigger = backupRow.getByText('Hooks Triggered', { exact: true });
-    await expect(hooksTrigger).toBeVisible({ timeout: 90_000 });
-    await hooksTrigger.click();
-
-    const hookRow = backupRow.locator('[data-testid="operation-row"][data-op-type="Run Hook"]');
+    // (a) Detailed operation history renders hook executions as first-class
+    // rows so their status and logs are visible without opening the parent.
+    const hookRow = page.locator('[data-testid="operation-row"][data-op-type="Run Hook"]');
     await expect(hookRow).toHaveAttribute('data-status', 'success', { timeout: 90_000 });
 
     // (b) Node-side: the marker file exists with the expected content.
@@ -181,7 +173,7 @@ test.describe('backup hooks', () => {
     await (await navigationItem(page, 'sidebar-item-plan-hook-plan')).click();
     await expect(page).toHaveURL(/#\/plan\/hook-plan$/);
     await page.getByTestId('plan-backup-now').click();
-    await page.getByRole('tab', { name: 'List View' }).click();
+    await page.getByTestId('view-tab-list').click();
 
     // Default on-error policy (ON_ERROR_IGNORE) is non-halting: the backup
     // completes successfully...
@@ -190,12 +182,8 @@ test.describe('backup hooks', () => {
     );
     await expect(backupRow).toBeVisible({ timeout: 90_000 });
 
-    // ...while the Run Hook operation surfaces the non-zero exit as an error.
-    // A failed hook's "Hooks Triggered" accordion is expanded by default, so its
-    // nested Run Hook row is mounted without any extra interaction. (The row can
-    // read as "hidden" mid-animation, so assert on its attribute rather than
-    // visibility.)
-    const hookRow = backupRow.locator('[data-testid="operation-row"][data-op-type="Run Hook"]');
+    // ...while the standalone Run Hook operation surfaces the non-zero exit.
+    const hookRow = page.locator('[data-testid="operation-row"][data-op-type="Run Hook"]');
     await expect(hookRow).toHaveAttribute('data-status', 'error', { timeout: 90_000 });
   });
 });
