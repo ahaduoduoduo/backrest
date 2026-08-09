@@ -138,7 +138,7 @@ const stackDateFormatter = new Intl.DateTimeFormat(undefined, {
 const STACK_CARD_COUNT = 5;
 
 function stackTransform(depth: number): string {
-  const translateY = depth * -12;
+  const translateY = depth * -18;
   const translateZ = depth * -44;
   const scale = 1 - depth * 0.018;
   return `translate3d(0, ${translateY}px, ${translateZ}px) scale(${scale})`;
