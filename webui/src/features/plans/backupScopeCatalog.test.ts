@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_PLAN_EXCLUDES,
   EXCLUDE_PRESETS,
   getCustomExcludeRules,
   getCustomPaths,
@@ -9,6 +10,15 @@ import {
 } from "./backupScopeCatalog";
 
 describe("backupScopeCatalog", () => {
+  it("uses the visible macOS metadata preset for new plans", () => {
+    const preset = EXCLUDE_PRESETS.find(
+      (candidate) => candidate.id === "macos-metadata",
+    );
+
+    expect(DEFAULT_PLAN_EXCLUDES).toEqual(["**/.DS_Store"]);
+    expect(preset?.patterns).toEqual(DEFAULT_PLAN_EXCLUDES);
+  });
+
   it("maps mounted Synology paths to readable source groups", () => {
     const paths = [
       "/source/docker",

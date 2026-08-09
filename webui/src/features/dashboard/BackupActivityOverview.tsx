@@ -21,6 +21,7 @@ import { Tooltip } from "../../components/ui/tooltip";
 import { formatBytes } from "../../lib/formatting";
 import { getLocale } from "../../paraglide/runtime";
 import { backendUrl } from "../../state/buildcfg";
+import { backupDayOutcome } from "./backupDayOutcome";
 
 const ACTIVITY_OPERATION_LIMIT = 5000;
 const ACTIVITY_REQUEST_TIMEOUT_MS = 4000;
@@ -599,6 +600,12 @@ export const BackupActivityOverview = ({
                 const key = dateKey(date);
                 const day = summary.days.get(key);
                 const level = activityLevel(day, thresholds);
+                const outcome = backupDayOutcome({
+                  success: day?.success,
+                  warning: day?.warning,
+                  inprogress: day?.running,
+                  error: day?.failed,
+                });
                 const future = date > startOfDay(new Date());
                 return (
                   <Tooltip
@@ -662,9 +669,9 @@ export const BackupActivityOverview = ({
                         }
                       }}
                       boxShadow={
-                        day?.failed
+                        outcome === "error"
                           ? "inset 0 0 0 1px rgba(255, 164, 92, 0.9)"
-                          : day?.running
+                          : outcome === "inprogress"
                             ? "inset 0 0 0 1px rgba(97, 184, 255, 0.95)"
                             : undefined
                       }

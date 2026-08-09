@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { OperationStatus } from "../../../gen/ts/v1/operations_pb";
 import type { SummaryDashboardResponse_DayStatusBucket } from "../../../gen/ts/v1/service_pb";
-import { toCells } from "./HistoryStrip";
+import { historyCellBoxShadow, toCells } from "./HistoryStrip";
 
 describe("HistoryStrip timeline order", () => {
   it("places the oldest day on the left and today on the right", () => {
@@ -23,5 +24,24 @@ describe("HistoryStrip timeline order", () => {
     expect(cells[28].bucket).toBe(yesterdayBucket);
     expect(cells[29].bucket).toBe(todayBucket);
     expect(cells[29].isToday).toBe(true);
+  });
+
+  it("shows a mixed failure and success day as backed up", () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayBucket = {
+      timestampMs: BigInt(today.getTime()),
+      statusCounts: [
+        { status: OperationStatus.STATUS_ERROR, count: 1n },
+        { status: OperationStatus.STATUS_SUCCESS, count: 1n },
+      ],
+    } as SummaryDashboardResponse_DayStatusBucket;
+
+    const cells = toCells([todayBucket]);
+
+    expect(cells[29].kind).toBe("recovered");
+    expect(cells[29].bucket?.statusCounts).toHaveLength(2);
+    expect(historyCellBoxShadow(cells[29].kind, true)).toContain("orange-400");
+    expect(historyCellBoxShadow("ok", true)).not.toContain("orange-400");
   });
 });

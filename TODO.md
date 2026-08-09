@@ -4,6 +4,12 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Exclude Finder-generated `.DS_Store` files by default in new
+  backup plans and expose the rule as a named plan setting.
+- [x] 2026-08-09: Keep long error notifications inside the mobile viewport and
+  treat a successful retry as the day's final yearly-calendar state, mark the
+  task strip as recovered, and retain every failed operation in detailed
+  history.
 - [x] 2026-08-09: Scope the default CI matrix to the deployed Linux amd64
   Docker path; retain Go, WebUI, backup, restore, history, authentication, and
   mobile checks while excluding Windows, rclone, and SFTP jobs, and make the
