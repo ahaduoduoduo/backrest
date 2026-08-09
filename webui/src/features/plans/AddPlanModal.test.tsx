@@ -138,6 +138,16 @@ describe("AddPlanModal", () => {
         .getByTestId("exclude-preset-macos-metadata")
         .querySelector('input[type="checkbox"]'),
     ).toBeChecked();
+    expect(
+      screen
+        .getByTestId("exclude-preset-synology-metadata")
+        .querySelector('input[type="checkbox"]'),
+    ).toBeChecked();
+    expect(
+      screen
+        .getByTestId("exclude-preset-windows-metadata")
+        .querySelector('input[type="checkbox"]'),
+    ).toBeChecked();
     // Submit button.
     expect(
       screen.getByRole("button", { name: m.add_plan_modal_button_submit() }),
