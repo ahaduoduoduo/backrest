@@ -27,6 +27,10 @@ stay in the lower center. Folder rows are keyboard accessible; every file and
 folder retains the existing information, restore, and download actions.
 
 The plan route fills the available viewport above the persistent bottom dock.
+Its compact version stack uses the same solid surface as the active file list,
+keeps a small visual gap above the translucent dock, and leaves page scrolling
+disabled. The dock remains interactive above editor dialogs; selecting a dock
+destination dismisses the current editor before navigation continues.
 It does not create a page-level scroll area. Only the file list scrolls, and
 only when its entries exceed the active card height. Path controls, file rows,
 entry icons, action menus, and compact restore/information dialogs use one

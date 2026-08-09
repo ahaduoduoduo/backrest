@@ -53,10 +53,11 @@ All 30-day backup strips run chronologically from the oldest date on the left
 to today on the right. A successful retry clears the yearly calendar warning;
 the task strip uses a green cell with an orange recovery outline, while earlier
 failures remain available in the day details and operation history.
-Desktop and mobile share a compact bottom navigation capsule. Its selection
-pill moves between closed-path icons, while task and repository choices open
-above it. Task, repository, and settings editors use a floating workspace that
-leaves the application and bottom navigation visible. The plan editor manages
+Desktop and mobile share a compact translucent bottom navigation capsule. Its
+evenly inset selection pill moves between closed-path icons, while task and
+repository choices open above it. Task, repository, and settings editors use a
+floating workspace; the dock remains interactive and dismisses the current
+editor before changing sections. The plan editor manages
 backup roots as a direct directory list, so new projects below an existing root
 require no compiled service mapping. Standard filesystem exclusions remain
 readable presets, with exact glob rules under an advanced section. New plans

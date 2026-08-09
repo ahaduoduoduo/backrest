@@ -71,8 +71,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   the title and closed-path controls remain inside the card footer.
 - `webui/src/components/layout/BottomDock.tsx`: fixed desktop/mobile capsule
   navigation with closed-path Home, Plans, Repositories, and Settings glyphs;
-  its shared selection pill moves between items, while task and repository
-  submenus support pointer hover and touch click without a page header.
+  its evenly inset shared selection pill moves between items, task and
+  repository submenus support pointer hover and touch click, and navigation
+  dismisses an open editor before changing sections.
 - `webui/src/lib/repositoryLocation.ts`: classifies the actual Restic backend
   URI as local storage, remote storage, or a remote Backrest instance.
 - `docs/timeline-file-browser.md`: documents snapshot selection, bounded
@@ -88,8 +89,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   responsive canvas treatment.
 - `webui/src/components/common/TwoPaneModal.tsx` and `SectionCard.tsx`: shared
   floating workspace for task, repository, and settings editing; it retains a
-  visible application backdrop and bottom dock on desktop and mobile, with
-  consistent navigation, cards, footer, borders, and corner treatment.
+  visible application backdrop and interactive bottom dock on desktop and
+  mobile, with consistent navigation, cards, footer, borders, and corner
+  treatment.
 - `webui/src/components/common/FormModal.tsx`: shared compact information and
   restore dialog with the same dark surface, corner scale, footer, and button
   treatment as the editor workspace.
