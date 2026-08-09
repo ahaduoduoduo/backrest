@@ -22,8 +22,8 @@ import { DoRepoTaskRequest_Task } from "../../../gen/ts/v1/service_pb";
 vi.mock("../operations/OperationListView", () => ({
   OperationListView: () => <div data-testid="operation-list-view-stub" />,
 }));
-vi.mock("../operations/OperationTreeView", () => ({
-  OperationTreeView: () => <div data-testid="operation-tree-view-stub" />,
+vi.mock("./PlanSnapshotExplorer", () => ({
+  PlanSnapshotExplorer: () => <div data-testid="snapshot-explorer-stub" />,
 }));
 
 const config = makeConfig({

@@ -4,6 +4,11 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Replace the plan operation tree with a direct historical
+  file browser that keeps the current folder while moving between Restic
+  versions, isolate detailed diagnostics in operation history, and redesign
+  dashboard task cards around calendar colors, next run, repository addition,
+  card navigation, and start/stop controls.
 - [x] 2026-08-09: Extend the generic generated-files exclusion switch to
   recursively omit Node dependency trees, npm/pnpm/yarn/Bun caches, and
   dependency-cache Docker named volumes without project-specific mappings.

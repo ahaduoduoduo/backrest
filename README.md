@@ -40,10 +40,12 @@ current day and month upload traffic, and backup days share one metric strip;
 each calendar cell reveals that day's processed backup size and repository
 upload amount on hover or tap. The effective OpenList upload rate is shown in
 the matching repository editor.
-The dashboard is limited to backup activity and backup-task status, with an
-immediate backup action on each task card for manual reruns. Repository capacity
-and 30-day health appear at the top of each repository page, while runtime paths
-and the configuration JSON are grouped under System Info in Settings.
+The dashboard is limited to backup activity and backup-task status. Each task
+card opens a timeline-based historical file browser, starts idle backups from a
+compact top-right control, and stops the active operation from the same place.
+Repository capacity and 30-day health appear at the top of each repository
+page, while runtime paths and the configuration JSON are grouped under System
+Info in Settings.
 All 30-day backup strips run chronologically from the oldest date on the left
 to today on the right. A successful retry clears the yearly calendar warning;
 the task strip uses a green cell with an orange recovery outline, while earlier
@@ -63,6 +65,10 @@ advanced descriptions only where they are needed to explain exact behavior.
 
 See [docs/openlist-115-backup.md](docs/openlist-115-backup.md) for deployment and
 recovery configuration.
+
+The direct historical file browser and its bounded repository-read behavior
+are documented in
+[docs/timeline-file-browser.md](docs/timeline-file-browser.md).
 
 Frontend work can run through the Dockerized Vite development service without
 rebuilding the embedded Go binary. Setup and request routing are documented in

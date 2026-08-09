@@ -223,7 +223,11 @@ export const SnapshotBrowser = ({
         });
       });
     } catch (e: any) {
-      alerts.error(m.snapshot_browser_failed_to_load_snapshot_files_message({ message: e.message }));
+      alerts.error(
+        m.snapshot_browser_failed_to_load_snapshot_files_message({
+          message: e.message,
+        }),
+      );
     } finally {
       setLoadingKeys((prev) => {
         const next = new Set(prev);
@@ -318,9 +322,51 @@ const FileNode = ({
   entry: LsEntry;
   snapshotOpId?: bigint;
 }) => {
-  const { snapshotId, repoId, planId, showModal } = React.useContext(
+  const { snapshotId, repoId, planId } = React.useContext(
     SnapshotBrowserContext,
   )!;
+
+  return (
+    <Flex
+      align="center"
+      justify="space-between"
+      width="full"
+      data-testid="snapshot-browser-entry"
+    >
+      <Text>
+        {entry.name}
+        {entry.type === "file" && (
+          <Text as="span" color="fg.muted" ml={2} fontSize="sm">
+            ({formatBytes(Number(entry.size))})
+          </Text>
+        )}
+      </Text>
+
+      <SnapshotEntryActions
+        entry={entry}
+        snapshotId={snapshotId}
+        snapshotOpId={snapshotOpId}
+        repoId={repoId}
+        planId={planId}
+      />
+    </Flex>
+  );
+};
+
+export const SnapshotEntryActions = ({
+  entry,
+  snapshotId,
+  snapshotOpId,
+  repoId,
+  planId,
+}: {
+  entry: LsEntry;
+  snapshotId: string;
+  snapshotOpId?: bigint;
+  repoId: string;
+  planId?: string;
+}) => {
+  const showModal = useShowModal();
 
   const doDownload = () => {
     backrestService
@@ -329,7 +375,11 @@ const FileNode = ({
         window.open(resp.value, "_blank");
       })
       .catch((e) => {
-        alerts.error(m.snapshot_browser_failed_to_fetch_download_url_message({ message: e.message }));
+        alerts.error(
+          m.snapshot_browser_failed_to_fetch_download_url_message({
+            message: e.message,
+          }),
+        );
       });
   };
 
@@ -362,63 +412,53 @@ const FileNode = ({
   };
 
   return (
-    <Flex
-      align="center"
-      justify="space-between"
-      width="full"
-      data-testid="snapshot-browser-entry"
-    >
-      <Text>
-        {entry.name}
-        {entry.type === "file" && (
-          <Text as="span" color="fg.muted" ml={2} fontSize="sm">
-            ({formatBytes(Number(entry.size))})
-          </Text>
-        )}
-      </Text>
-
-      <Box onClick={(e: any) => e.stopPropagation()}>
-        <MenuRoot>
+    <Box onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+      <MenuRoot>
+        {/* @ts-ignore */}
+        <MenuTrigger asChild>
+          <Button
+            size="xs"
+            variant="ghost"
+            aria-label={m.snapshot_browser_actions_for_path({
+              path: entry.path,
+            })}
+          >
+            <FiMoreHorizontal />
+          </Button>
+        </MenuTrigger>
+        {/* @ts-ignore */}
+        <MenuContent>
           {/* @ts-ignore */}
-          <MenuTrigger asChild>
-            <Button size="xs" variant="ghost">
-              <FiMoreHorizontal />
-            </Button>
-          </MenuTrigger>
+          <MenuItem value="info" onClick={showInfo}>
+            <FiInfo />
+            {/* @ts-ignore */}
+            <MenuItemText>{m.snapshot_browser_info()}</MenuItemText>
+          </MenuItem>
           {/* @ts-ignore */}
-          <MenuContent>
+          <MenuItem
+            value="restore"
+            onClick={restore}
+            data-testid="snapshot-restore"
+          >
+            <FiRefreshCw />
             {/* @ts-ignore */}
-            <MenuItem value="info" onClick={showInfo}>
-              <FiInfo />
-              {/* @ts-ignore */}
-              <MenuItemText>{m.snapshot_browser_info()}</MenuItemText>
-            </MenuItem>
-            {/* @ts-ignore */}
+            <MenuItemText>{m.snapshot_browser_restore_to_path()}</MenuItemText>
+          </MenuItem>
+          {snapshotOpId ? (
+            // @ts-ignore
             <MenuItem
-              value="restore"
-              onClick={restore}
-              data-testid="snapshot-restore"
+              value="download"
+              onClick={doDownload}
+              data-testid="snapshot-download"
             >
-              <FiRefreshCw />
+              <FiDownload />
               {/* @ts-ignore */}
-              <MenuItemText>{m.snapshot_browser_restore_to_path()}</MenuItemText>
+              <MenuItemText>{m.snapshot_browser_download()}</MenuItemText>
             </MenuItem>
-            {snapshotOpId ? (
-              // @ts-ignore
-              <MenuItem
-                value="download"
-                onClick={doDownload}
-                data-testid="snapshot-download"
-              >
-                <FiDownload />
-                {/* @ts-ignore */}
-                <MenuItemText>{m.snapshot_browser_download()}</MenuItemText>
-              </MenuItem>
-            ) : null}
-          </MenuContent>
-        </MenuRoot>
-      </Box>
-    </Flex>
+          ) : null}
+        </MenuContent>
+      </MenuRoot>
+    </Box>
   );
 };
 
@@ -474,7 +514,9 @@ const RestoreModal = ({
       alerts.success(m.snapshot_browser_restore_started_successfully());
       showModal(null);
     } catch (e: any) {
-      alerts.error(m.snapshot_browser_failed_to_restore_message({ message: e.message }));
+      alerts.error(
+        m.snapshot_browser_failed_to_restore_message({ message: e.message }),
+      );
     }
   };
 

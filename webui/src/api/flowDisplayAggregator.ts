@@ -264,13 +264,13 @@ export const colorForStatus = (status: OperationStatus) => {
     case OperationStatus.STATUS_PENDING:
       return "grey";
     case OperationStatus.STATUS_INPROGRESS:
-      return "blue";
+      return "#37d785";
     case OperationStatus.STATUS_ERROR:
       return "red";
     case OperationStatus.STATUS_WARNING:
       return "orange";
     case OperationStatus.STATUS_SUCCESS:
-      return "green";
+      return "#63b9e8";
     case OperationStatus.STATUS_USER_CANCELLED:
       return "orange";
     default:

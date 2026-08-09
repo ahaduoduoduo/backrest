@@ -2,6 +2,11 @@ import { create } from "@bufbuild/protobuf";
 import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SummaryDashboardResponse_SummarySchema } from "../../../gen/ts/v1/service_pb";
+import {
+  OperationListSchema,
+  OperationSchema,
+  OperationStatus,
+} from "../../../gen/ts/v1/operations_pb";
 import { backrestService } from "../../api/client";
 import { alerts } from "../../components/common/Alerts";
 import * as m from "../../paraglide/messages";
@@ -77,6 +82,42 @@ describe("SummaryDashboard PlanCard", () => {
     await user.click(button);
     await waitFor(() =>
       expect(backrestService.backup).toHaveBeenCalledTimes(2),
+    );
+  });
+
+  it("uses the running control to cancel the active backup", async () => {
+    const activeOperation = create(OperationSchema, {
+      id: 42n,
+      planId: "nas-config",
+      status: OperationStatus.STATUS_INPROGRESS,
+      op: { case: "operationBackup", value: {} },
+    });
+    vi.mocked(backrestService.getOperations).mockResolvedValue(
+      create(OperationListSchema, { operations: [activeOperation] }),
+    );
+    vi.mocked(backrestService.cancel).mockResolvedValue({} as never);
+    const runningSummary = create(SummaryDashboardResponse_SummarySchema, {
+      id: "nas-config",
+      recentBackups: {
+        status: [OperationStatus.STATUS_INPROGRESS],
+        timestampMs: [BigInt(Date.now())],
+      },
+    });
+
+    const { user } = renderWithProviders(
+      <PlanCard summary={runningSummary} />,
+      { config },
+    );
+    const stopButton = await screen.findByRole("button", {
+      name: m.dashboard_card_stop_backup(),
+    });
+    await waitFor(() => expect(stopButton).not.toBeDisabled());
+    await user.click(stopButton);
+
+    await waitFor(() =>
+      expect(backrestService.cancel).toHaveBeenCalledWith(
+        expect.objectContaining({ operationId: 42n }),
+      ),
     );
   });
 });

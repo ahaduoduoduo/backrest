@@ -643,7 +643,9 @@ export const BackupActivityOverview = ({
                   >
                     <Box
                       as="button"
+                      className="backup-activity-day"
                       data-testid={`backup-activity-day-${key}`}
+                      data-outcome={outcome}
                       data-backup-size={day?.bytesProcessed ?? 0}
                       data-upload-size={day?.bytesAdded ?? 0}
                       aria-label={describeDay(date, day)}
@@ -656,8 +658,7 @@ export const BackupActivityOverview = ({
                       opacity={future ? 0.25 : 1}
                       cursor={future ? "default" : "pointer"}
                       touchAction="manipulation"
-                      transition="transform 120ms ease, box-shadow 120ms ease"
-                      _hover={future ? undefined : { transform: "scale(1.16)" }}
+                      transition="transform 120ms var(--ease-out), box-shadow 120ms var(--ease-out)"
                       _focusVisible={{
                         outline: "2px solid #8bd4fb",
                         outlineOffset: "2px",
@@ -672,7 +673,7 @@ export const BackupActivityOverview = ({
                         outcome === "error"
                           ? "inset 0 0 0 1px rgba(255, 164, 92, 0.9)"
                           : outcome === "inprogress"
-                            ? "inset 0 0 0 1px rgba(97, 184, 255, 0.95)"
+                            ? "inset 0 0 0 1px rgba(55, 215, 133, 0.98), 0 0 8px rgba(55, 215, 133, 0.34)"
                             : undefined
                       }
                     />
