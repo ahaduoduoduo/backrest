@@ -5,13 +5,6 @@ type LocalizedText = {
   en: string;
 };
 
-export interface BackupSourceOption {
-  id: string;
-  path: string;
-  title: LocalizedText;
-  description: LocalizedText;
-}
-
 export interface ExcludePreset {
   id: string;
   patterns: string[];
@@ -51,101 +44,10 @@ const WINDOWS_METADATA_EXCLUDES = [
   "**/Desktop.ini",
 ];
 
-const sqliteRuntimePatterns = (path: string) => [
-  path,
-  `${path}-wal`,
-  `${path}-shm`,
-  `${path}-journal`,
-];
-
 export const DEFAULT_PLAN_EXCLUDES = [
   ...MACOS_METADATA_EXCLUDES,
   ...SYNOLOGY_METADATA_EXCLUDES,
   ...WINDOWS_METADATA_EXCLUDES,
-];
-
-export const BACKUP_SOURCE_OPTIONS: BackupSourceOption[] = [
-  {
-    id: "docker",
-    path: "/source/docker",
-    title: { zh: "Docker 服务", en: "Docker services" },
-    description: {
-      zh: "Compose、环境变量、持久化目录和自建服务代码。",
-      en: "Compose files, environment files, persistent data, and local service code.",
-    },
-  },
-  {
-    id: "home-assistant",
-    path: "/source/home-assistant",
-    title: { zh: "Home Assistant", en: "Home Assistant" },
-    description: {
-      zh: "配置、自动化、自定义组件和集成设置。",
-      en: "Configuration, automations, custom components, and integrations.",
-    },
-  },
-  {
-    id: "docker-named-volumes",
-    path: "/source/docker-volumes/telegram-data",
-    title: { zh: "Telegram 数据", en: "Telegram data" },
-    description: {
-      zh: "Bot 配置和消息读取位置。",
-      en: "Bot configuration and message update position.",
-    },
-  },
-  {
-    id: "web-live",
-    path: "/source/web-live",
-    title: { zh: "直播代理", en: "Live proxy" },
-    description: {
-      zh: "直播代理代码和 Compose；频道配置由 Docker 服务入口备份。",
-      en: "Live proxy code and Compose; channel data is included through Docker services.",
-    },
-  },
-  {
-    id: "web-autoaccount",
-    path: "/source/web-autoaccount",
-    title: { zh: "自动化服务数据", en: "Automation service data" },
-    description: {
-      zh: "自动化服务配置与附件；数据库使用备份前生成的一致副本。",
-      en: "Automation settings and artifacts; the database uses a consistent pre-backup copy.",
-    },
-  },
-  {
-    id: "dsm-certificates",
-    path: "/source/dsm-certificates",
-    title: { zh: "DSM 证书", en: "DSM certificates" },
-    description: {
-      zh: "证书、私钥和 DSM 服务证书配置。",
-      en: "Certificates, private keys, and DSM service certificate configuration.",
-    },
-  },
-  {
-    id: "dsm-package-config",
-    path: "/source/dsm-packages",
-    title: { zh: "DSM 套件配置", en: "DSM package settings" },
-    description: {
-      zh: "Container Manager、Download Station、DDNS 和 VMM 等套件设置。",
-      en: "Settings for Container Manager, Download Station, DDNS, VMM, and other packages.",
-    },
-  },
-  {
-    id: "recovery-staging",
-    path: "/staging",
-    title: { zh: "群晖恢复资料", en: "Synology recovery files" },
-    description: {
-      zh: "DSM 重建资料、完整 Docker 清单和应用数据库一致副本。",
-      en: "DSM reconstruction facts, a complete Docker inventory, and consistent application database copies.",
-    },
-  },
-  {
-    id: "time-machine",
-    path: "/source/time-machine",
-    title: { zh: "Time Machine", en: "Time Machine" },
-    description: {
-      zh: "Mac 的完整本地备份包；此备份任务只用于异地容灾。",
-      en: "The complete local Mac backup bundle, copied only for off-site recovery.",
-    },
-  },
 ];
 
 export const EXCLUDE_PRESETS: ExcludePreset[] = [
@@ -210,93 +112,15 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
       en: "Omits .git while retaining working files that may contain Docker configuration or service data.",
     },
   },
-  {
-    id: "old-transfer-cache",
-    patterns: ["/source/docker/SYNC/**", "/source/docker/SYNC_BIU/**"],
-    title: { zh: "旧传输缓存", en: "Legacy transfer caches" },
-    description: {
-      zh: "SYNC 和 SYNC_BIU 目录不上传。",
-      en: "Omits the SYNC and SYNC_BIU directories.",
-    },
-  },
-  {
-    id: "backrest-runtime",
-    patterns: ["/source/docker/backrest/**"],
-    title: { zh: "Backrest 运行目录", en: "Backrest runtime data" },
-    description: {
-      zh: "运行原文件不直接上传；配置和操作记录由恢复资料保存，缓存不上传。",
-      en: "Live files are omitted; recovery data preserves configuration and operation history while cache stays local.",
-    },
-  },
-  {
-    id: "mounted-source-aliases",
-    patterns: [
-      "/source/docker/homeassistant/**",
-      "/source/docker/telegram-data/**",
-      "/source/web-live/data/**",
-    ],
-    title: { zh: "重复数据入口", en: "Duplicate source aliases" },
-    description: {
-      zh: "数据仍通过 Home Assistant、Telegram 或 Docker 服务入口备份。",
-      en: "Data remains backed up through the Home Assistant, Telegram, or Docker service source.",
-    },
-  },
-  {
-    id: "live-databases",
-    patterns: [
-      ...sqliteRuntimePatterns("/source/docker/alist/data.db"),
-      ...sqliteRuntimePatterns("/source/docker/autofilm-core/autofilm.sqlite"),
-      ...sqliteRuntimePatterns(
-        "/source/docker/jellyfin/config/data/jellyfin.db",
-      ),
-      ...sqliteRuntimePatterns(
-        "/source/docker/jellyfin/config/data/infuse_sync.db",
-      ),
-      ...sqliteRuntimePatterns(
-        "/source/docker/jellyfin/config/data/library.db",
-      ),
-      "/source/docker/jellyfin/config/data/kodisyncqueue*.db",
-      ...sqliteRuntimePatterns("/source/docker/subhub/data/subhub.db"),
-      ...sqliteRuntimePatterns("/source/docker/localproxy-data/localproxy.db"),
-      ...sqliteRuntimePatterns(
-        "/source/docker/nas-gateway-manager/data/manager.db",
-      ),
-      ...sqliteRuntimePatterns("/source/web-autoaccount/automation.db"),
-      ...sqliteRuntimePatterns("/source/home-assistant/home-assistant_v2.db"),
-    ],
-    title: { zh: "运行中的数据库原文件", en: "Live database files" },
-    description: {
-      zh: "在线数据库改用备份前生成的一致副本；历史备份文件仍会上传。",
-      en: "Live databases use consistent pre-backup copies while historical database backups remain included.",
-    },
-  },
-  {
-    id: "staging-control",
-    patterns: ["/staging/control/**"],
-    title: { zh: "备份协调文件", en: "Backup coordination files" },
-    description: {
-      zh: "主机与备份服务之间的一次性请求和执行日志。",
-      en: "One-time requests and execution logs exchanged by the host and backup service.",
-    },
-  },
-  {
-    id: "dsm-package-runtime",
-    patterns: ["/source/dsm-packages/appconf/Virtualization/ccc/etcd.data/**"],
-    title: { zh: "DSM 套件运行数据", en: "DSM package runtime data" },
-    description: {
-      zh: "跳过 VMM 活动状态；可迁移的套件配置仍会上传。",
-      en: "Omits active VMM state while retaining portable package settings.",
-    },
-  },
 ];
 
 export const scopeText = (locale = getLocale()) => {
   const zh = locale.toLowerCase().startsWith("zh");
   return {
-    backupTitle: zh ? "将备份" : "Backed up",
+    backupTitle: zh ? "备份目录" : "Backup directories",
     backupDescription: zh
-      ? "打开需要保存到 115 的内容。"
-      : "Enable the content that should be stored offsite.",
+      ? "添加需要保存的根目录；其中新增的项目会自动进入备份。"
+      : "Add root directories to preserve; new projects below them are included automatically.",
     excludeTitle: zh ? "将跳过" : "Skipped",
     excludeDescription: zh
       ? "打开无需上传的内容，例如日志、缓存和临时文件。"
@@ -306,12 +130,10 @@ export const scopeText = (locale = getLocale()) => {
     excluded: zh ? "已排除" : "Excluded",
     included: zh ? "会上传" : "Uploaded",
     partial: zh ? "部分规则生效" : "Partially enabled",
-    customPaths: zh ? "其他备份目录" : "Other backup paths",
-    customRules: zh ? "其他排除规则" : "Other exclusion rules",
-    advancedTitle: zh ? "高级路径与规则" : "Advanced paths and rules",
+    advancedTitle: zh ? "高级排除规则" : "Advanced exclusion rules",
     advancedDescription: zh
-      ? "添加非标准目录或精确规则时使用。"
-      : "Use this for custom paths or exact Restic patterns.",
+      ? "查看或修改精确的 Restic 排除规则。"
+      : "Inspect or edit exact Restic exclusion patterns.",
     overviewTitle: zh ? "备份内容" : "Backup content",
     overviewDescription: zh
       ? "每个备份任务会上传哪些内容、跳过哪些内容。"
@@ -339,26 +161,7 @@ export const localizeScopeText = (
   locale = getLocale(),
 ) => (locale.toLowerCase().startsWith("zh") ? value.zh : value.en);
 
-export const getKnownSources = (paths: string[]) => {
-  const pathSet = new Set(paths);
-  return BACKUP_SOURCE_OPTIONS.filter((source) => pathSet.has(source.path));
-};
-
-export const getCustomPaths = (paths: string[]) => {
-  const knownPaths = new Set(
-    BACKUP_SOURCE_OPTIONS.map((source) => source.path),
-  );
-  return paths.filter((path) => !knownPaths.has(path));
-};
-
 export const getPresetMatchCount = (preset: ExcludePreset, rules: string[]) => {
   const ruleSet = new Set(rules);
   return preset.patterns.filter((pattern) => ruleSet.has(pattern)).length;
-};
-
-export const getCustomExcludeRules = (rules: string[]) => {
-  const knownRules = new Set(
-    EXCLUDE_PRESETS.flatMap((preset) => preset.patterns),
-  );
-  return rules.filter((rule) => !knownRules.has(rule));
 };

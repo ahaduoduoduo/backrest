@@ -1,5 +1,4 @@
-import { Box, Flex, SimpleGrid, Stack, Text } from "@chakra-ui/react";
-import type { ReactNode } from "react";
+import { Box, Flex, Stack, Text } from "@chakra-ui/react";
 import { FiCheck, FiFolder, FiSlash } from "react-icons/fi";
 import {
   AccordionItem,
@@ -11,10 +10,7 @@ import { DynamicList } from "../../components/common/DynamicList";
 import { ToggleField } from "../../components/common/ToggleField";
 import * as m from "../../paraglide/messages";
 import {
-  BACKUP_SOURCE_OPTIONS,
   EXCLUDE_PRESETS,
-  getCustomExcludeRules,
-  getCustomPaths,
   getPresetMatchCount,
   localizeScopeText,
   scopeText,
@@ -29,25 +25,6 @@ interface BackupScopeEditorProps {
   onIexcludesChange: (iexcludes: string[]) => void;
 }
 
-const PathBadge = ({
-  children,
-  compact = false,
-}: {
-  children: ReactNode;
-  compact?: boolean;
-}) => (
-  <Text
-    as="code"
-    display={compact ? { base: "none", md: "block" } : "block"}
-    mt={2}
-    color="fg.muted"
-    fontSize="11px"
-    overflowWrap="anywhere"
-  >
-    {children}
-  </Text>
-);
-
 export const BackupScopeEditor = ({
   paths,
   excludes,
@@ -57,17 +34,6 @@ export const BackupScopeEditor = ({
   onIexcludesChange,
 }: BackupScopeEditorProps) => {
   const copy = scopeText();
-  const selectedPaths = new Set(paths);
-  const customPaths = getCustomPaths(paths);
-  const customExcludes = getCustomExcludeRules(excludes);
-
-  const updateSource = (path: string, checked: boolean) => {
-    onPathsChange(
-      checked
-        ? Array.from(new Set([...paths, path]))
-        : paths.filter((item) => item !== path),
-    );
-  };
 
   const updatePreset = (patterns: string[], checked: boolean) => {
     const patternSet = new Set(patterns);
@@ -90,46 +56,16 @@ export const BackupScopeEditor = ({
         <Text fontSize="xs" color="fg.muted" mb={3}>
           {copy.backupDescription}
         </Text>
-        <SimpleGrid columns={{ base: 1, lg: 2 }} gap={2.5}>
-          {BACKUP_SOURCE_OPTIONS.map((source) => {
-            const checked = selectedPaths.has(source.path);
-            return (
-              <Box
-                key={source.id}
-                borderWidth="1px"
-                borderColor={checked ? "blue.500" : "border"}
-                bg={checked ? "blue.950" : "bg.subtle"}
-                borderRadius="lg"
-                p={{ base: 3.5, md: 4 }}
-              >
-                <ToggleField
-                  checked={checked}
-                  onChange={(value) => updateSource(source.path, value)}
-                  testId={`backup-source-${source.id}`}
-                  label={localizeScopeText(source.title)}
-                  hint={localizeScopeText(source.description)}
-                />
-                <PathBadge compact>{source.path}</PathBadge>
-              </Box>
-            );
-          })}
-        </SimpleGrid>
-        {customPaths.length > 0 && (
-          <Box
-            mt={3}
-            p={3}
-            borderWidth="1px"
-            borderColor="border"
-            borderRadius="md"
-          >
-            <Text fontSize="xs" fontWeight="semibold">
-              {copy.customPaths}
-            </Text>
-            {customPaths.map((path) => (
-              <PathBadge key={path}>{path}</PathBadge>
-            ))}
-          </Box>
-        )}
+        <DynamicList
+          label={m.add_plan_modal_field_paths()}
+          tooltip={m.add_plan_modal_field_paths_tooltip()}
+          items={paths}
+          onUpdate={onPathsChange}
+          required
+          autocompleteType="uri"
+          placeholder={m.add_plan_modal_field_paths()}
+          testId="add-plan-path"
+        />
       </Box>
 
       <Box>
@@ -185,22 +121,6 @@ export const BackupScopeEditor = ({
             );
           })}
         </Stack>
-        {(customExcludes.length > 0 || iexcludes.length > 0) && (
-          <Box
-            mt={3}
-            p={3}
-            borderWidth="1px"
-            borderColor="border"
-            borderRadius="md"
-          >
-            <Text fontSize="xs" fontWeight="semibold">
-              {copy.customRules}
-            </Text>
-            {[...customExcludes, ...iexcludes].map((rule, index) => (
-              <PathBadge key={`${rule}-${index}`}>{rule}</PathBadge>
-            ))}
-          </Box>
-        )}
       </Box>
 
       <AccordionRoot collapsible variant="plain">
@@ -221,16 +141,6 @@ export const BackupScopeEditor = ({
           </AccordionItemTrigger>
           <AccordionItemContent px={0} pt={3}>
             <Stack gap={4}>
-              <DynamicList
-                label={m.add_plan_modal_field_paths()}
-                tooltip={m.add_plan_modal_field_paths_tooltip()}
-                items={paths}
-                onUpdate={onPathsChange}
-                required
-                autocompleteType="uri"
-                placeholder={m.add_plan_modal_field_paths()}
-                testId="add-plan-path"
-              />
               <DynamicList
                 label={m.add_plan_modal_field_excludes()}
                 items={excludes}

@@ -4,14 +4,17 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Replace compiled per-service backup source switches with a
+  generic root-directory list so new Docker and Web projects are included
+  without frontend changes.
 - [x] 2026-08-09: Back up Home Assistant Recorder history and Backrest operation
   databases through consistent staging copies, preserve historical Jellyfin
   database files, and omit common macOS, DSM, and Windows filesystem metadata.
 - [x] 2026-08-09: Exclude the legacy Live Proxy data copy after moving active
   channel data to `/volume1/docker/live-proxy`.
 - [x] 2026-08-09: Describe flat Synology persistence roots for Backrest and
-  AutoFilm, and keep separately mounted Home Assistant and Telegram data from
-  appearing twice in one snapshot.
+  AutoFilm; Home Assistant and Telegram now enter through the shared Docker
+  root without duplicate source mounts.
 - [x] 2026-08-09: Exclude Finder-generated `.DS_Store` files by default in new
   backup plans and expose the rule as a named plan setting.
 - [x] 2026-08-09: Keep long error notifications inside the mobile viewport and
