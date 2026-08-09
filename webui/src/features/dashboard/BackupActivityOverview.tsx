@@ -35,6 +35,7 @@ interface ActivityDay {
   warning: number;
   failed: number;
   running: number;
+  pending: number;
 }
 
 interface ActivitySummary {
@@ -55,12 +56,12 @@ const activityCopy = () => {
     todayUpload: zh ? "今日上传" : "Uploaded today",
     monthUpload: zh ? "本月上传" : "Uploaded this month",
     days: zh ? "备份天数" : "Backup days",
-    daily: zh ? "备份日历" : "Daily backups",
     noBackup: zh ? "无备份" : "No backup",
     success: zh ? "成功" : "successful",
     warning: zh ? "警告" : "warnings",
     failed: zh ? "异常" : "failed",
     running: zh ? "进行中" : "running",
+    pending: zh ? "等待开始" : "waiting to start",
     dayBackupSize: zh ? "备份大小" : "Backup size",
     dayUpload: zh ? "上传量" : "Uploaded",
     weekdays: zh
@@ -124,6 +125,7 @@ function summarizeActivity(operations: Operation[]): ActivitySummary {
       warning: 0,
       failed: 0,
       running: 0,
+      pending: 0,
     };
     const metrics = backupMetrics(operation);
     day.bytesAdded += metrics.bytesAdded;
@@ -137,8 +139,10 @@ function summarizeActivity(operations: Operation[]): ActivitySummary {
         day.warning += 1;
         break;
       case OperationStatus.STATUS_INPROGRESS:
-      case OperationStatus.STATUS_PENDING:
         day.running += 1;
+        break;
+      case OperationStatus.STATUS_PENDING:
+        day.pending += 1;
         break;
       case OperationStatus.STATUS_ERROR:
       case OperationStatus.STATUS_SYSTEM_CANCELLED:
@@ -365,6 +369,7 @@ const ActivityDayTooltip = ({
         day.warning > 0 ? `${day.warning} ${copy.warning}` : "",
         day.failed > 0 ? `${day.failed} ${copy.failed}` : "",
         day.running > 0 ? `${day.running} ${copy.running}` : "",
+        day.pending > 0 ? `${day.pending} ${copy.pending}` : "",
       ]
         .filter(Boolean)
         .join(" · ")
@@ -541,10 +546,6 @@ export const BackupActivityOverview = ({
         </SimpleGrid>
 
         <Box pt={{ base: 6, md: 8 }} pb={{ base: 6, md: 8 }}>
-          <Text mb={4} fontSize="14px" fontWeight="600">
-            {copy.daily}
-          </Text>
-
           <Grid
             templateColumns="20px minmax(0, 1fr)"
             columnGap={{ base: 2, md: 3 }}
@@ -674,7 +675,9 @@ export const BackupActivityOverview = ({
                           ? "inset 0 0 0 1px rgba(255, 164, 92, 0.9)"
                           : outcome === "inprogress"
                             ? "inset 0 0 0 1px rgba(55, 215, 133, 0.98), 0 0 8px rgba(55, 215, 133, 0.34)"
-                            : undefined
+                            : outcome === "empty" && (day?.pending ?? 0) > 0
+                              ? "inset 0 0 0 1px rgba(99, 185, 232, 0.98), 0 0 8px rgba(99, 185, 232, 0.26)"
+                              : undefined
                       }
                     />
                   </Tooltip>

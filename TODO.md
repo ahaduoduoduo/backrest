@@ -4,6 +4,9 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Restore visible desktop depth in the historical file stack,
+  balance the dashboard's top and bottom-dock spacing, remove the redundant
+  calendar heading, and distinguish queued backups with a blue outline.
 - [x] 2026-08-10: Give the bottom-dock selection pill one geometric reference
   so its top, bottom, and outer horizontal margins are all six pixels.
 - [x] 2026-08-10: Increase bottom-dock transparency and restore the historical
