@@ -3,7 +3,7 @@ import { devices } from '@playwright/test';
 import { backrestClient, seedInstance, seedPlan, seedRepo } from '../harness/seed';
 
 test.describe('mobile backup console', () => {
-  test('uses the real device viewport, compact navigation, and a full-screen editor', async ({
+  test('uses the real device viewport, bottom dock, and a full-screen editor', async ({
     browser,
     backrest,
   }) => {
@@ -46,30 +46,29 @@ test.describe('mobile backup console', () => {
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
 
-    await page.getByRole('button', { name: 'Menu' }).click();
-    const navigation = page.getByRole('dialog');
-    await expect(navigation.getByTestId('mobile-add-plan')).toBeVisible();
+    const dock = page.getByRole('navigation');
+    await expect(dock).toBeVisible();
+    await page.getByRole('button', { name: 'Plans', exact: true }).click();
+    const navigation = page.getByTestId('dock-submenu');
+    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
     await expect(navigation.getByText('nas-config')).toBeVisible();
     await expect
       .poll(async () => {
-        const box = await navigation.boundingBox();
+        const box = await dock.boundingBox();
         return (
           box && {
-            x: Math.round(box.x),
             width: Math.round(box.width),
-            height: Math.round(box.height),
+            bottomAtLeastSafeMargin: Math.round(viewport.height - box.y - box.height) >= 18,
           }
         );
       })
-      .toEqual({ x: 0, width: viewport.width, height: viewport.height });
-    await page.keyboard.press('Escape');
+      .toEqual({ width: 340, bottomAtLeastSafeMargin: true });
+    await page.getByRole('button', { name: 'Plans', exact: true }).click();
     await expect(navigation).not.toBeVisible();
 
-    await page.getByRole('button', { name: 'Menu' }).click();
+    await page.getByRole('button', { name: 'Plans', exact: true }).click();
     await expect(navigation).toBeVisible();
-    await navigation
-      .getByRole('button', { name: 'Edit Plan nas-config', exact: true })
-      .click();
+    await navigation.getByRole('button', { name: 'Edit Plan nas-config', exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('button', { name: 'Content' })).toBeVisible();

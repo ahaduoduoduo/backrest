@@ -90,11 +90,10 @@ test.describe('cancel a running backup', () => {
     //    directly there; the default Tree View only shows rows after
     //    selecting a node).
     await page.goto(`${backrest.url}/#/plan/my-plan`);
-    await expect(page.getByTestId('plan-backup-now')).toBeVisible();
-    await page.getByRole('tab', { name: 'List View' }).click();
+    await page.getByTestId('view-tab-list').click();
 
     // Trigger the backup.
-    await page.getByTestId('plan-backup-now').click();
+    await backrestClient(backrest).backup({ value: 'my-plan' });
 
     // 3. The (single) Backup operation-row reaches "in progress".
     const backupRow = page.locator('[data-testid="operation-row"][data-op-type="Backup"]');
@@ -137,8 +136,7 @@ test.describe('cancel a running backup', () => {
     // 6. Durability + UI sanity: reload the page; the plan view still
     //    renders and the cancelled backup row persists.
     await page.reload();
-    await expect(page.getByTestId('plan-backup-now')).toBeVisible();
-    await page.getByRole('tab', { name: 'List View' }).click();
+    await page.getByTestId('view-tab-list').click();
 
     const rowAfterReload = page.locator('[data-testid="operation-row"][data-op-type="Backup"]');
     await expect(rowAfterReload).toHaveCount(1, { timeout: 30_000 });

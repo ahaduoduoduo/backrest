@@ -19,9 +19,14 @@ import {
   FiLock,
   FiGlobe,
   FiServer,
+  FiLogOut,
 } from "react-icons/fi";
 import { formatErrorAlert, alerts } from "../../components/common/Alerts";
-import { backrestService, authenticationService } from "../../api/client";
+import {
+  backrestService,
+  authenticationService,
+  setAuthToken,
+} from "../../api/client";
 import {
   clone,
   create,
@@ -68,6 +73,7 @@ import {
   AccordionRoot,
 } from "../../components/ui/accordion";
 import { DataListItem, DataListRoot } from "../../components/ui/data-list";
+import { Tooltip } from "../../components/ui/tooltip";
 
 export const SettingsModal = () => {
   const [config, setConfig] = useConfig();
@@ -178,7 +184,12 @@ export const SettingsModal = () => {
       setGeneratedToken(resp.token);
       await refreshConfig();
     } catch (e: any) {
-      alerts.error(formatErrorAlert(e, m.settings_modal_failed_to_generate_pairing_token()));
+      alerts.error(
+        formatErrorAlert(
+          e,
+          m.settings_modal_failed_to_generate_pairing_token(),
+        ),
+      );
     } finally {
       setGenerateLoading(false);
     }
@@ -194,7 +205,9 @@ export const SettingsModal = () => {
       setConfig(await backrestService.setConfig(newConfig));
       alerts.success(m.settings_modal_pairing_token_removed());
     } catch (e: any) {
-      alerts.error(formatErrorAlert(e, m.settings_modal_failed_to_remove_pairing_token()));
+      alerts.error(
+        formatErrorAlert(e, m.settings_modal_failed_to_remove_pairing_token()),
+      );
     }
   };
 
@@ -276,8 +289,16 @@ export const SettingsModal = () => {
   const users = getField(["auth", "users"]) || [];
 
   const sections: SectionDef[] = [
-    { id: "general", label: m.settings_modal_general(), icon: <FiSettings size={14} /> },
-    { id: "auth", label: m.settings_modal_authentication(), icon: <FiLock size={14} /> },
+    {
+      id: "general",
+      label: m.settings_modal_general(),
+      icon: <FiSettings size={14} />,
+    },
+    {
+      id: "auth",
+      label: m.settings_modal_authentication(),
+      icon: <FiLock size={14} />,
+    },
     ...(isMultihostSyncEnabled
       ? [
           {
@@ -300,6 +321,23 @@ export const SettingsModal = () => {
       onClose={handleCancel}
       title={m.app_menu_settings()}
       headerIcon={<FiSettings size={14} />}
+      headerStart={
+        !config.auth?.disabled ? (
+          <Tooltip content={m.app_logout()}>
+            <IconButton
+              size="xs"
+              variant="ghost"
+              aria-label={m.app_logout()}
+              onClick={() => {
+                setAuthToken("");
+                window.location.reload();
+              }}
+            >
+              <FiLogOut />
+            </IconButton>
+          </Tooltip>
+        ) : undefined
+      }
       sections={sections}
       dirty={dirty}
       dirtyCount={1}
@@ -515,7 +553,9 @@ export const SettingsModal = () => {
                       <Input
                         value={tokenLabel}
                         onChange={(e) => setTokenLabel(e.target.value)}
-                        placeholder={m.settings_modal_eg_laptop2({ example: "laptop-2" })}
+                        placeholder={m.settings_modal_eg_laptop2({
+                          example: "laptop-2",
+                        })}
                         width="full"
                       />
                     </Field>
@@ -528,7 +568,9 @@ export const SettingsModal = () => {
                         {/* @ts-ignore */}
                         <SelectTrigger>
                           {/* @ts-ignore */}
-                          <SelectValueText placeholder={m.settings_modal_select_ttl()} />
+                          <SelectValueText
+                            placeholder={m.settings_modal_select_ttl()}
+                          />
                         </SelectTrigger>
                         {/* @ts-ignore */}
                         <SelectContent zIndex={2000}>
@@ -540,7 +582,10 @@ export const SettingsModal = () => {
                         </SelectContent>
                       </SelectRoot>
                     </Field>
-                    <Field label={m.settings_modal_max_uses()} helperText={"0 = " + m.settings_modal_0_unlimited()}>
+                    <Field
+                      label={m.settings_modal_max_uses()}
+                      helperText={"0 = " + m.settings_modal_0_unlimited()}
+                    >
                       <Input
                         type="number"
                         value={tokenMaxUses}
@@ -725,7 +770,11 @@ const PairingTokenItem = ({
             size="xs"
             variant="ghost"
             onClick={() => setShowToken(!showToken)}
-            aria-label={showToken ? m.settings_modal_hide_token() : m.settings_modal_show_token()}
+            aria-label={
+              showToken
+                ? m.settings_modal_hide_token()
+                : m.settings_modal_show_token()
+            }
           >
             {showToken ? <FiEyeOff size={14} /> : <FiEye size={14} />}
           </IconButton>
@@ -805,7 +854,9 @@ const KnownHostsList = ({ items, onUpdate, peerStates, config }: any) => {
       const colonIdx = pairToken.indexOf(":");
       if (hashIdx === -1 || colonIdx === -1 || colonIdx > hashIdx) {
         throw new Error(
-          m.settings_modal_invalid_token_format_expected_keyidsecretinstanceid({ expected: "<keyid>:<secret>#<instanceid>" }),
+          m.settings_modal_invalid_token_format_expected_keyidsecretinstanceid({
+            expected: "<keyid>:<secret>#<instanceid>",
+          }),
         );
       }
       const keyId = pairToken.substring(0, colonIdx);
@@ -841,9 +892,13 @@ const KnownHostsList = ({ items, onUpdate, peerStates, config }: any) => {
       setPairToken("");
       setPairInstanceUrl("");
       setShowAddForm(false);
-      alerts.success(m.settings_modal_server_added_to_known_hosts_save_settings_to_apply());
+      alerts.success(
+        m.settings_modal_server_added_to_known_hosts_save_settings_to_apply(),
+      );
     } catch (e: any) {
-      alerts.error(formatErrorAlert(e, m.settings_modal_failed_to_add_known_host()));
+      alerts.error(
+        formatErrorAlert(e, m.settings_modal_failed_to_add_known_host()),
+      );
     }
   };
 
@@ -879,7 +934,9 @@ const KnownHostsList = ({ items, onUpdate, peerStates, config }: any) => {
               <Input
                 value={pairInstanceUrl}
                 onChange={(e) => setPairInstanceUrl(e.target.value)}
-                placeholder={m.settings_modal_eg_laptop2({ example: "http://server:9898" })}
+                placeholder={m.settings_modal_eg_laptop2({
+                  example: "http://server:9898",
+                })}
                 width="full"
               />
             </Field>

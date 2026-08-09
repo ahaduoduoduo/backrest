@@ -26,25 +26,27 @@ export const test = base.extend<BackrestFixtures>({
 export { expect };
 
 /**
- * Opens the current desktop navigation drawer and returns its dialog.
- *
- * The console no longer keeps a persistent sidebar mounted. Tests that need
- * a plan, repository, or add action must open the header navigation first.
- * The helper is idempotent so a journey can request several items from the
- * same open drawer without toggling it closed.
+ * Opens one bottom-dock submenu and returns it.
  */
-export async function openNavigation(page: Page): Promise<Locator> {
-  const navigation = page.getByRole('dialog', { name: 'Menu' });
-  if (!(await navigation.isVisible())) {
-    await page.getByTestId('desktop-navigation-trigger').click();
+export async function openNavigation(
+  page: Page,
+  section: 'plans' | 'repos' = 'plans',
+): Promise<Locator> {
+  const label = section === 'plans' ? 'Plans' : 'Repositories';
+  const trigger = page.getByRole('button', { name: label, exact: true });
+  const navigation = page.getByTestId('dock-submenu');
+  if (!(await navigation.isVisible()) || (await navigation.getAttribute('aria-label')) !== label) {
+    await trigger.click();
     await expect(navigation).toBeVisible();
+    await expect(navigation).toHaveAttribute('aria-label', label);
   }
   return navigation;
 }
 
-/** Returns one stable navigation test target, opening the drawer if needed. */
+/** Returns one stable navigation test target, opening its dock submenu first. */
 export async function navigationItem(page: Page, testId: string): Promise<Locator> {
-  const navigation = await openNavigation(page);
+  const section = testId.includes('repo') ? 'repos' : 'plans';
+  const navigation = await openNavigation(page, section);
   return navigation.getByTestId(testId);
 }
 

@@ -1,4 +1,4 @@
-import { test, expect, openNavigation } from '../harness/fixtures';
+import { test, expect } from '../harness/fixtures';
 import { seedInstance } from '../harness/seed';
 
 /**
@@ -36,9 +36,7 @@ test.describe('settings edit', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
     // Reopen Settings from the navigation panel.
-    let navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
-    await navigation.getByRole('button', { name: 'Settings' }).click();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -70,9 +68,7 @@ test.describe('settings edit', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
     // Reopen Settings and confirm both facts persisted.
-    navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
-    await navigation.getByRole('button', { name: 'Settings' }).click();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const reopened = page.getByRole('dialog');
     await expect(reopened).toBeVisible();
 

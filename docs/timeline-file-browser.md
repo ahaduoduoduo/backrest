@@ -2,10 +2,9 @@
 
 Updated: 2026-08-09
 
-The plan page separates recovery from diagnostics. **Browse Files** opens the
-newest usable Restic snapshot directly, while **Operation History** keeps the
-complete execution record for backup, indexing, hooks, restore, forget, check,
-prune, and command operations.
+The plan page opens directly into historical files. A single icon below the
+version card flips the same surface to the complete operation record for
+backup, indexing, hooks, restore, forget, check, prune, and command operations.
 
 ## Snapshot timeline
 
@@ -21,15 +20,15 @@ return to that version's root instead of silently navigating somewhere else.
 
 All layouts use a Time Machine-inspired stack of up to five same-size directory
 windows. Older versions recede behind the active window, while a compact rail
-on the right provides newer/older arrows and sampled timeline ticks. The stack
+inside its right edge provides older/newer arrows and sampled timeline ticks. The stack
 keeps Backrest's dark blue visual language rather than reproducing Finder or
 the macOS desktop. Folder rows are keyboard accessible; every file and folder
 retains the existing information, restore, and download actions.
 
-The header also retains Backrest's two-step delete action for the selected
-historical version. The operation is scheduled through the existing Forget
-API, and the live version list removes it once the snapshot index is marked as
-forgotten.
+A neutral delete icon below the card arms on its first click and becomes red.
+The second click schedules the selected version through the existing Forget
+API; the live version list removes it once the snapshot index is marked as
+forgotten. Operation history remains available from the adjacent flip button.
 
 ## Repository reads
 
@@ -50,6 +49,19 @@ Version changes use a 240 ms transform-and-opacity transition with the shared
 viewer while the next window advances from the stack; moving to a newer version
 reverses the movement. Reduced-motion clients keep a short opacity transition
 and apply positional changes immediately.
+
+The operation face uses a 240 ms Y-axis flip for spatial consistency. Reduced
+motion replaces the rotation with a 160 ms cross-fade. Bottom-dock submenus use
+a 180 ms transform-and-opacity transition.
+
+## Application navigation
+
+The application has no persistent header, breadcrumb row, or navigation
+drawer. A glass capsule stays at the bottom on desktop and mobile with Home,
+Plans, Repositories, and Settings icons. Plans and Repositories expose their
+items above the capsule on hover or click. Repository location labels come
+from the Restic backend URI, so network backends are shown as remote storage
+even when the current Backrest instance manages them.
 
 ## Dashboard task cards
 

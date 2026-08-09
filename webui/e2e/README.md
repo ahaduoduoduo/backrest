@@ -88,7 +88,7 @@ pnpm run e2e          # headless
 | `sidebar-add-repo`                                   | Sidebar: "Add repo" button                                                                                      |
 | `sidebar-item-plan-${id}`                            | Sidebar: plan row                                                                                               |
 | `sidebar-item-repo-${id}`                            | Sidebar: repo row                                                                                               |
-| `plan-backup-now`                                    | Plan view: "Backup now" button                                                                                  |
+| `dock-submenu`                                       | Bottom dock: plans or repositories submenu                                                                      |
 | `operation-row`                                      | Operation list/tree rows; carries `data-op-type` (e.g. "Backup") and `data-status` (e.g. "success") attributes  |
 | `login-username` / `login-password` / `login-submit` | Login modal                                                                                                     |
 | `snapshot-browser-entry`                             | Snapshot browser: file/dir row                                                                                  |

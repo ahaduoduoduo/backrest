@@ -63,8 +63,14 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/PlanSnapshotExplorer.tsx` and
   `SnapshotExplorerHeader.tsx`: present successful Restic snapshots as a
   Time Machine-inspired directory-window stack with persistent paths, a
-  sampled right-side timeline, older/newer navigation, and selected-version
-  deletion.
+  sampled in-card timeline and older/newer navigation.
+- `webui/src/features/plans/PlanView.tsx`: owns the single task title, file and
+  operation card faces, 3D flip state, and icon-only two-step version deletion.
+- `webui/src/components/layout/BottomDock.tsx`: fixed desktop/mobile capsule
+  navigation with Home, Plans, Repositories, and Settings; task and repository
+  submenus support pointer hover and touch click without a page header.
+- `webui/src/lib/repositoryLocation.ts`: classifies the actual Restic backend
+  URI as local storage, remote storage, or a remote Backrest instance.
 - `docs/timeline-file-browser.md`: documents snapshot selection, bounded
   repository reads, responsive behavior, motion, and task-card controls.
 - `webui/messages/zh.json`: plain-language Chinese product copy for navigation,
@@ -73,12 +79,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   behavioral difference between deleting old version records and reclaiming
   unreferenced storage space.
 - `webui/src/index.sass`, `webui/src/app/App.tsx`, and
-  `webui/src/components/layout/MainContentArea.tsx`: fixed dark application
-  shell, page-root neutral glass desktop navigation, responsive navigation,
-  spacing, border, and canvas treatment.
-- `webui/src/components/layout/MobileNavigation.tsx`: compact full-screen
-  mobile navigation using the dashboard's rounded dark panels, blue active
-  state, and grouped dashboard, plan, repository, and settings rows.
+  `webui/src/components/layout/MainContentArea.tsx`: headerless dark application
+  shell, full-width page sizing, bottom-dock clearance, glass surfaces, and
+  responsive canvas treatment.
 - `webui/src/components/common/TwoPaneModal.tsx`: desktop two-pane editor and a
   fixed, opaque phone editor covering the complete viewport.
 - `webui/src/components/ui/toaster.tsx`: viewport-bounded global notifications

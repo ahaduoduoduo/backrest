@@ -175,9 +175,8 @@ test.describe('sftp-backed repository', () => {
     // pick up the RPC-seeded plan.
     await page.goto(`${backrest.url}/#/plan/sftp-plan`);
     await page.reload();
-    await expect(page.getByTestId('plan-backup-now')).toBeVisible();
-    await page.getByTestId('plan-backup-now').click();
-    await page.getByRole('tab', { name: 'List View' }).click();
+    await backrestClient(backrest).backup({ value: 'sftp-plan' });
+    await page.getByTestId('view-tab-list').click();
 
     await expect(
       page.locator('[data-testid="operation-row"][data-op-type="Backup"][data-status="success"]'),

@@ -79,14 +79,13 @@ test.describe('real-time backup progress (operation history)', () => {
     // 2. Open the plan before any backup exists, then enter detailed operation
     //    history. The page is never reloaded from here on.
     await page.goto(`${backrest.url}/#/plan/my-plan`);
-    await expect(page.getByTestId('plan-backup-now')).toBeVisible();
     await page.getByTestId('view-tab-list').click();
     // The disabled schedule means anything that appears later arrived through
     // the live operation stream.
     await expect(page.getByText('No operations yet')).toBeVisible();
 
     // 3. Trigger the backup.
-    await page.getByTestId('plan-backup-now').click();
+    await client.backup({ value: 'my-plan' });
 
     // 4a. The Backup row arrives through the live stream and reports its
     //     in-progress state directly in the diagnostics list.

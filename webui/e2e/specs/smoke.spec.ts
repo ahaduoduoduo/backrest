@@ -1,4 +1,4 @@
-import { test, expect, openNavigation } from '../harness/fixtures';
+import { test, expect, navigationItem } from '../harness/fixtures';
 import { seedInstance } from '../harness/seed';
 
 test.describe('smoke', () => {
@@ -27,8 +27,7 @@ test.describe('smoke', () => {
     // No setup dialog auto-opens for a configured instance.
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
-    const navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
-    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-repo')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-plan')).toBeVisible();
   });
 });

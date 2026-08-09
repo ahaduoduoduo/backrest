@@ -213,8 +213,6 @@ const FileRow = ({
       align="center"
       minH={{ base: "58px", md: "52px" }}
       px={{ base: 3, md: 4 }}
-      borderBottom="1px solid"
-      borderColor="whiteAlpha.070"
       gap={3}
     >
       <Flex
@@ -308,12 +306,14 @@ export const PlanSnapshotExplorer = ({
   planId,
   instanceId,
   maxHistory,
+  onVersionChange,
 }: {
   repoId: string;
   repoGuid: string;
   planId: string;
   instanceId?: string;
   maxHistory: bigint;
+  onVersionChange?: (snapshotId: string) => void;
 }) => {
   const request = useMemo(
     () =>
@@ -349,6 +349,10 @@ export const PlanSnapshotExplorer = ({
       setSelectedId(versions[0].id);
     }
   }, [versions, selectedId]);
+
+  useEffect(() => {
+    onVersionChange?.(selectedVersion?.id || "");
+  }, [onVersionChange, selectedVersion?.id]);
 
   useEffect(() => {
     if (!selectedVersion) return;
@@ -433,13 +437,7 @@ export const PlanSnapshotExplorer = ({
     directoryLoading || loadedDirectoryKey !== activeDirectoryKey;
 
   return (
-    <Box
-      className="snapshot-explorer"
-      position="relative"
-      minW={0}
-      px={{ base: 0, md: 3 }}
-      py={{ base: 2, md: 4 }}
-    >
+    <Box className="snapshot-explorer" position="relative" minW={0}>
       <Box className="snapshot-time-scene">
         <Box className="snapshot-time-stage" position="relative" minW={0}>
           <AnimatePresence initial={false}>
@@ -486,14 +484,11 @@ export const PlanSnapshotExplorer = ({
                   aria-hidden={activeVersion ? undefined : true}
                 >
                   {activeVersion ? (
-                    <Box className="snapshot-time-window" overflow="hidden">
-                      <Flex
-                        align="center"
-                        minH="52px"
-                        px={{ base: 2, md: 3 }}
-                        borderBottom="1px solid"
-                        borderColor="whiteAlpha.080"
-                      >
+                    <Box
+                      className="snapshot-time-window snapshot-time-window-active"
+                      overflow="hidden"
+                    >
+                      <Flex align="center" minH="52px" px={{ base: 2, md: 3 }}>
                         {currentPath !== "/" && (
                           <IconButton
                             size="xs"
@@ -534,8 +529,6 @@ export const PlanSnapshotExplorer = ({
                         fontFamily="mono"
                         fontSize="9px"
                         letterSpacing="0.08em"
-                        borderBottom="1px solid"
-                        borderColor="whiteAlpha.060"
                       >
                         <Text flex="1">
                           {m.snapshot_explorer_column_name()}
@@ -626,15 +619,12 @@ export const PlanSnapshotExplorer = ({
               );
             })}
           </AnimatePresence>
+          <SnapshotExplorerHeader
+            versions={versions}
+            selectedIndex={selectedIndex}
+            onSelect={selectVersion}
+          />
         </Box>
-
-        <SnapshotExplorerHeader
-          versions={versions}
-          selectedIndex={selectedIndex}
-          repoId={repoId}
-          planId={planId}
-          onSelect={selectVersion}
-        />
       </Box>
     </Box>
   );

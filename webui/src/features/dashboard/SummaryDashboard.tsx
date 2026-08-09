@@ -94,7 +94,7 @@ export const SummaryDashboard = () => {
   );
 
   return (
-    <Stack gap={{ base: 4, md: 8 }} width="full">
+    <Stack gap={{ base: 4, md: 5 }} width="full">
       <BackupActivityOverview
         protectedBytes={protectedBytes}
         planIds={plans.map((plan) => plan.id)}
@@ -105,21 +105,15 @@ export const SummaryDashboard = () => {
 
       {/* Plan cards */}
       {plans.length > 0 && (
-        <Stack gap={4}>
-          <Heading size="md">{m.app_menu_plans()}</Heading>
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-            {plans.map((s) => (
-              <PlanCard key={s.id} summary={s} onRefresh={fetchData} />
-            ))}
-          </SimpleGrid>
-        </Stack>
+        <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+          {plans.map((s) => (
+            <PlanCard key={s.id} summary={s} onRefresh={fetchData} />
+          ))}
+        </SimpleGrid>
       )}
 
       {plans.length === 0 && (
-        <Stack gap={4}>
-          <Heading size="md">{m.app_menu_plans()}</Heading>
-          <EmptyState title={m.dashboard_plans_empty()} icon={<FiServer />} />
-        </Stack>
+        <EmptyState title={m.dashboard_plans_empty()} icon={<FiServer />} />
       )}
     </Stack>
   );

@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { test, expect, navigationItem, openNavigation } from '../harness/fixtures';
+import { test, expect, navigationItem } from '../harness/fixtures';
 import { backrestClient, seedInstance, seedRepo } from '../harness/seed';
 import type { Page } from '@playwright/test';
 
@@ -96,9 +96,8 @@ test.describe('backup hooks', () => {
     const marker = path.join(backrest.dataDir, 'hook-ran.txt');
 
     await page.goto(backrest.url);
-    const navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
-    await expect(navigation.getByTestId('sidebar-item-repo-local-repo')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-plan')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-item-repo-local-repo')).toBeVisible();
 
     await createPlanWithCommandHookViaUI(page, {
       name: 'hook-plan',
@@ -116,7 +115,7 @@ test.describe('backup hooks', () => {
     // Run the backup from the plan view.
     await (await navigationItem(page, 'sidebar-item-plan-hook-plan')).click();
     await expect(page).toHaveURL(/#\/plan\/hook-plan$/);
-    await page.getByTestId('plan-backup-now').click();
+    await backrestClient(backrest).backup({ value: 'hook-plan' });
     await page.getByTestId('view-tab-list').click();
 
     // The backup itself succeeds. (A future-dated *scheduled* backup row also
@@ -159,9 +158,8 @@ test.describe('backup hooks', () => {
     });
 
     await page.goto(backrest.url);
-    const navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
-    await expect(navigation.getByTestId('sidebar-item-repo-local-repo')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-plan')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-item-repo-local-repo')).toBeVisible();
 
     await createPlanWithCommandHookViaUI(page, {
       name: 'hook-plan',
@@ -172,7 +170,7 @@ test.describe('backup hooks', () => {
 
     await (await navigationItem(page, 'sidebar-item-plan-hook-plan')).click();
     await expect(page).toHaveURL(/#\/plan\/hook-plan$/);
-    await page.getByTestId('plan-backup-now').click();
+    await backrestClient(backrest).backup({ value: 'hook-plan' });
     await page.getByTestId('view-tab-list').click();
 
     // Default on-error policy (ON_ERROR_IGNORE) is non-halting: the backup

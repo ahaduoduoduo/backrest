@@ -4,6 +4,10 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Remove the global header, breadcrumb duplication, and drawer
+  navigation; add a persistent bottom dock, URI-based remote storage labels,
+  a full-size glass historical card with in-card time controls, reversible
+  operation-history flip, and icon-only two-step version deletion.
 - [x] 2026-08-09: Replace the flat historical-version selector with a
   Time Machine-inspired directory-window stack and right-side timeline,
   simplify task-card decoration, and replace the numbered mobile contents

@@ -1,5 +1,5 @@
-import { test, expect, navigationItem, openNavigation } from '../harness/fixtures';
-import { seedInstance, seedRepo } from '../harness/seed';
+import { test, expect, navigationItem } from '../harness/fixtures';
+import { backrestClient, seedInstance, seedRepo } from '../harness/seed';
 
 /**
  * CUJ3 — the flagship "add first plan and run first backup" journey.
@@ -26,12 +26,12 @@ test.describe('add plan and run first backup (CUJ3)', () => {
     //    navigation contains the add action and seeded repository.
     await page.goto(backrest.url);
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    const navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
-    await expect(navigation.getByTestId('sidebar-item-repo-local-repo')).toBeVisible();
+    const addPlan = await navigationItem(page, 'sidebar-add-plan');
+    await expect(addPlan).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-item-repo-local-repo')).toBeVisible();
 
     // 3. Open the Add Plan dialog (lazy-loaded chunk; auto-waited).
-    await navigation.getByTestId('sidebar-add-plan').click();
+    await addPlan.click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -68,14 +68,12 @@ test.describe('add plan and run first backup (CUJ3)', () => {
     // Navigate into the plan view via the navigation drawer.
     await planItem.click();
     await expect(page).toHaveURL(/#\/plan\/my-plan$/);
-    await expect(page.getByTestId('plan-backup-now')).toBeVisible();
-
-    // 5. Run the first backup. Switch to the List View tab, where each operation
+    // 5. Run the first backup through the API. Switch to the operation face, where each operation
     //    renders as its own operation-row (the default Tree View only surfaces
     //    rows in a side panel after a node is selected). Rows update live —
     //    never reload.
-    await page.getByTestId('plan-backup-now').click();
-    await page.getByRole('tab', { name: 'List View' }).click();
+    await backrestClient(backrest).backup({ value: 'my-plan' });
+    await page.getByTestId('view-tab-list').click();
 
     // A Backup operation row appears immediately once the trigger is accepted.
     // NOTE: the plan carries the default hourly cron schedule, so the list also

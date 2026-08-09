@@ -1,4 +1,4 @@
-import { test, expect, openNavigation } from '../harness/fixtures';
+import { test, expect, navigationItem } from '../harness/fixtures';
 
 test.describe('first run', () => {
   test('completes first-run setup with auth left disabled', async ({ page, backrest }) => {
@@ -36,17 +36,15 @@ test.describe('first run', () => {
     await dialog.getByRole('button', { name: 'Cancel' }).click();
 
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    let navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
-    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-plan')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-repo')).toBeVisible();
 
     // Reload explicitly: setup persisted server-side, so the Settings
     // dialog must not auto-open again.
     await page.reload();
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
-    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-plan')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-repo')).toBeVisible();
   });
 
   test('completes first-run setup with a user account and requires login', async ({
@@ -106,8 +104,7 @@ test.describe('first run', () => {
     // Login succeeds (reloads the page, then loadConfig succeeds and finds
     // users configured): no login dialog remains and navigation is available.
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    const navigation = await openNavigation(page);
-    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
-    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-plan')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-add-repo')).toBeVisible();
   });
 });
