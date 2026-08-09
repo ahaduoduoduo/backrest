@@ -4,6 +4,7 @@ import { SummaryDashboardResponse_DayStatusBucket } from "../../../gen/ts/v1/ser
 import { Tooltip } from "../../components/ui/tooltip";
 import { formatBytes } from "../../lib/formatting";
 import * as m from "../../paraglide/messages";
+import { backupDayOutcome } from "./backupDayOutcome";
 
 const HISTORY_DAYS = 30;
 
@@ -50,7 +51,7 @@ const STATUS_CAT: Record<OperationStatus, StatusCat | null> = {
   [OperationStatus.STATUS_ERROR]: "err",
   // A system cancellation aborts the backup unexpectedly — treat it as a failure.
   [OperationStatus.STATUS_SYSTEM_CANCELLED]: "err",
-  // A backup running for the day; surfaced over any finished result (see CAT_RANK).
+  // A backup running for the day when no usable result has completed yet.
   [OperationStatus.STATUS_INPROGRESS]: "inprogress",
   // A user-initiated cancellation is an incomplete backup, not a hard failure.
   [OperationStatus.STATUS_USER_CANCELLED]: "warn",
@@ -60,32 +61,44 @@ const STATUS_CAT: Record<OperationStatus, StatusCat | null> = {
   [OperationStatus.STATUS_PENDING]: null,
 };
 
-// Higher rank wins for a day with mixed results: a failure beats a finished
-// success, and an in-progress backup beats everything (the day is still settling).
-const CAT_RANK: Record<StatusCat, number> = {
-  ok: 1,
-  warn: 2,
-  err: 3,
-  inprogress: 4,
-};
-
 function cellKind(
   bucket: SummaryDashboardResponse_DayStatusBucket | undefined,
 ): CellKind {
-  const counts = bucket?.statusCounts ?? [];
-  if (counts.length === 0) {
+  const statusCounts = bucket?.statusCounts ?? [];
+  if (statusCounts.length === 0) {
     // No backup this day: only alarming if the server says one was due.
     return bucket?.overdue ? "overdue" : "idle";
   }
-  let worst: StatusCat | undefined;
-  for (const { status } of counts) {
+  const categoryCounts: Record<StatusCat, number> = {
+    ok: 0,
+    warn: 0,
+    err: 0,
+    inprogress: 0,
+  };
+  for (const { status } of statusCounts) {
     const cat = STATUS_CAT[status];
-    if (cat && (worst === undefined || CAT_RANK[cat] > CAT_RANK[worst])) {
-      worst = cat;
-    }
+    if (cat) categoryCounts[cat]++;
   }
-  // A day with operations but no recognized status (e.g. only in-progress).
-  return worst ?? "other";
+  switch (
+    backupDayOutcome({
+      success: categoryCounts.ok,
+      warning: categoryCounts.warn,
+      inprogress: categoryCounts.inprogress,
+      error: categoryCounts.err,
+    })
+  ) {
+    case "success":
+      return "ok";
+    case "warning":
+      return "warn";
+    case "inprogress":
+      return "inprogress";
+    case "error":
+      return "err";
+    default:
+      // A day with operations but no outcome yet (e.g. only pending).
+      return "other";
+  }
 }
 
 const MS_PER_DAY = 86_400_000;
@@ -156,7 +169,8 @@ const CAT_LABEL: Record<StatusCat, (p: { count: number }) => string> = {
   ok: m.dashboard_history_tooltip_status_ok,
 };
 
-// Worst-first, matching CAT_RANK, so the tooltip lists the most urgent line first.
+// Detail order remains urgency-first even though the cell reflects whether the
+// day ultimately obtained a usable backup.
 const CAT_ORDER: StatusCat[] = ["inprogress", "err", "warn", "ok"];
 
 const DayTooltip = ({ cell }: { cell: DayCell }) => {

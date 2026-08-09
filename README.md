@@ -45,7 +45,9 @@ immediate backup action on each task card for manual reruns. Repository capacity
 and 30-day health appear at the top of each repository page, while runtime paths
 and the configuration JSON are grouped under System Info in Settings.
 All 30-day backup strips run chronologically from the oldest date on the left
-to today on the right.
+to today on the right. A successful retry marks that day as backed up in both
+calendar views, while earlier failures remain available in the day details and
+operation history.
 The mobile navigation remains a full-screen numbered contents page. The plan
 editor maps Synology mounts and standard Restic exclude patterns to named
 switches while retaining exact paths and glob rules under an advanced section.

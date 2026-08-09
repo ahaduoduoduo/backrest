@@ -31,14 +31,17 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
   backup activity wall combining Backrest operation metrics with current 115
   day and month upload traffic. Each day exposes Restic's processed bytes and
-  repository-added bytes through a hover/tap detail panel; operation queries
-  do not read repository data.
+  repository-added bytes through a hover/tap detail panel; a successful retry
+  resolves the calendar day's state without deleting earlier error details,
+  and operation queries do not read repository data.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
   activity data and backup-task cards, including a plan-level manual backup
   action that reports active progress and refreshes the card after completion.
 - `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
   status strips in chronological order, from the oldest date on the left to
-  today on the right, with per-day backup-size details.
+  today on the right, with per-day backup-size and mixed-outcome details.
+- `webui/src/features/dashboard/backupDayOutcome.ts`: defines the shared
+  success-first protection rule used by yearly and 30-day backup calendars.
 - `webui/src/features/repositories/RepoView.tsx`: repository file browser,
   operations, storage statistics, maintenance actions, and a top-level 30-day
   capacity and backup-health summary.
@@ -66,5 +69,7 @@ configuration model, operation log, snapshot browser, and restore operations.
   contents index for dashboard, plans, repositories, and settings.
 - `webui/src/components/common/TwoPaneModal.tsx`: desktop two-pane editor and a
   fixed, opaque phone editor covering the complete viewport.
+- `webui/src/components/ui/toaster.tsx`: viewport-bounded global notifications
+  with wrapped, scrollable long-error content on phone screens.
 - `docs/openlist-115-backup.md`: deployment, plan grouping, excludes,
   consistency, and recovery instructions.

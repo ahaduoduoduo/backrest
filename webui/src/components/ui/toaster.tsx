@@ -21,31 +21,61 @@ export const Toaster = () => {
     <Portal>
       <ChakraToaster toaster={toaster}>
         {(toast: any) => (
-          <Toast.Root width={{ md: "500px" }}>
+          <Toast.Root
+            data-testid="app-toast"
+            width={{ base: "calc(100vw - 24px)", md: "500px" }}
+            maxWidth="calc(100vw - 24px)"
+            minWidth={0}
+            alignItems="flex-start"
+            overflow="hidden"
+          >
             {toast.type === "loading" ? (
-              <Spinner size="sm" color="blue.solid" />
+              <Spinner size="sm" color="blue.solid" flexShrink={0} />
             ) : (
               // @ts-ignore
-              <Toast.Indicator />
+              <Toast.Indicator flexShrink={0} mt="0.5" />
             )}
-            <Stack gap="1" flex="1" maxWidth="100%" userSelect="text">
+            <Stack
+              gap="1"
+              flex="1"
+              minWidth={0}
+              maxWidth="100%"
+              maxHeight={{ base: "52vh", md: "420px" }}
+              overflowY="auto"
+              userSelect="text"
+            >
               {toast.title && (
                 // @ts-ignore
-                <Toast.Title userSelect="text">{toast.title}</Toast.Title>
+                <Toast.Title
+                  userSelect="text"
+                  whiteSpace="pre-wrap"
+                  overflowWrap="anywhere"
+                  wordBreak="break-word"
+                  lineHeight="1.45"
+                >
+                  {toast.title}
+                </Toast.Title>
               )}
               {toast.description && (
                 // @ts-ignore
-                <Toast.Description userSelect="text">
+                <Toast.Description
+                  userSelect="text"
+                  whiteSpace="pre-wrap"
+                  overflowWrap="anywhere"
+                  wordBreak="break-word"
+                >
                   {toast.description}
                 </Toast.Description>
               )}
             </Stack>
             {toast.action && (
               // @ts-ignore
-              <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>
+              <Toast.ActionTrigger flexShrink={0}>
+                {toast.action.label}
+              </Toast.ActionTrigger>
             )}
             {/* @ts-ignore */}
-            <Toast.CloseTrigger />
+            <Toast.CloseTrigger flexShrink={0} />
           </Toast.Root>
         )}
       </ChakraToaster>

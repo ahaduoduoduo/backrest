@@ -49,7 +49,17 @@ export const formatErrorAlert = (error: any, prefix?: string) => {
     return (
       <>
         {prefix}
-        <pre style={{ alignContent: "normal", textAlign: "left" }}>
+        <pre
+          style={{
+            alignContent: "normal",
+            textAlign: "left",
+            margin: 0,
+            maxWidth: "100%",
+            whiteSpace: "pre-wrap",
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
+          }}
+        >
           {contents}
         </pre>
       </>
