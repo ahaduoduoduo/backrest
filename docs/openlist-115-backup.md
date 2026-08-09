@@ -104,6 +104,7 @@ Example paths:
 Example excludes:
 
 ```text
+**/.DS_Store
 **/*.log
 **/logs/**
 **/cache/**

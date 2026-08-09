@@ -15,6 +15,7 @@ type CellKind =
   | "overdue"
   | "inprogress"
   | "ok"
+  | "recovered"
   | "warn"
   | "err"
   | "other";
@@ -26,6 +27,15 @@ interface DayCell {
   bucket?: SummaryDashboardResponse_DayStatusBucket; // present for in-window days
 }
 
+export function historyCellBoxShadow(kind: CellKind, isToday: boolean) {
+  if (kind === "recovered") {
+    return "0 0 0 1px var(--chakra-colors-orange-400)";
+  }
+  return isToday
+    ? "0 0 0 2px var(--chakra-colors-bg-canvas), 0 0 0 3.5px var(--chakra-colors-fg-muted)"
+    : undefined;
+}
+
 const CELL_STYLE: Record<CellKind, { bg: string; dim: boolean }> = {
   beforeStart: { bg: "bg.muted", dim: true },
   // No backup and none expected yet (e.g. a weekly plan between runs): stay quiet.
@@ -34,6 +44,7 @@ const CELL_STYLE: Record<CellKind, { bg: string; dim: boolean }> = {
   overdue: { bg: "bg.emphasized", dim: false },
   inprogress: { bg: "blue.400", dim: false },
   ok: { bg: "green.500", dim: false },
+  recovered: { bg: "green.500", dim: false },
   warn: { bg: "orange.400", dim: false },
   err: { bg: "red.500", dim: false },
   other: { bg: "bg.muted", dim: false },
@@ -88,7 +99,7 @@ function cellKind(
     })
   ) {
     case "success":
-      return "ok";
+      return categoryCounts.err > 0 ? "recovered" : "ok";
     case "warning":
       return "warn";
     case "inprogress":
@@ -144,7 +155,7 @@ function summaryText(cells: DayCell[]): string {
   if (active.length === 0) return m.dashboard_history_no_data();
   const missed = active.filter((c) => c.kind === "overdue").length;
   const issues = active.filter(
-    (c) => c.kind === "warn" || c.kind === "err",
+    (c) => c.kind === "recovered" || c.kind === "warn" || c.kind === "err",
   ).length;
   if (missed === 0 && issues === 0) return m.dashboard_history_all_backed_up();
   const parts: string[] = [];
@@ -290,11 +301,7 @@ export const HistoryStrip = ({
                 bg={style.bg}
                 opacity={style.dim ? 0.35 : 1}
                 cursor="default"
-                boxShadow={
-                  c.isToday
-                    ? "0 0 0 2px var(--chakra-colors-bg-canvas), 0 0 0 3.5px var(--chakra-colors-fg-muted)"
-                    : undefined
-                }
+                boxShadow={historyCellBoxShadow(c.kind, c.isToday)}
               />
             </Tooltip>
           );

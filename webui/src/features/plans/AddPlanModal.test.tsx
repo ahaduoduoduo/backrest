@@ -133,6 +133,11 @@ describe("AddPlanModal", () => {
       screen.getByText(m.add_plan_modal_field_paths()),
     ).toBeInTheDocument();
     expect(screen.getByText(scopeText("en").backupTitle)).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId("exclude-preset-macos-metadata")
+        .querySelector('input[type="checkbox"]'),
+    ).toBeChecked();
     // Submit button.
     expect(
       screen.getByRole("button", { name: m.add_plan_modal_button_submit() }),
@@ -163,6 +168,7 @@ describe("AddPlanModal", () => {
       (plan) => plan.id === "guided-plan",
     );
     expect(savedPlan?.paths).toContain("/source/docker");
+    expect(savedPlan?.excludes).toContain("**/.DS_Store");
     expect(savedPlan?.excludes).toContain("**/.git/**");
   });
 

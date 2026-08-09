@@ -59,10 +59,11 @@ import {
 } from "../../components/common/TwoPaneModal";
 import { SectionCard } from "../../components/common/SectionCard";
 import { BackupScopeEditor } from "./BackupScopeEditor";
-import { scopeText } from "./backupScopeCatalog";
+import { DEFAULT_PLAN_EXCLUDES, scopeText } from "./backupScopeCatalog";
 
 // Default Plan
 const planDefaults = create(PlanSchema, {
+  excludes: DEFAULT_PLAN_EXCLUDES,
   schedule: {
     schedule: {
       case: "cron",

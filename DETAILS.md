@@ -39,7 +39,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   action that reports active progress and refreshes the card after completion.
 - `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
   status strips in chronological order, from the oldest date on the left to
-  today on the right, with per-day backup-size and mixed-outcome details.
+  today on the right, with per-day backup-size and mixed-outcome details; a
+  recovered failure uses a green cell with an orange outline.
 - `webui/src/features/dashboard/backupDayOutcome.ts`: defines the shared
   success-first protection rule used by yearly and 30-day backup calendars.
 - `webui/src/features/repositories/RepoView.tsx`: repository file browser,
@@ -52,7 +53,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   OpenList REST repository name from its URI and displays its effective upload
   rate inside repository settings.
 - `webui/src/features/plans/backupScopeCatalog.ts`: reusable mapping from the
-  deployed Synology mount paths and Restic patterns to concise labels.
+  deployed Synology mount paths and Restic patterns to concise labels; new
+  plans start with the visible macOS `.DS_Store` exclusion enabled.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: guided source and exclusion
   controls backed by the unchanged `Plan.paths`, `Plan.excludes`, and
   `Plan.iexcludes` fields.
