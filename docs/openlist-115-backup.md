@@ -118,11 +118,14 @@ Example excludes:
 /source/docker/backrest/**
 /source/docker/homeassistant/**
 /source/docker/telegram-data/**
+/source/web-live/data/**
 ```
 
 Home Assistant configuration remains included while its logs, cache, and
 temporary database sidecars are excluded. If the main database is required,
 back it up using a database-aware export or a stable filesystem snapshot.
+Live Proxy channel data is included from `/source/docker/live-proxy`; the old
+copy below `/source/web-live/data` is omitted to avoid duplicate uploads.
 
 ### Time Machine off-site copy
 
