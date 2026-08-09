@@ -52,6 +52,9 @@ The mobile navigation remains a full-screen numbered contents page. The plan
 editor maps Synology mounts and standard Restic exclude patterns to named
 switches while retaining exact paths and glob rules under an advanced section.
 New plans skip Finder-generated `.DS_Store` files by default.
+The deployed Synology layout keeps service data under top-level
+`/volume1/docker/<service>` directories; dedicated Home Assistant and Telegram
+sources exclude their duplicate paths beneath the shared Docker root.
 The Chinese interface uses task-oriented terms throughout: backup tasks,
 storage repositories, backup versions, file browsing, old-version deletion,
 space reclamation, and integrity checks. Restic command names remain in

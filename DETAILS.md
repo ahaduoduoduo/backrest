@@ -54,7 +54,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   rate inside repository settings.
 - `webui/src/features/plans/backupScopeCatalog.ts`: reusable mapping from the
   deployed Synology mount paths and Restic patterns to concise labels; new
-  plans start with the visible macOS `.DS_Store` exclusion enabled.
+  plans start with the visible macOS `.DS_Store` exclusion enabled, and the
+  catalog recognizes flat service roots plus dedicated-source duplicate rules.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: guided source and exclusion
   controls backed by the unchanged `Plan.paths`, `Plan.excludes`, and
   `Plan.iexcludes` fields.

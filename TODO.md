@@ -4,6 +4,9 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Describe flat Synology persistence roots for Backrest and
+  AutoFilm, and keep separately mounted Home Assistant and Telegram data from
+  appearing twice in one snapshot.
 - [x] 2026-08-09: Exclude Finder-generated `.DS_Store` files by default in new
   backup plans and expose the rule as a named plan setting.
 - [x] 2026-08-09: Keep long error notifications inside the mobile viewport and
