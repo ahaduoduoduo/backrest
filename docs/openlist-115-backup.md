@@ -105,6 +105,13 @@ Example excludes:
 
 ```text
 **/.DS_Store
+**/._*
+**/.AppleDouble/**
+**/.Spotlight-V100/**
+**/.fseventsd/**
+**/@tmp/**
+**/#recycle/**
+**/Thumbs.db
 **/*.log
 **/logs/**
 **/cache/**
@@ -121,9 +128,11 @@ Example excludes:
 /source/web-live/data/**
 ```
 
-Home Assistant configuration remains included while its logs, cache, and
-temporary database sidecars are excluded. If the main database is required,
-back it up using a database-aware export or a stable filesystem snapshot.
+Home Assistant configuration remains included while its live database and
+sidecars are excluded from direct reads. The snapshot hook creates and verifies
+a transaction-consistent Recorder database copy in `/staging/recovery/databases`.
+Backrest operation databases use the same export path. Historical Jellyfin
+database copies such as `.bk`, `.old`, and migration backups remain included.
 Live Proxy channel data is included from `/source/docker/live-proxy`; the old
 copy below `/source/web-live/data` is omitted to avoid duplicate uploads.
 

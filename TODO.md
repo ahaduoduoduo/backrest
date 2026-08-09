@@ -4,6 +4,9 @@ Updated: 2026-08-09
 
 ## Completed
 
+- [x] 2026-08-09: Back up Home Assistant Recorder history and Backrest operation
+  databases through consistent staging copies, preserve historical Jellyfin
+  database files, and omit common macOS, DSM, and Windows filesystem metadata.
 - [x] 2026-08-09: Exclude the legacy Live Proxy data copy after moving active
   channel data to `/volume1/docker/live-proxy`.
 - [x] 2026-08-09: Describe flat Synology persistence roots for Backrest and

@@ -10,13 +10,17 @@ import {
 } from "./backupScopeCatalog";
 
 describe("backupScopeCatalog", () => {
-  it("uses the visible macOS metadata preset for new plans", () => {
-    const preset = EXCLUDE_PRESETS.find(
-      (candidate) => candidate.id === "macos-metadata",
-    );
+  it("uses all visible filesystem metadata presets for new plans", () => {
+    const presets = ["macos-metadata", "synology-metadata", "windows-metadata"]
+      .map((id) => EXCLUDE_PRESETS.find((candidate) => candidate.id === id))
+      .filter((preset) => preset !== undefined);
 
-    expect(DEFAULT_PLAN_EXCLUDES).toEqual(["**/.DS_Store"]);
-    expect(preset?.patterns).toEqual(DEFAULT_PLAN_EXCLUDES);
+    expect(DEFAULT_PLAN_EXCLUDES).toEqual(
+      presets.flatMap((preset) => preset.patterns),
+    );
+    expect(DEFAULT_PLAN_EXCLUDES).toContain("**/._*");
+    expect(DEFAULT_PLAN_EXCLUDES).toContain("**/@tmp/**");
+    expect(DEFAULT_PLAN_EXCLUDES).toContain("**/Thumbs.db");
   });
 
   it("maps mounted Synology paths to readable source groups", () => {
@@ -52,13 +56,17 @@ describe("backupScopeCatalog", () => {
   it("recognizes the flat runtime paths without treating them as custom rules", () => {
     const rules = [
       "/source/docker/backrest/**",
-      "/source/docker/autofilm-core/autofilm.sqlite*",
+      "/source/docker/autofilm-core/autofilm.sqlite",
+      "/source/home-assistant/home-assistant_v2.db-wal",
       "/source/docker/homeassistant/**",
       "/source/docker/telegram-data/**",
       "/source/web-live/data/**",
+      "/source/docker/jellyfin/config/data/jellyfin.db.old",
     ];
 
-    expect(getCustomExcludeRules(rules)).toEqual([]);
+    expect(getCustomExcludeRules(rules)).toEqual([
+      "/source/docker/jellyfin/config/data/jellyfin.db.old",
+    ]);
   });
 
   it("provides concise Chinese labels", () => {
