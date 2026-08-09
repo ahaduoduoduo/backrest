@@ -1,15 +1,15 @@
-import { test, expect } from '../harness/fixtures';
+import { test, expect, openNavigation } from '../harness/fixtures';
 import { seedInstance } from '../harness/seed';
 
 /**
- * Settings modal: reopening after first-run setup, immutability of the
+ * Settings modal: reopening from the header navigation after first-run setup, immutability of the
  * instance id, and persistence of an edit across a reload.
  *
  * seedInstance(backrest) (default name "e2e-test") sets config.instance and
  * disables auth via the API directly, so on load shouldShowSettings() is
  * false (webui/src/state/configutil.ts) and no dialog auto-opens — the
- * Settings modal must be reopened explicitly from the sidebar's "Settings"
- * button (webui/src/app/App.tsx, SidebarContent).
+ * Settings modal must be reopened explicitly from the navigation panel's
+ * "Settings" button (webui/src/app/App.tsx, SidebarContent).
  *
  * webui/src/features/settings/SettingsModal.tsx sets
  * `disabled={!!config.instance}` on the instance-id input, so once an
@@ -32,12 +32,13 @@ test.describe('settings edit', () => {
     await seedInstance(backrest, INSTANCE_NAME);
     await page.goto(backrest.url);
 
-    // Seeded instance: sidebar loads directly, no auto-opened dialog.
-    await expect(page.getByTestId('sidebar-add-repo')).toBeVisible();
+    // Seeded instance: no setup dialog auto-opens.
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
-    // Reopen Settings from the sidebar.
-    await page.getByRole('button', { name: 'Settings' }).click();
+    // Reopen Settings from the navigation panel.
+    let navigation = await openNavigation(page);
+    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
+    await navigation.getByRole('button', { name: 'Settings' }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -64,13 +65,14 @@ test.describe('settings edit', () => {
     // triggers window.location.reload().
     await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
 
-    // Post-reload: seeded config is still valid (instance set, auth
-    // disabled), so the sidebar loads directly with no auto-opened dialog.
-    await expect(page.getByTestId('sidebar-add-repo')).toBeVisible();
+    // Post-reload: seeded config is still valid (instance set, auth disabled),
+    // so no setup dialog opens and navigation remains available.
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
     // Reopen Settings and confirm both facts persisted.
-    await page.getByRole('button', { name: 'Settings' }).click();
+    navigation = await openNavigation(page);
+    await expect(navigation.getByTestId('sidebar-add-repo')).toBeVisible();
+    await navigation.getByRole('button', { name: 'Settings' }).click();
     const reopened = page.getByRole('dialog');
     await expect(reopened).toBeVisible();
 

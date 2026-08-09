@@ -1,4 +1,4 @@
-import { test, expect } from '../harness/fixtures';
+import { test, expect, navigationItem } from '../harness/fixtures';
 import type { Page } from '@playwright/test';
 import type { BackrestInstance } from '../harness/backrest';
 
@@ -85,14 +85,13 @@ test.describe('auth login', () => {
     await expect(page.getByTestId('sidebar-add-repo')).toHaveCount(0);
 
     // Correct password: on success LoginModal stores the token and reloads the
-    // page after 500ms. Assert the post-reload state (sidebar), not the toast.
+    // page after 500ms. Assert the post-reload navigation, not the toast.
     await login.getByTestId('login-username').fill(USERNAME);
     await login.getByTestId('login-password').fill(PASSWORD);
     await login.getByTestId('login-submit').click();
 
-    await expect(page.getByTestId('sidebar-add-repo')).toBeVisible();
-    // No dialog should remain once authenticated.
     await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(await navigationItem(page, 'sidebar-add-repo')).toBeVisible();
   });
 
   test('logout returns to the login gate', async ({ page, backrest }) => {
@@ -103,7 +102,8 @@ test.describe('auth login', () => {
     await login.getByTestId('login-username').fill(USERNAME);
     await login.getByTestId('login-password').fill(PASSWORD);
     await login.getByTestId('login-submit').click();
-    await expect(page.getByTestId('sidebar-add-repo')).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(await navigationItem(page, 'sidebar-add-repo')).toBeVisible();
 
     // The header Logout control clears the token and reloads.
     await page.getByRole('button', { name: 'Logout' }).click();

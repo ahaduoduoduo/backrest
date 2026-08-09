@@ -1,5 +1,5 @@
-import { test, expect } from '../harness/fixtures';
-import { seedInstance } from '../harness/seed';
+import { test, expect, navigationItem } from '../harness/fixtures';
+import { backrestClient, seedInstance } from '../harness/seed';
 
 /**
  * CUJ2: add the first repository through the UI.
@@ -24,7 +24,7 @@ test.describe('add repo (CUJ2)', () => {
     await seedInstance(backrest);
     await page.goto(backrest.url);
 
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
 
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
@@ -40,11 +40,11 @@ test.describe('add repo (CUJ2)', () => {
     await dialog.getByTestId('add-repo-submit').click();
 
     // restic init + AddRepo's GUID lookup can take a few seconds.
-    const sidebarItem = page.getByTestId('sidebar-item-repo-my-repo');
-    await expect(sidebarItem).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('dialog')).toHaveCount(0);
+    const repoItem = await navigationItem(page, 'sidebar-item-repo-my-repo');
+    await expect(repoItem).toBeVisible({ timeout: 30_000 });
 
-    await sidebarItem.click();
+    await repoItem.click();
     await expect(page).toHaveURL(/#\/repo\//);
 
     // Repo view rendered.
@@ -70,7 +70,7 @@ test.describe('add repo (CUJ2)', () => {
     await seedInstance(backrest);
     await page.goto(backrest.url);
 
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
 
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
@@ -93,14 +93,17 @@ test.describe('add repo (CUJ2)', () => {
     await expect(toast).toBeVisible({ timeout: 15_000 });
 
     // Testing configuration must not have created the repo yet.
-    await expect(page.getByTestId('sidebar-item-repo-my-repo')).toHaveCount(0);
+    const configBeforeSubmit = await backrestClient(backrest).getConfig({});
+    expect(configBeforeSubmit.repos.some((repo) => repo.id === 'my-repo')).toBe(false);
     await expect(dialog).toBeVisible();
 
     // Toasts render top-end, clear of the dialog footer, so Submit is
     // clickable while the toast is still showing.
     await dialog.getByTestId('add-repo-submit').click();
 
-    await expect(page.getByTestId('sidebar-item-repo-my-repo')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(await navigationItem(page, 'sidebar-item-repo-my-repo')).toBeVisible({
+      timeout: 30_000,
+    });
   });
 });

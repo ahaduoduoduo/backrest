@@ -1,4 +1,4 @@
-import { test, expect } from '../harness/fixtures';
+import { test, expect, navigationItem, openNavigation } from '../harness/fixtures';
 import { seedInstance, seedRepo } from '../harness/seed';
 
 /**
@@ -22,15 +22,16 @@ test.describe('add plan and run first backup (CUJ3)', () => {
       'nested/world.txt': 'nested content',
     });
 
-    // 2. Load the app: the sidebar (and the seeded repo entry) is visible and no
-    //    first-run dialog auto-opens.
+    // 2. Load the app: no first-run dialog auto-opens, and the current
+    //    navigation contains the add action and seeded repository.
     await page.goto(backrest.url);
-    await expect(page.getByTestId('sidebar-add-plan')).toBeVisible();
-    await expect(page.getByTestId('sidebar-item-repo-local-repo')).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);
+    const navigation = await openNavigation(page);
+    await expect(navigation.getByTestId('sidebar-add-plan')).toBeVisible();
+    await expect(navigation.getByTestId('sidebar-item-repo-local-repo')).toBeVisible();
 
     // 3. Open the Add Plan dialog (lazy-loaded chunk; auto-waited).
-    await page.getByTestId('sidebar-add-plan').click();
+    await navigation.getByTestId('sidebar-add-plan').click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -57,14 +58,14 @@ test.describe('add plan and run first backup (CUJ3)', () => {
     await dialog.getByTestId('add-plan-name').click();
     await expect(pathInput).toHaveValue(dataPath);
 
-    // 4. Submit -> dialog closes and the plan appears in the sidebar.
+    // 4. Submit -> dialog closes and the plan appears in navigation.
     await dialog.getByTestId('add-plan-submit').click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
-    const planItem = page.getByTestId('sidebar-item-plan-my-plan');
+    const planItem = await navigationItem(page, 'sidebar-item-plan-my-plan');
     await expect(planItem).toBeVisible();
 
-    // Navigate into the plan view via the sidebar.
+    // Navigate into the plan view via the navigation drawer.
     await planItem.click();
     await expect(page).toHaveURL(/#\/plan\/my-plan$/);
     await expect(page.getByTestId('plan-backup-now')).toBeVisible();

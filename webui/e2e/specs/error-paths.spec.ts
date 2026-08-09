@@ -1,5 +1,5 @@
-import { test, expect } from '../harness/fixtures';
-import { seedInstance, seedRepo } from '../harness/seed';
+import { test, expect, navigationItem } from '../harness/fixtures';
+import { backrestClient, seedInstance, seedRepo } from '../harness/seed';
 
 /**
  * Error-path coverage for the Add Repo and Add Plan dialogs: a wrong-password
@@ -28,9 +28,9 @@ test.describe('error paths', () => {
     await seedInstance(backrest);
     await seedRepo(backrest, 'existing-repo');
     await page.goto(backrest.url);
-    await expect(page.getByTestId('sidebar-item-repo-existing-repo')).toBeVisible();
+    await expect(await navigationItem(page, 'sidebar-item-repo-existing-repo')).toBeVisible();
 
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -57,7 +57,8 @@ test.describe('error paths', () => {
     });
 
     await expect(dialog).toBeVisible();
-    await expect(page.getByTestId('sidebar-item-repo-bad-pw')).toHaveCount(0);
+    const config = await backrestClient(backrest).getConfig({});
+    expect(config.repos.some((repo) => repo.id === 'bad-pw')).toBe(false);
   });
 
   test('submitting Add Repo with everything empty shows required-field validation and adds nothing', async ({
@@ -67,7 +68,7 @@ test.describe('error paths', () => {
     await seedInstance(backrest);
     await page.goto(backrest.url);
 
-    await page.getByTestId('sidebar-add-repo').click();
+    await (await navigationItem(page, 'sidebar-add-repo')).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -79,7 +80,8 @@ test.describe('error paths', () => {
     // en.json: add_repo_modal_error_repo_name_required = "Please input repo name"
     await expect(page.getByText(/Please input repo name/i)).toBeVisible();
     await expect(dialog).toBeVisible();
-    await expect(page.locator('[data-testid^="sidebar-item-repo-"]')).toHaveCount(0);
+    let config = await backrestClient(backrest).getConfig({});
+    expect(config.repos).toHaveLength(0);
 
     // Fill only the name so the *next* validation rule (URI) fires,
     // demonstrating the second add_repo_modal_error_* key as well.
@@ -89,7 +91,8 @@ test.describe('error paths', () => {
     // en.json: add_repo_modal_error_uri_required = "Please input repo URI"
     await expect(page.getByText(/Please input repo URI/i)).toBeVisible();
     await expect(dialog).toBeVisible();
-    await expect(page.locator('[data-testid^="sidebar-item-repo-"]')).toHaveCount(0);
+    config = await backrestClient(backrest).getConfig({});
+    expect(config.repos).toHaveLength(0);
   });
 
   test('submitting Add Plan with no paths surfaces the paths-required validation and adds nothing', async ({
@@ -100,7 +103,7 @@ test.describe('error paths', () => {
     await seedRepo(backrest, 'existing-repo');
     await page.goto(backrest.url);
 
-    await page.getByTestId('sidebar-add-plan').click();
+    await (await navigationItem(page, 'sidebar-add-plan')).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
@@ -127,6 +130,7 @@ test.describe('error paths', () => {
     });
 
     await expect(dialog).toBeVisible();
-    await expect(page.getByTestId('sidebar-item-plan-plan-no-paths')).toHaveCount(0);
+    const config = await backrestClient(backrest).getConfig({});
+    expect(config.plans.some((plan) => plan.id === 'plan-no-paths')).toBe(false);
   });
 });
