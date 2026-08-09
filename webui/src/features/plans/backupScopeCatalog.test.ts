@@ -49,6 +49,17 @@ describe("backupScopeCatalog", () => {
     expect(getCustomExcludeRules(rules)).toEqual(["**/private-build/**"]);
   });
 
+  it("recognizes the flat runtime paths without treating them as custom rules", () => {
+    const rules = [
+      "/source/docker/backrest/**",
+      "/source/docker/autofilm-core/autofilm.sqlite*",
+      "/source/docker/homeassistant/**",
+      "/source/docker/telegram-data/**",
+    ];
+
+    expect(getCustomExcludeRules(rules)).toEqual([]);
+  });
+
   it("provides concise Chinese labels", () => {
     const copy = scopeText("zh");
     expect(copy.overviewTitle).toBe("备份内容");

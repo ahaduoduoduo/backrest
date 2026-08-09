@@ -169,7 +169,7 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
   },
   {
     id: "backrest-runtime",
-    patterns: ["/source/docker/autofilm-suite/autofilm-core/data/backrest/**"],
+    patterns: ["/source/docker/backrest/**"],
     title: { zh: "Backrest 运行目录", en: "Backrest runtime data" },
     description: {
       zh: "排除缓存、任务记录和本地存储库元数据，避免备份包含自身。",
@@ -177,10 +177,22 @@ export const EXCLUDE_PRESETS: ExcludePreset[] = [
     },
   },
   {
+    id: "mounted-source-aliases",
+    patterns: [
+      "/source/docker/homeassistant/**",
+      "/source/docker/telegram-data/**",
+    ],
+    title: { zh: "重复数据入口", en: "Duplicate source aliases" },
+    description: {
+      zh: "这两项仍通过 Home Assistant 和 Telegram 独立入口备份。",
+      en: "These remain backed up through the dedicated Home Assistant and Telegram sources.",
+    },
+  },
+  {
     id: "live-databases",
     patterns: [
       "/source/docker/alist/data.db*",
-      "/source/docker/autofilm-suite/autofilm-core/data/autofilm.sqlite*",
+      "/source/docker/autofilm-core/autofilm.sqlite*",
       "/source/docker/jellyfin/config/data/*.db*",
       "/source/docker/subhub/data/subhub.db*",
       "/source/docker/localproxy-data/localproxy.db*",

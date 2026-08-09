@@ -95,10 +95,10 @@ restores host-specific.
 Example paths:
 
 ```text
-/source/docker-snapshot/compose
-/source/docker-snapshot/volumes
-/source/docker-snapshot/database-dumps
-/source/docker-snapshot/recovery-manifest
+/source/docker
+/source/home-assistant
+/source/docker-volumes/telegram-data
+/staging
 ```
 
 Example excludes:
@@ -115,6 +115,9 @@ Example excludes:
 **/__pycache__/**
 **/home-assistant.db-shm
 **/home-assistant.db-wal
+/source/docker/backrest/**
+/source/docker/homeassistant/**
+/source/docker/telegram-data/**
 ```
 
 Home Assistant configuration remains included while its logs, cache, and
