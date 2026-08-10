@@ -63,7 +63,7 @@ import { DEFAULT_PLAN_EXCLUDES, scopeText } from "./backupScopeCatalog";
 
 // Default Plan
 const planDefaults = create(PlanSchema, {
-  priority: 0,
+  uploadWeight: 1,
   excludes: DEFAULT_PLAN_EXCLUDES,
   schedule: {
     schedule: {
@@ -169,6 +169,7 @@ export const AddPlanModal = ({
   const handleOk = async () => {
     setConfirmLoading(true);
     try {
+      const uploadWeight = formData.uploadWeight || 1;
       if (!formData.id?.trim()) {
         throw new Error(m.add_plan_modal_validation_plan_name_required());
       }
@@ -182,11 +183,17 @@ export const AddPlanModal = ({
         throw new Error(m.add_plan_modal_validation_repository_required());
       }
       if (
-        !Number.isInteger(formData.priority) ||
-        formData.priority < -2147483648 ||
-        formData.priority > 2147483647
+        !Number.isFinite(formData.dailyUploadGib) ||
+        formData.dailyUploadGib < 0
       ) {
-        throw new Error(m.add_plan_modal_validation_priority_integer());
+        throw new Error(m.add_plan_modal_validation_daily_upload_gib());
+      }
+      if (
+        !Number.isInteger(uploadWeight) ||
+        uploadWeight < 1 ||
+        uploadWeight > 1000
+      ) {
+        throw new Error(m.add_plan_modal_validation_upload_weight());
       }
       if (
         formData.backup_flags &&
@@ -212,9 +219,13 @@ export const AddPlanModal = ({
         );
       }
 
-      const plan = fromJson(PlanSchema, formData, {
-        ignoreUnknownFields: true,
-      });
+      const plan = fromJson(
+        PlanSchema,
+        { ...formData, uploadWeight },
+        {
+          ignoreUnknownFields: true,
+        },
+      );
 
       if (
         plan.retention &&
@@ -465,25 +476,45 @@ export const AddPlanModal = ({
             onChange={(v: any) => updateField(["schedule"], v)}
             defaults={ScheduleDefaultsDaily}
           />
-          <Field
-            label={m.add_plan_modal_field_priority()}
-            helperText={m.add_plan_modal_field_priority_tooltip()}
-          >
-            <Input
-              type="number"
-              inputMode="numeric"
-              step={1}
-              min={-2147483648}
-              max={2147483647}
-              value={getField(["priority"]) ?? 0}
-              onChange={(e) =>
-                updateField(
-                  ["priority"],
-                  e.target.value === "" ? 0 : Number(e.target.value),
-                )
-              }
-            />
-          </Field>
+          <Flex gap={3} direction={{ base: "column", md: "row" }}>
+            <Field
+              label={m.add_plan_modal_field_daily_upload_gib()}
+              helperText={m.add_plan_modal_field_daily_upload_gib_tooltip()}
+            >
+              <Input
+                type="number"
+                inputMode="decimal"
+                step={1}
+                min={0}
+                value={getField(["dailyUploadGib"]) ?? 0}
+                onChange={(e) =>
+                  updateField(
+                    ["dailyUploadGib"],
+                    e.target.value === "" ? 0 : Number(e.target.value),
+                  )
+                }
+              />
+            </Field>
+            <Field
+              label={m.add_plan_modal_field_upload_weight()}
+              helperText={m.add_plan_modal_field_upload_weight_tooltip()}
+            >
+              <Input
+                type="number"
+                inputMode="numeric"
+                step={1}
+                min={1}
+                max={1000}
+                value={getField(["uploadWeight"]) || 1}
+                onChange={(e) =>
+                  updateField(
+                    ["uploadWeight"],
+                    e.target.value === "" ? 1 : Number(e.target.value),
+                  )
+                }
+              />
+            </Field>
+          </Flex>
         </SectionCard>
       </TwoPaneSection>
 

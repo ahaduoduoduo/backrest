@@ -15,6 +15,7 @@ import (
 
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
 	"github.com/garethgeorge/backrest/internal/cryptoutil"
+	"github.com/garethgeorge/backrest/internal/openlistclient"
 	"github.com/garethgeorge/backrest/internal/orchestrator/logging"
 	"github.com/garethgeorge/backrest/internal/protoutil"
 	"github.com/garethgeorge/backrest/pkg/restic"
@@ -25,7 +26,7 @@ import (
 // RepoOrchestrator implements higher level repository operations on top of
 // the restic package. It can be thought of as a controller for a repo.
 type RepoOrchestrator struct {
-	mu sync.Mutex
+	mu sync.RWMutex
 
 	config     *v1.Config
 	repoConfig *v1.Repo
@@ -106,6 +107,9 @@ func (r *RepoOrchestrator) Init(ctx context.Context) error {
 }
 
 func (r *RepoOrchestrator) Snapshots(ctx context.Context) ([]*restic.Snapshot, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -118,6 +122,15 @@ func (r *RepoOrchestrator) Snapshots(ctx context.Context) ([]*restic.Snapshot, e
 }
 
 func (r *RepoOrchestrator) SnapshotsForPlan(ctx context.Context, plan *v1.Plan) ([]*restic.Snapshot, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.snapshotsForPlan(ctx, plan)
+}
+
+// snapshotsForPlan is called by Backup while its shared repository lock is
+// already held. Keeping the unlocked helper separate avoids recursive RLock
+// acquisition while an exclusive maintenance operation is waiting.
+func (r *RepoOrchestrator) snapshotsForPlan(ctx context.Context, plan *v1.Plan) ([]*restic.Snapshot, error) {
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -138,10 +151,10 @@ func (r *RepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun boo
 	l := r.logger(ctx)
 	l.Debug("repo orchestrator starting backup", zap.String("repo", r.repoConfig.Id))
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 
-	snapshots, err := r.SnapshotsForPlan(ctx, plan)
+	snapshots, err := r.snapshotsForPlan(ctx, plan)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get snapshots for plan: %w", err)
 	}
@@ -180,6 +193,10 @@ func (r *RepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun boo
 		opts = append(opts, restic.WithFlags(args...))
 	}
 
+	if taskUsername := r.taskRESTUsername(plan); taskUsername != "" {
+		opts = append(opts, restic.WithEnv("RESTIC_REST_USERNAME="+taskUsername))
+	}
+
 	if dryRun {
 		opts = append(opts, restic.WithFlags("--dry-run", "-vv"))
 	}
@@ -194,6 +211,19 @@ func (r *RepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun boo
 
 	l.Debug("backup completed", zap.Duration("duration", time.Since(startTime)))
 	return summary, nil
+}
+
+func (r *RepoOrchestrator) taskRESTUsername(plan *v1.Plan) string {
+	if !openlistclient.Configured() || openlistclient.RepositoryName(r.repoConfig.GetUri()) == "" || plan.GetDailyUploadGib() <= 0 {
+		return ""
+	}
+	baseUsername := ""
+	for _, value := range r.repoConfig.GetEnv() {
+		if username, ok := strings.CutPrefix(value, "RESTIC_REST_USERNAME="); ok {
+			baseUsername = username
+		}
+	}
+	return openlistclient.EncodeTaskUsername(baseUsername, plan.GetId(), plan.GetDailyUploadGib(), plan.GetUploadWeight())
 }
 
 func (r *RepoOrchestrator) ListSnapshotFiles(ctx context.Context, snapshotId string, path string) ([]*v1.LsEntry, error) {

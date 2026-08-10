@@ -9,6 +9,7 @@ import (
 
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
 	"github.com/garethgeorge/backrest/internal/hook"
+	"github.com/garethgeorge/backrest/internal/openlistclient"
 	"github.com/garethgeorge/backrest/internal/oplog"
 	"github.com/garethgeorge/backrest/internal/orchestrator/logging"
 	"github.com/garethgeorge/backrest/internal/orchestrator/tasks"
@@ -29,7 +30,7 @@ var _ tasks.TaskRunner = &taskRunnerImpl{}
 
 func newTaskRunnerImpl(orchestrator *Orchestrator, task tasks.Task, op *v1.Operation) *taskRunnerImpl {
 	return &taskRunnerImpl{
-		config:       orchestrator.config,
+		config:       orchestrator.Config(),
 		orchestrator: orchestrator,
 		t:            task,
 		op:           op,
@@ -153,6 +154,34 @@ func (t *taskRunnerImpl) GetRepoOrchestrator(repoID string) (tasks.RepoOrchestra
 func (t *taskRunnerImpl) ScheduleTask(task tasks.Task, priority int64) error {
 	_, err := t.orchestrator.ScheduleTask(task, priority)
 	return err
+}
+
+func (t *taskRunnerImpl) ReleaseUploadAllocation(ctx context.Context, plan *v1.Plan) error {
+	dailyLimitBytes := openlistclient.DailyLimitBytes(plan.GetDailyUploadGib())
+	if dailyLimitBytes <= 0 || !openlistclient.Configured() {
+		return nil
+	}
+	repoConfig, err := t.GetRepo(plan.GetRepo())
+	if err != nil {
+		return err
+	}
+	repository := openlistclient.RepositoryName(repoConfig.GetUri())
+	if repository == "" {
+		return nil
+	}
+	request := openlistclient.ReleaseRequest{
+		Repository:      repository,
+		TaskID:          plan.GetId(),
+		DailyLimitBytes: dailyLimitBytes,
+		Weight:          plan.GetUploadWeight(),
+	}
+	if request.Weight <= 0 {
+		request.Weight = 1
+	}
+	if err := openlistclient.ReleaseAllocation(ctx, request); err != nil {
+		return err
+	}
+	return t.orchestrator.resumeWaitingBackups(plan.GetRepo(), plan.GetId())
 }
 
 func (t *taskRunnerImpl) Config() *v1.Config {

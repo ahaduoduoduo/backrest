@@ -8,9 +8,10 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `.github/workflows/custom-image.yml`: builds the production linux/amd64 image
   after non-documentation changes reach `main`, retains a manual rebuild entry,
   and publishes both a stable console tag and an immutable commit tag.
-- `.github/workflows/test.yml`: runs Linux Go race tests, WebUI unit and type
-  checks, and Docker-relevant browser journeys; upstream Windows, rclone, and
-  SFTP coverage is excluded from the fork's default matrix.
+- `.github/workflows/test.yml`: compiles the full Go tree, then runs race tests
+  for the API, configuration, backup scheduler, repository, task, and Restic
+  runtime packages plus WebUI unit and type checks. Browser E2E, multihost
+  sync, Windows, rclone, and SFTP jobs are excluded from this Docker-only fork.
 - `.github/workflows/release-preview.yml`: keeps upstream multi-platform
   snapshot artifacts available through manual dispatch without rebuilding
   macOS and Windows packages on every `main` update.
@@ -71,14 +72,15 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: direct root-directory list
   and readable exclusion controls backed by the unchanged `Plan.paths`,
   `Plan.excludes`, and `Plan.iexcludes` fields.
-- `proto/v1/config.proto`, `internal/orchestrator/tasks/task.go`, and
-  `internal/orchestrator/orchestrator.go`: persist signed per-plan priority
-  weights and order scheduled backups without allowing those weights to cross
-  internal maintenance or interactive task classes. Lower-priority backups
-  yield cleanly when a higher-priority plan becomes due; manual “backup now”
-  operations enter the same weighted backup queue.
-- `docs/plan-priority.md`: priority semantics, equal-weight ordering,
-  preemption behavior, and configuration examples.
+- `proto/v1/config.proto`, `internal/orchestrator/repo/repo.go`, and
+  `internal/orchestrator/orchestrator.go`: persist per-plan upload allocations
+  and weights, allow backup readers to run concurrently, and keep repository
+  maintenance exclusive.
+- `internal/openlistclient/client.go`: encodes a plan identity, allocation, and
+  weight into the authenticated Restic request and releases unused allocation
+  after a completed backup.
+- `docs/parallel-upload-scheduling.md`: task allocations, weighted provider
+  concurrency, waiting state, and unused-allocation sharing.
 - `webui/src/features/plans/PlanSnapshotExplorer.tsx` and
   `SnapshotExplorerHeader.tsx`: present successful Restic snapshots as a
   Time Machine-inspired directory-window stack with persistent paths, a

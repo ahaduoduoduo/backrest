@@ -35,6 +35,12 @@ before the limit remain in the Restic repository and are reused by the next run.
 An explicit user stop is shown as a neutral stopped operation rather than a
 backup failure; starting the plan again creates a new incremental Restic run.
 
+Backup plans can run concurrently against the same Restic repository. Each
+plan has a daily upload allocation and a positive upload weight. OpenList keeps
+the provider-wide upload concurrency fixed and distributes newly available
+upload slots by weight. A completed plan releases its unused daily allocation
+to waiting plans without increasing the global calendar limit.
+
 The console reads 115 upload usage through the Backrest backend, so OpenList
 credentials are never sent to the browser. Source selection, excludes,
 snapshot browsing, historical versions, single-file restore, retention, check,

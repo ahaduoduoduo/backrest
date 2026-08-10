@@ -48,22 +48,6 @@ const (
 	TaskPriorityInteractive          = 32 * taskPriorityClassStride // highest priority
 )
 
-const (
-	minPlanPriority = TaskPriorityDefault - (1 << 31)
-	maxPlanPriority = TaskPriorityDefault + (1 << 31) - 1
-)
-
-// PlanTaskPriority converts a user-configured signed plan weight into the
-// scheduled-backup priority class.
-func PlanTaskPriority(weight int32) int64 {
-	return TaskPriorityDefault + int64(weight)
-}
-
-// IsPlanTaskPriority reports whether priority belongs to a scheduled backup.
-func IsPlanTaskPriority(priority int64) bool {
-	return priority >= minPlanPriority && priority <= maxPlanPriority
-}
-
 // TaskRunner is an interface for running tasks. It is used by tasks to create operations and write logs.
 type TaskRunner interface {
 	// InstanceID returns the instance ID executing this task.
@@ -88,6 +72,8 @@ type TaskRunner interface {
 	GetRepoOrchestrator(repoID string) (RepoOrchestrator, error)
 	// ScheduleTask schedules a task to run at a specific time.
 	ScheduleTask(task Task, priority int64) error
+	// ReleaseUploadAllocation makes this plan's unused daily OpenList allocation available to other plans.
+	ReleaseUploadAllocation(ctx context.Context, plan *v1.Plan) error
 	// Config returns the current config.
 	Config() *v1.Config
 	// Logger returns the logger.

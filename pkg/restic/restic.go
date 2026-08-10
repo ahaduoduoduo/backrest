@@ -74,9 +74,27 @@ func (r *Repo) commandWithContext(ctx context.Context, args []string, opts ...Ge
 
 	cmd := exec.CommandContext(ctx, fullCmd[0], fullCmd[1:]...)
 	platformutil.SetPlatformOptions(cmd)
-	cmd.Env = append(cmd.Env, opt.extraEnv...)
+	cmd.Env = compactEnvironment(opt.extraEnv)
 
 	return cmd
+}
+
+func compactEnvironment(values []string) []string {
+	seen := make(map[string]struct{}, len(values))
+	result := make([]string, 0, len(values))
+	for idx := len(values) - 1; idx >= 0; idx-- {
+		key, _, ok := strings.Cut(values[idx], "=")
+		if !ok {
+			key = values[idx]
+		}
+		if _, exists := seen[key]; exists {
+			continue
+		}
+		seen[key] = struct{}{}
+		result = append(result, values[idx])
+	}
+	slices.Reverse(result)
+	return result
 }
 
 type outputOpts struct {

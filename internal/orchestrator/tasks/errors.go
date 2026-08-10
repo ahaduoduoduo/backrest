@@ -2,19 +2,11 @@ package tasks
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
 )
-
-// ErrPriorityPreempted is used as a context cancellation cause when a
-// scheduled backup yields to a due backup with a higher configured plan
-// priority. It is deliberately separate from user cancellation: uploaded
-// restic packs remain useful and the run should be displayed as waiting for
-// resume rather than as a failure.
-var ErrPriorityPreempted = errors.New("scheduled backup yielded to a higher-priority backup")
 
 // TaskCancelledError is returned when a task is cancelled.
 type TaskCancelledError struct {

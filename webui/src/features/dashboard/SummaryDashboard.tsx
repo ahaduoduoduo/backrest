@@ -131,7 +131,12 @@ export const SummaryDashboard = () => {
       {plans.length > 0 && (
         <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
           {plans.map((s) => (
-            <PlanCard key={s.id} summary={s} onRefresh={fetchData} />
+            <PlanCard
+              key={s.id}
+              summary={s}
+              openListUsage={openListUsage}
+              onRefresh={fetchData}
+            />
           ))}
         </SimpleGrid>
       )}

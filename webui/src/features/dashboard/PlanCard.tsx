@@ -19,6 +19,7 @@ import { alerts } from "../../components/common/Alerts";
 import { Tooltip } from "../../components/ui/tooltip";
 import { formatBytes, formatTime } from "../../lib/formatting";
 import { useConfig } from "../../app/provider";
+import { openListRepositoryName, type OpenListUsage } from "../../api/openlist";
 import * as m from "../../paraglide/messages";
 import { HistoryStrip } from "./HistoryStrip";
 
@@ -249,9 +250,11 @@ const BackupProgress = ({ progress }: { progress: LiveProgress | null }) => {
 
 export const PlanCard = ({
   summary,
+  openListUsage,
   onRefresh,
 }: {
   summary: SummaryDashboardResponse_Summary;
+  openListUsage?: OpenListUsage | null;
   onRefresh?: () => void | Promise<void>;
 }) => {
   const navigate = useNavigate();
@@ -283,15 +286,30 @@ export const PlanCard = ({
     () => config?.plans.find((candidate) => candidate.id === summary.id),
     [config, summary.id],
   );
+  const taskUsage = useMemo(() => {
+    if (!plan || !config || !openListUsage) return null;
+    const repository = config.repos.find(
+      (candidate) => candidate.id === plan.repo,
+    );
+    if (!repository) return null;
+    const repositoryName = openListRepositoryName(repository.uri);
+    if (!repositoryName) return null;
+    return (
+      openListUsage.repositories
+        .find((candidate) => candidate.name === repositoryName)
+        ?.tasks?.find((candidate) => candidate.id === plan.id) ?? null
+    );
+  }, [config, openListUsage, plan]);
   const schedule = scheduleText(
     plan?.schedule?.schedule.case === "maxFrequencyHours"
       ? plan.schedule.schedule.value
       : undefined,
   );
   const nextBackup = Number(summary.nextBackupTimeMs ?? 0);
-  const lastUpload = Number(
-    summary.recentBackups?.bytesAdded[backupIndex] ?? 0,
-  );
+  const dailyLimit =
+    taskUsage?.day_limit ?? Math.round((plan?.dailyUploadGib ?? 0) * 2 ** 30);
+  const uploadedToday = taskUsage?.day_bytes ?? 0;
+  const uploadWeight = taskUsage?.weight ?? plan?.uploadWeight ?? 1;
 
   const startBackup = async () => {
     setActionPending(true);
@@ -470,7 +488,7 @@ export const PlanCard = ({
             </Flex>
             <Box width="42%" minW="112px" py={2}>
               <Text color="whiteAlpha.330" fontSize="9px">
-                {m.dashboard_card_last_upload()}
+                {m.dashboard_card_today_upload()}
               </Text>
               <Text
                 mt="6px"
@@ -480,7 +498,11 @@ export const PlanCard = ({
                 letterSpacing="-0.035em"
                 fontVariantNumeric="tabular-nums"
               >
-                + {formatBytes(lastUpload)}
+                {formatBytes(uploadedToday)}
+                {dailyLimit > 0 && ` / ${formatBytes(dailyLimit)}`}
+              </Text>
+              <Text mt="2px" color="whiteAlpha.300" fontSize="9px">
+                {m.dashboard_card_upload_weight({ weight: uploadWeight })}
               </Text>
             </Box>
           </Flex>

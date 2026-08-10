@@ -4,15 +4,12 @@ Updated: 2026-08-11
 
 ## Completed
 
+- [x] 2026-08-11: Allow backup plans to run concurrently, configure a daily
+  upload allocation and positive upload weight per plan, and release unused
+  allocation to waiting plans after a successful run.
 - [x] 2026-08-11: Prefer an in-progress backup in dashboard task cards when a
   cancelled future schedule marker sorts ahead of it, keeping the main status,
   progress, and stop control attached to the live Restic operation.
-- [x] 2026-08-11: Apply each plan's configured weight to both scheduled and
-  manually requested backups; “backup now” changes due time without bypassing
-  higher-weight plans.
-- [x] 2026-08-11: Replace the two-level background-plan environment variable
-  with a signed priority weight stored on every backup plan; higher weights run
-  first and can cleanly interrupt a lower-priority scheduled backup.
 - [x] 2026-08-10: Present explicit user cancellation as a neutral stopped
   backup in task cards, 30-day history, and yearly activity instead of an
   abnormal or recovered failure; the running control remains a stop action.
