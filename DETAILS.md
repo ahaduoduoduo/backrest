@@ -45,7 +45,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   OpenList repository referenced by those plans.
 - `webui/src/features/dashboard/PlanCard.tsx`: renders the calendar-aligned task
   summary, start/stop control, next-run treatment, repository addition, and
-  direct navigation to historical files.
+  direct navigation to historical files. A live backup takes display priority
+  over cancelled future schedule markers without removing those markers from
+  operation history.
 - `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
   status strips in chronological order, from the oldest date on the left to
   today on the right, with per-day backup-size and mixed-outcome details; a

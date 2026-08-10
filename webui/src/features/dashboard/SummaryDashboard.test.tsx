@@ -120,4 +120,42 @@ describe("SummaryDashboard PlanCard", () => {
       ),
     );
   });
+
+  it("prefers an active backup over a later cancelled schedule marker", async () => {
+    const activeOperation = create(OperationSchema, {
+      id: 43n,
+      planId: "nas-config",
+      status: OperationStatus.STATUS_INPROGRESS,
+      op: { case: "operationBackup", value: {} },
+    });
+    vi.mocked(backrestService.getOperations).mockResolvedValue(
+      create(OperationListSchema, { operations: [activeOperation] }),
+    );
+    const mixedSummary = create(SummaryDashboardResponse_SummarySchema, {
+      id: "nas-config",
+      recentBackups: {
+        status: [
+          OperationStatus.STATUS_USER_CANCELLED,
+          OperationStatus.STATUS_INPROGRESS,
+        ],
+        timestampMs: [
+          BigInt(Date.now() + 2 * 60 * 60 * 1000),
+          BigInt(Date.now() - 30 * 60 * 1000),
+        ],
+        bytesAdded: [0n, 1024n],
+        waitingForResume: [false, false],
+      },
+    });
+
+    renderWithProviders(<PlanCard summary={mixedSummary} />, { config });
+
+    expect(
+      screen.getAllByText(m.dashboard_state_label_run()).length,
+    ).toBeGreaterThan(0);
+    expect(
+      await screen.findByRole("button", {
+        name: m.dashboard_card_stop_backup(),
+      }),
+    ).toBeEnabled();
+  });
 });
