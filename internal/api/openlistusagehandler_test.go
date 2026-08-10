@@ -21,7 +21,7 @@ func TestOpenListUsageHandlerUnconfigured(t *testing.T) {
 func TestOpenListUsageHandler(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username, password, ok := r.BasicAuth()
-		if r.URL.Path != openListUsagePath || !ok || username != "backrest" || password != "secret" {
+		if r.URL.Path != "/restic/_usage" || !ok || username != "backrest" || password != "secret" {
 			t.Errorf("unexpected upstream request: %s %v %q", r.URL.Path, ok, username)
 			w.WriteHeader(http.StatusBadRequest)
 			return
