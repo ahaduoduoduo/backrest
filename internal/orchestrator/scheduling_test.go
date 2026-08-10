@@ -263,3 +263,44 @@ func TestSchedulerWait(t *testing.T) {
 	case <-ran:
 	}
 }
+
+func TestBackgroundBackupYieldsToDueNormalBackup(t *testing.T) {
+	orch := newTestOrchestrator(t)
+	orch.backgroundPlans = map[string]struct{}{"time-machine": {}}
+
+	background := newTestTask(func() error { return nil }, func(t time.Time) *time.Time { return &t }).(*testTask)
+	background.TaskType = "backup"
+	background.TaskPlanID = "time-machine"
+	backgroundOp := &v1.Operation{Id: 42}
+	current := stContainer{
+		ScheduledTask: tasks.ScheduledTask{Task: background, RunAt: time.Now(), Op: backgroundOp},
+		priority:      tasks.TaskPriorityBackground,
+	}
+
+	normal := newTestTask(func() error { return nil }, func(t time.Time) *time.Time { return &t }).(*testTask)
+	normal.TaskType = "backup"
+	normal.TaskPlanID = "nas-config"
+	due := stContainer{
+		ScheduledTask: tasks.ScheduledTask{Task: normal, RunAt: time.Now().Add(-time.Second)},
+		priority:      tasks.TaskPriorityDefault,
+	}
+	orch.taskQueue.Enqueue(due.RunAt, due.priority, due)
+
+	runCtx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	orch.taskCancel[backgroundOp.Id] = cancel
+	done := make(chan struct{})
+	defer close(done)
+
+	go orch.watchForBackupPreemption(context.Background(), current, done)
+
+	deadline := time.NewTimer(2 * time.Second)
+	defer deadline.Stop()
+	for !errors.Is(context.Cause(runCtx), tasks.ErrPriorityPreempted) {
+		select {
+		case <-deadline.C:
+			t.Fatal("background backup was not preempted by due normal backup")
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+}

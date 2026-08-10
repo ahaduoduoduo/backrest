@@ -15,6 +15,7 @@ type fakeRepoOrchestrator struct {
 
 	backupResult *restic.BackupProgressEntry
 	backupErr    error
+	backupFunc   func(context.Context) (*restic.BackupProgressEntry, error)
 
 	forgetResult []*v1.ResticSnapshot
 	forgetErr    error
@@ -45,6 +46,9 @@ func (f *fakeRepoOrchestrator) UnlockIfAutoEnabled(ctx context.Context) error {
 }
 
 func (f *fakeRepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun bool, cb func(event *restic.BackupProgressEntry)) (*restic.BackupProgressEntry, error) {
+	if f.backupFunc != nil {
+		return f.backupFunc(ctx)
+	}
 	if cb != nil && f.backupResult != nil {
 		cb(f.backupResult)
 	}

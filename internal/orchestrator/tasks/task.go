@@ -36,6 +36,7 @@ const (
 	PlanForSystemTasks                  = "_system_" // plan for system tasks e.g. garbage collection, prune, stats, etc.
 
 	TaskPriorityStats          = 0
+	TaskPriorityBackground     = 1 << 0 // long-running backups that may yield to normal backup plans.
 	TaskPriorityDefault        = 1 << 1 // default priority
 	TaskPriorityForget         = 1 << 2
 	TaskPriorityIndexSnapshots = 1 << 3

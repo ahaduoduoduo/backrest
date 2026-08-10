@@ -247,6 +247,7 @@ func TestBackupTaskRun(t *testing.T) {
 		wantScheduled []string // expected scheduled task types
 		wantStatus    v1.OperationStatus
 		wantWaiting   bool
+		preempt       bool
 	}{
 		{
 			name: "successful backup with retention",
@@ -339,6 +340,27 @@ func TestBackupTaskRun(t *testing.T) {
 			},
 		},
 		{
+			name: "priority preemption waits without reporting an error",
+			fake: &fakeRepoOrchestrator{
+				backupFunc: func(ctx context.Context) (*restic.BackupProgressEntry, error) {
+					return nil, context.Cause(ctx)
+				},
+			},
+			plan:        &v1.Plan{Id: "plan1", Repo: "repo1"},
+			wantStatus:  v1.OperationStatus_STATUS_SUCCESS,
+			wantWaiting: true,
+			preempt:     true,
+			wantHooks: []v1.Hook_Condition{
+				v1.Hook_CONDITION_SNAPSHOT_START,
+				v1.Hook_CONDITION_SNAPSHOT_END,
+			},
+			wantNotHooks: []v1.Hook_Condition{
+				v1.Hook_CONDITION_SNAPSHOT_ERROR,
+				v1.Hook_CONDITION_ANY_ERROR,
+				v1.Hook_CONDITION_SNAPSHOT_SUCCESS,
+			},
+		},
+		{
 			name:    "unlock error",
 			fake:    &fakeRepoOrchestrator{unlockErr: fmt.Errorf("unlock failed")},
 			plan:    &v1.Plan{Id: "plan1", Repo: "repo1"},
@@ -386,7 +408,13 @@ func TestBackupTaskRun(t *testing.T) {
 			task := NewOneoffBackupTask(repo, tc.plan, time.Now(), tc.dryRun)
 			st := nextAndCreate(t, task, runner)
 
-			err := task.Run(context.Background(), st, runner)
+			runCtx := context.Background()
+			if tc.preempt {
+				var cancel context.CancelCauseFunc
+				runCtx, cancel = context.WithCancelCause(runCtx)
+				cancel(ErrPriorityPreempted)
+			}
+			err := task.Run(runCtx, st, runner)
 			if tc.wantErr {
 				require.Error(t, err)
 			} else {
