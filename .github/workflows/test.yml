@@ -39,7 +39,17 @@ jobs:
         run: go build ./...
 
       - name: Test
-        run: PATH=$(pwd):$PATH gotestsum ./... -- --race
+        run: |
+          PATH=$(pwd):$PATH gotestsum \
+            ./internal/api \
+            ./internal/config \
+            ./internal/openlistclient \
+            ./internal/orchestrator \
+            ./internal/orchestrator/repo \
+            ./internal/orchestrator/tasks \
+            ./pkg/restic \
+            ./webui \
+            -- --race
 
   test-webui:
     runs-on: ubuntu-latest

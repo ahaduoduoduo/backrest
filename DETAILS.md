@@ -8,9 +8,10 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `.github/workflows/custom-image.yml`: builds the production linux/amd64 image
   after non-documentation changes reach `main`, retains a manual rebuild entry,
   and publishes both a stable console tag and an immutable commit tag.
-- `.github/workflows/test.yml`: runs Linux Go tests plus WebUI unit and type
-  checks. Browser E2E, Windows, rclone, and SFTP jobs are excluded from this
-  Docker-only fork.
+- `.github/workflows/test.yml`: compiles the full Go tree, then runs race tests
+  for the API, configuration, backup scheduler, repository, task, and Restic
+  runtime packages plus WebUI unit and type checks. Browser E2E, multihost
+  sync, Windows, rclone, and SFTP jobs are excluded from this Docker-only fork.
 - `.github/workflows/release-preview.yml`: keeps upstream multi-platform
   snapshot artifacts available through manual dispatch without rebuilding
   macOS and Windows packages on every `main` update.
