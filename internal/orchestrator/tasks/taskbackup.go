@@ -151,8 +151,8 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 		}
 		backupOp.OperationBackup.WaitingForResume = true
 		op.Status = v1.OperationStatus_STATUS_SUCCESS
-		op.DisplayMessage = "Background backup yielded to a higher-priority backup. Uploaded data is preserved and will be reused by the next scheduled run."
-		l.Info("background backup waiting for the next scheduled run",
+		op.DisplayMessage = "Backup yielded to a higher-priority plan. Uploaded data is preserved and will be reused by the next scheduled run."
+		l.Info("lower-priority backup waiting for the next scheduled run",
 			zap.String("plan", plan.Id),
 			zap.Duration("duration", time.Since(startTime)))
 

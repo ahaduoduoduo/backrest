@@ -264,31 +264,30 @@ func TestSchedulerWait(t *testing.T) {
 	}
 }
 
-func TestBackgroundBackupYieldsToDueNormalBackup(t *testing.T) {
+func TestLowerPriorityBackupYieldsToDueHigherPriorityBackup(t *testing.T) {
 	orch := newTestOrchestrator(t)
-	orch.backgroundPlans = map[string]struct{}{"time-machine": {}}
 
-	background := newTestTask(func() error { return nil }, func(t time.Time) *time.Time { return &t }).(*testTask)
-	background.TaskType = "backup"
-	background.TaskPlanID = "time-machine"
-	backgroundOp := &v1.Operation{Id: 42}
+	lower := newTestTask(func() error { return nil }, func(t time.Time) *time.Time { return &t }).(*testTask)
+	lower.TaskType = "backup"
+	lower.TaskPlanID = "time-machine"
+	lowerOp := &v1.Operation{Id: 42}
 	current := stContainer{
-		ScheduledTask: tasks.ScheduledTask{Task: background, RunAt: time.Now(), Op: backgroundOp},
-		priority:      tasks.TaskPriorityBackground,
+		ScheduledTask: tasks.ScheduledTask{Task: lower, RunAt: time.Now(), Op: lowerOp},
+		priority:      tasks.PlanTaskPriority(1),
 	}
 
-	normal := newTestTask(func() error { return nil }, func(t time.Time) *time.Time { return &t }).(*testTask)
-	normal.TaskType = "backup"
-	normal.TaskPlanID = "nas-config"
+	higher := newTestTask(func() error { return nil }, func(t time.Time) *time.Time { return &t }).(*testTask)
+	higher.TaskType = "backup"
+	higher.TaskPlanID = "nas-config"
 	due := stContainer{
-		ScheduledTask: tasks.ScheduledTask{Task: normal, RunAt: time.Now().Add(-time.Second)},
-		priority:      tasks.TaskPriorityDefault,
+		ScheduledTask: tasks.ScheduledTask{Task: higher, RunAt: time.Now().Add(-time.Second)},
+		priority:      tasks.PlanTaskPriority(2),
 	}
 	orch.taskQueue.Enqueue(due.RunAt, due.priority, due)
 
 	runCtx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
-	orch.taskCancel[backgroundOp.Id] = cancel
+	orch.taskCancel[lowerOp.Id] = cancel
 	done := make(chan struct{})
 	defer close(done)
 
@@ -299,7 +298,7 @@ func TestBackgroundBackupYieldsToDueNormalBackup(t *testing.T) {
 	for !errors.Is(context.Cause(runCtx), tasks.ErrPriorityPreempted) {
 		select {
 		case <-deadline.C:
-			t.Fatal("background backup was not preempted by due normal backup")
+			t.Fatal("lower-priority backup was not preempted by due higher-priority backup")
 		case <-time.After(10 * time.Millisecond):
 		}
 	}

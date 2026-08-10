@@ -5,9 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"slices"
-	"strings"
 	"sync"
 	"time"
 
@@ -47,7 +45,6 @@ type Orchestrator struct {
 	lastQueueResetTime time.Time
 	logStore           *logstore.LogStore
 	resticBin          string
-	backgroundPlans    map[string]struct{}
 
 	taskCancelMu sync.Mutex
 	taskCancel   map[int64]context.CancelCauseFunc
@@ -67,7 +64,7 @@ type stContainer struct {
 	tasks.ScheduledTask
 	retryCount  int // number of times this task has been retried.
 	createdTime time.Time
-	priority    int
+	priority    int64
 	callbacks   []func(error)
 }
 
@@ -88,7 +85,6 @@ func NewOrchestrator(resticBin string, cfgMgr *config.ConfigManager, log *oplog.
 		logStore:         logStore,
 		taskCancel:       make(map[int64]context.CancelCauseFunc),
 		taskCancelStatus: make(map[int64]v1.OperationStatus),
-		backgroundPlans:  parsePlanIDs(os.Getenv("BACKREST_BACKGROUND_PLANS")),
 		resticBin:        resticBin,
 	}
 
@@ -171,33 +167,6 @@ func NewOrchestrator(resticBin string, cfgMgr *config.ConfigManager, log *oplog.
 	zap.L().Info("orchestrator created")
 
 	return o, nil
-}
-
-func parsePlanIDs(value string) map[string]struct{} {
-	plans := make(map[string]struct{})
-	for _, planID := range strings.FieldsFunc(value, func(r rune) bool {
-		return r == ',' || r == ';' || r == '\n'
-	}) {
-		if planID = strings.TrimSpace(planID); planID != "" {
-			plans[planID] = struct{}{}
-		}
-	}
-	return plans
-}
-
-func (o *Orchestrator) isBackgroundBackup(t tasks.Task) bool {
-	if t == nil || t.Type() != "backup" {
-		return false
-	}
-	_, ok := o.backgroundPlans[t.PlanID()]
-	return ok
-}
-
-func (o *Orchestrator) effectiveTaskPriority(t tasks.Task, requested int) int {
-	if o.isBackgroundBackup(t) {
-		return tasks.TaskPriorityBackground
-	}
-	return requested
 }
 
 func (o *Orchestrator) autoInitReposIfNeeded(resticBin string) error {
@@ -320,7 +289,7 @@ func (o *Orchestrator) ScheduleDefaultTasks(config *v1.Config) error {
 		}
 
 		t := tasks.NewScheduledBackupTask(repo, plan)
-		if _, err := o.ScheduleTask(t, tasks.TaskPriorityDefault); err != nil {
+		if _, err := o.ScheduleTask(t, tasks.PlanTaskPriority(plan.GetPriority())); err != nil {
 			return fmt.Errorf("schedule backup task for plan %q: %w", plan.Id, err)
 		}
 	}
@@ -479,9 +448,10 @@ func (o *Orchestrator) Run(ctx context.Context) {
 		originalOp := proto.Clone(t.Op).(*v1.Operation)
 		o.prepareOperationForRetry(&t)
 
-		// A background backup remains serial like every other task, but watches
-		// for a normal backup becoming due. If that happens it yields cleanly so
-		// the higher-priority plan can use the repository and upload allowance.
+		// A scheduled backup remains serial like every other task, but watches
+		// for a higher-weight backup becoming due. If that happens it yields
+		// cleanly so the higher-priority plan can use the repository and upload
+		// allowance.
 		preemptionDone := make(chan struct{})
 		go o.watchForBackupPreemption(ctx, t, preemptionDone)
 
@@ -502,7 +472,8 @@ func (o *Orchestrator) Run(ctx context.Context) {
 }
 
 func (o *Orchestrator) watchForBackupPreemption(ctx context.Context, current stContainer, done <-chan struct{}) {
-	if current.Op == nil || !o.isBackgroundBackup(current.Task) {
+	if current.Op == nil || current.Task == nil || current.Task.Type() != "backup" ||
+		!tasks.IsPlanTaskPriority(current.priority) {
 		return
 	}
 
@@ -526,8 +497,8 @@ func (o *Orchestrator) watchForBackupPreemption(ctx context.Context, current stC
 			o.taskCancelMu.Unlock()
 
 			if running {
-				zap.L().Info("preempting background backup for due higher-priority backup",
-					zap.String("backgroundTask", current.Task.Name()),
+				zap.L().Info("preempting scheduled backup for due higher-priority backup",
+					zap.String("yieldingTask", current.Task.Name()),
 					zap.String("dueTask", queued.Task.Name()),
 					zap.Time("dueAt", queued.RunAt))
 			}
@@ -644,7 +615,7 @@ func (o *Orchestrator) handleTaskCompletion(t *stContainer, err error, originalO
 	}
 
 	// Regular rescheduling
-	if _, e := o.ScheduleTask(t.Task, tasks.TaskPriorityDefault); e != nil {
+	if _, e := o.ScheduleTask(t.Task, t.priority); e != nil {
 		zap.L().Error("reschedule task", zap.String("task", t.Task.Name()), zap.Error(e))
 	}
 
@@ -824,8 +795,7 @@ func (o *Orchestrator) updateOperationStatus(ctx context.Context, op *v1.Operati
 // ScheduleTask schedules a task for execution and returns the scheduled operation's ID
 // (assigned by OpLog.Add inside CreateUnscheduledTask), or 0 when the task produced no
 // operation or was never scheduled.
-func (o *Orchestrator) ScheduleTask(t tasks.Task, priority int, callbacks ...func(error)) (int64, error) {
-	priority = o.effectiveTaskPriority(t, priority)
+func (o *Orchestrator) ScheduleTask(t tasks.Task, priority int64, callbacks ...func(error)) (int64, error) {
 	nextRun, err := o.CreateUnscheduledTask(t, priority, o.curTime())
 	if err != nil {
 		return 0, err
@@ -846,7 +816,7 @@ func (o *Orchestrator) ScheduleTask(t tasks.Task, priority int, callbacks ...fun
 	return nextRun.Op.GetId(), nil
 }
 
-func (o *Orchestrator) CreateUnscheduledTask(t tasks.Task, priority int, curTime time.Time) (tasks.ScheduledTask, error) {
+func (o *Orchestrator) CreateUnscheduledTask(t tasks.Task, priority int64, curTime time.Time) (tasks.ScheduledTask, error) {
 	nextRun, err := t.Next(curTime, newTaskRunnerImpl(o, t, nil))
 	if err != nil {
 		return tasks.NeverScheduledTask, fmt.Errorf("finding run time for task %q: %w", t.Name(), err)

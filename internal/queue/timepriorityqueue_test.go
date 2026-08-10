@@ -15,7 +15,7 @@ func TestTPQPriority(t *testing.T) {
 
 	now := time.Now().Add(-time.Second)
 	for i := 0; i < 100; i++ {
-		tpq.Enqueue(now, i, val{i})
+		tpq.Enqueue(now, int64(i), val{i})
 	}
 
 	if tpq.Len() != 100 {
@@ -30,16 +30,29 @@ func TestTPQPriority(t *testing.T) {
 	}
 }
 
+func TestTPQDueTimeBreaksEqualPriority(t *testing.T) {
+	t.Parallel()
+	tpq := NewTimePriorityQueue[val]()
+	now := time.Now().Add(-time.Second)
+
+	tpq.Enqueue(now.Add(200*time.Millisecond), 5, val{2})
+	tpq.Enqueue(now, 5, val{1})
+
+	if got := tpq.Dequeue(context.Background()).v; got != 1 {
+		t.Fatalf("earlier equal-priority task ran second: got %d", got)
+	}
+}
+
 func TestTPQMixedReadinessStates(t *testing.T) {
 	t.Parallel()
 	tpq := NewTimePriorityQueue[val]()
 
 	now := time.Now()
 	for i := 0; i < 100; i++ {
-		tpq.Enqueue(now.Add(-100*time.Millisecond), i, val{i})
+		tpq.Enqueue(now.Add(-100*time.Millisecond), int64(i), val{i})
 	}
 	for i := 0; i < 100; i++ {
-		tpq.Enqueue(now.Add(100*time.Millisecond), i, val{i})
+		tpq.Enqueue(now.Add(100*time.Millisecond), int64(i), val{i})
 	}
 
 	if tpq.Len() != 200 {
@@ -69,7 +82,7 @@ func TestTPQStress(t *testing.T) {
 		defer cancel()
 		for ctx.Err() == nil {
 			v := rand.Intn(100) + 1
-			tpq.Enqueue(time.Now().Add(time.Duration(rand.Intn(1000)-500)*time.Millisecond), rand.Intn(5), val{v})
+			tpq.Enqueue(time.Now().Add(time.Duration(rand.Intn(1000)-500)*time.Millisecond), int64(rand.Intn(5)), val{v})
 			totalEnqueuedSum += v
 			totalEnqueued++
 		}
@@ -102,7 +115,7 @@ func TestTPQRemove(t *testing.T) {
 
 	now := time.Now().Add(-time.Second) // make sure the time is in the past
 	for i := 0; i < 100; i++ {
-		tpq.Enqueue(now, -i, val{i})
+		tpq.Enqueue(now, -int64(i), val{i})
 	}
 
 	if tpq.Len() != 100 {
@@ -129,10 +142,10 @@ func TestTPQReset(t *testing.T) {
 
 	now := time.Now() // make sure the time is in the past
 	for i := 0; i < 50; i++ {
-		tpq.Enqueue(now.Add(time.Second), i, val{i})
+		tpq.Enqueue(now.Add(time.Second), int64(i), val{i})
 	}
 	for i := 50; i < 100; i++ {
-		tpq.Enqueue(now.Add(-time.Second), i, val{i})
+		tpq.Enqueue(now.Add(-time.Second), int64(i), val{i})
 	}
 
 	if tpq.Len() != 100 {
@@ -174,7 +187,7 @@ func TestTPQGetAll(t *testing.T) {
 	now := time.Now()
 
 	for i := 0; i < 100; i++ {
-		tpq.Enqueue(now.Add(time.Second), i, val{i})
+		tpq.Enqueue(now.Add(time.Second), int64(i), val{i})
 	}
 
 	if tpq.Len() != 100 {

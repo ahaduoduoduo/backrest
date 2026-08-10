@@ -35,15 +35,34 @@ const (
 	InstanceIDForUnassociatedOperations = "_unassociated_"
 	PlanForSystemTasks                  = "_system_" // plan for system tasks e.g. garbage collection, prune, stats, etc.
 
-	TaskPriorityStats          = 0
-	TaskPriorityBackground     = 1 << 0 // long-running backups that may yield to normal backup plans.
-	TaskPriorityDefault        = 1 << 1 // default priority
-	TaskPriorityForget         = 1 << 2
-	TaskPriorityIndexSnapshots = 1 << 3
-	TaskPriorityCheck          = 1 << 4 // check should always run after prune.
-	TaskPriorityPrune          = 1 << 5
-	TaskPriorityInteractive    = 1 << 6 // highest priority
+	// The lower 32 bits are reserved for a signed per-plan backup weight. Task
+	// classes stay separated, so plan weights cannot overtake maintenance or
+	// interactive operations.
+	taskPriorityClassStride    int64 = 1 << 32
+	TaskPriorityStats                = 0 * taskPriorityClassStride
+	TaskPriorityDefault              = 1 * taskPriorityClassStride
+	TaskPriorityForget               = 2 * taskPriorityClassStride
+	TaskPriorityIndexSnapshots       = 4 * taskPriorityClassStride
+	TaskPriorityCheck                = 8 * taskPriorityClassStride // check should always run after prune.
+	TaskPriorityPrune                = 16 * taskPriorityClassStride
+	TaskPriorityInteractive          = 32 * taskPriorityClassStride // highest priority
 )
+
+const (
+	minPlanPriority = TaskPriorityDefault - (1 << 31)
+	maxPlanPriority = TaskPriorityDefault + (1 << 31) - 1
+)
+
+// PlanTaskPriority converts a user-configured signed plan weight into the
+// scheduled-backup priority class.
+func PlanTaskPriority(weight int32) int64 {
+	return TaskPriorityDefault + int64(weight)
+}
+
+// IsPlanTaskPriority reports whether priority belongs to a scheduled backup.
+func IsPlanTaskPriority(priority int64) bool {
+	return priority >= minPlanPriority && priority <= maxPlanPriority
+}
 
 // TaskRunner is an interface for running tasks. It is used by tasks to create operations and write logs.
 type TaskRunner interface {
@@ -68,7 +87,7 @@ type TaskRunner interface {
 	// GetRepoOrchestrator returns the orchestrator for the repo with the given ID.
 	GetRepoOrchestrator(repoID string) (RepoOrchestrator, error)
 	// ScheduleTask schedules a task to run at a specific time.
-	ScheduleTask(task Task, priority int) error
+	ScheduleTask(task Task, priority int64) error
 	// Config returns the current config.
 	Config() *v1.Config
 	// Logger returns the logger.

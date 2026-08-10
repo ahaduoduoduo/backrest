@@ -510,7 +510,7 @@ func (s *BackrestHandler) GetOperations(ctx context.Context, req *connect.Reques
 }
 
 // scheduleTaskAndWait schedules the task and blocks until it completes, returning the task's error.
-func (s *BackrestHandler) scheduleTaskAndWait(t tasks.Task, priority int) error {
+func (s *BackrestHandler) scheduleTaskAndWait(t tasks.Task, priority int64) error {
 	var taskErr error
 	wait := make(chan struct{})
 	if _, err := s.orchestrator.ScheduleTask(t, priority, func(e error) { taskErr = e; close(wait) }); err != nil {
