@@ -329,7 +329,6 @@ func TestBackupTaskRun(t *testing.T) {
 			plan:        &v1.Plan{Id: "plan1", Repo: "repo1"},
 			wantStatus:  v1.OperationStatus_STATUS_SUCCESS,
 			wantWaiting: true,
-			preempt:     true,
 			wantHooks: []v1.Hook_Condition{
 				v1.Hook_CONDITION_SNAPSHOT_START,
 				v1.Hook_CONDITION_SNAPSHOT_END,
@@ -350,6 +349,7 @@ func TestBackupTaskRun(t *testing.T) {
 			plan:        &v1.Plan{Id: "plan1", Repo: "repo1"},
 			wantStatus:  v1.OperationStatus_STATUS_SUCCESS,
 			wantWaiting: true,
+			preempt:     true,
 			wantHooks: []v1.Hook_Condition{
 				v1.Hook_CONDITION_SNAPSHOT_START,
 				v1.Hook_CONDITION_SNAPSHOT_END,
