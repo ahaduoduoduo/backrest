@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 
@@ -174,6 +175,12 @@ func validatePlan(plan *v1.Plan, repos map[string]*v1.Repo) error {
 		if e := protoutil.ValidateRetentionPolicy(plan.Retention); e != nil {
 			err = multierror.Append(err, fmt.Errorf("retention: %w", e))
 		}
+	}
+	if math.IsNaN(plan.GetDailyUploadGib()) || math.IsInf(plan.GetDailyUploadGib(), 0) || plan.GetDailyUploadGib() < 0 {
+		err = multierror.Append(err, fmt.Errorf("daily upload allocation must be a non-negative finite number"))
+	}
+	if plan.GetUploadWeight() < 0 {
+		err = multierror.Append(err, fmt.Errorf("upload weight must be a positive integer"))
 	}
 
 	slices.Sort(plan.Paths)

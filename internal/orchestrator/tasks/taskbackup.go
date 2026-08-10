@@ -145,47 +145,13 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 		return notifyError(err)
 	}
 
-	finishPriorityYield := func(summary *restic.BackupProgressEntry) error {
-		if summary == nil {
-			summary = &restic.BackupProgressEntry{}
-		}
-		backupOp.OperationBackup.WaitingForResume = true
-		op.Status = v1.OperationStatus_STATUS_SUCCESS
-		op.DisplayMessage = "Backup yielded to a higher-priority plan. Uploaded data is preserved and will be reused by the next scheduled run."
-		l.Info("lower-priority backup waiting for the next scheduled run",
-			zap.String("plan", plan.Id),
-			zap.Duration("duration", time.Since(startTime)))
-
-		// The backup context has already been cancelled to stop restic. Run the
-		// snapshot-end hook with cancellation detached so the Btrfs snapshot is
-		// still cleaned up before the higher-priority plan starts.
-		cleanupCtx, cleanupCancel := context.WithTimeout(context.WithoutCancel(ctx), time.Minute)
-		defer cleanupCancel()
-		if hookErr := runner.ExecuteHooks(cleanupCtx, []v1.Hook_Condition{
-			v1.Hook_CONDITION_SNAPSHOT_END,
-		}, HookVars{
-			Task:          t.Name(),
-			SnapshotStats: summary,
-			SnapshotId:    summary.SnapshotId,
-		}); hookErr != nil {
-			return fmt.Errorf("snapshot end hook after priority yield: %w", hookErr)
-		}
-		return nil
-	}
-
 	if err := runner.ExecuteHooks(ctx, []v1.Hook_Condition{
 		v1.Hook_CONDITION_SNAPSHOT_START,
 	}, HookVars{}); err != nil {
-		if errors.Is(context.Cause(ctx), ErrPriorityPreempted) {
-			return finishPriorityYield(nil)
-		}
 		return notifyError(fmt.Errorf("snapshot start hook: %w", err))
 	}
 
 	if err := repo.UnlockIfAutoEnabled(ctx); err != nil {
-		if errors.Is(context.Cause(ctx), ErrPriorityPreempted) {
-			return finishPriorityYield(nil)
-		}
 		return notifyError(fmt.Errorf("auto unlock repo %q: %w", t.RepoID(), err))
 	}
 
@@ -249,10 +215,6 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 	}
 
 	var conditions []v1.Hook_Condition
-	if errors.Is(context.Cause(ctx), ErrPriorityPreempted) {
-		return finishPriorityYield(summary)
-	}
-
 	if err != nil {
 		if errors.Is(err, restic.ErrUploadQuotaExceeded) {
 			backupOp.OperationBackup.WaitingForResume = true
@@ -337,6 +299,11 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 	conditions = append(conditions, v1.Hook_CONDITION_SNAPSHOT_END)
 	if err := runner.ExecuteHooks(ctx, conditions, vars); err != nil {
 		return fmt.Errorf("snapshot end hook: %w", err)
+	}
+	if !t.dryRun {
+		if releaseErr := runner.ReleaseUploadAllocation(ctx, plan); releaseErr != nil {
+			l.Warn("failed to release unused OpenList upload allocation", zap.Error(releaseErr))
+		}
 	}
 
 	return nil

@@ -531,7 +531,7 @@ func (s *BackrestHandler) Backup(ctx context.Context, req *connect.Request[v1.Ba
 	}
 	if err := s.scheduleTaskAndWait(
 		tasks.NewOneoffBackupTask(repo, plan, time.Now(), req.Msg.DryRun),
-		tasks.PlanTaskPriority(plan.GetPriority()),
+		tasks.TaskPriorityDefault,
 	); err != nil {
 		return nil, err
 	}

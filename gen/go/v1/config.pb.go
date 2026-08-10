@@ -800,9 +800,12 @@ type Plan struct {
 	Hooks           []*Hook                `protobuf:"bytes,8,rep,name=hooks,proto3" json:"hooks,omitempty"`                                                // hooks to run on events for this plan.
 	BackupFlags     []string               `protobuf:"bytes,10,rep,name=backup_flags,proto3" json:"backup_flags,omitempty"`                                 // extra flags to set when running a backup command.
 	SkipIfUnchanged bool                   `protobuf:"varint,13,opt,name=skip_if_unchanged,json=skipIfUnchanged,proto3" json:"skip_if_unchanged,omitempty"` // skip the backup if no changes are detected.
-	Priority        int32                  `protobuf:"varint,14,opt,name=priority,proto3" json:"priority,omitempty"`                                        // ordering weight for scheduled backups; larger values run first.
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// Deprecated: Marked as deprecated in v1/config.proto.
+	Priority       int32   `protobuf:"varint,14,opt,name=priority,proto3" json:"priority,omitempty"`                                      // deprecated: retained only for config compatibility.
+	DailyUploadGib float64 `protobuf:"fixed64,15,opt,name=daily_upload_gib,json=dailyUploadGib,proto3" json:"daily_upload_gib,omitempty"` // daily WAN upload allocation for this plan; 0 disables the per-plan allocation.
+	UploadWeight   int32   `protobuf:"varint,16,opt,name=upload_weight,json=uploadWeight,proto3" json:"upload_weight,omitempty"`          // positive weighted share while multiple plans upload concurrently.
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *Plan) Reset() {
@@ -905,9 +908,24 @@ func (x *Plan) GetSkipIfUnchanged() bool {
 	return false
 }
 
+// Deprecated: Marked as deprecated in v1/config.proto.
 func (x *Plan) GetPriority() int32 {
 	if x != nil {
 		return x.Priority
+	}
+	return 0
+}
+
+func (x *Plan) GetDailyUploadGib() float64 {
+	if x != nil {
+		return x.DailyUploadGib
+	}
+	return 0
+}
+
+func (x *Plan) GetUploadWeight() int32 {
+	if x != nil {
+		return x.UploadWeight
 	}
 	return 0
 }
@@ -2523,7 +2541,7 @@ const file_v1_config_proto_rawDesc = "" +
 	" \x01(\v2\x11.v1.CommandPrefixR\rcommandPrefix\x12\x16\n" +
 	"\x06shared\x18\r \x01(\bR\x06shared\x12,\n" +
 	"\x12origin_instance_id\x18\x0e \x01(\tR\x10originInstanceId\x125\n" +
-	"\rforget_policy\x18\x0f \x01(\v2\x10.v1.ForgetPolicyR\fforgetPolicy\"\xf5\x02\n" +
+	"\rforget_policy\x18\x0f \x01(\v2\x10.v1.ForgetPolicyR\fforgetPolicy\"\xc8\x03\n" +
 	"\x04Plan\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04repo\x18\x02 \x01(\tR\x04repo\x12\x14\n" +
@@ -2535,8 +2553,10 @@ const file_v1_config_proto_rawDesc = "" +
 	"\x05hooks\x18\b \x03(\v2\b.v1.HookR\x05hooks\x12\"\n" +
 	"\fbackup_flags\x18\n" +
 	" \x03(\tR\fbackup_flags\x12*\n" +
-	"\x11skip_if_unchanged\x18\r \x01(\bR\x0fskipIfUnchanged\x12\x1a\n" +
-	"\bpriority\x18\x0e \x01(\x05R\bpriorityJ\x04\b\x03\x10\x04J\x04\b\x06\x10\aJ\x04\b\v\x10\f\"\x9b\x02\n" +
+	"\x11skip_if_unchanged\x18\r \x01(\bR\x0fskipIfUnchanged\x12\x1e\n" +
+	"\bpriority\x18\x0e \x01(\x05B\x02\x18\x01R\bpriority\x12(\n" +
+	"\x10daily_upload_gib\x18\x0f \x01(\x01R\x0edailyUploadGib\x12#\n" +
+	"\rupload_weight\x18\x10 \x01(\x05R\fuploadWeightJ\x04\b\x03\x10\x04J\x04\b\x06\x10\aJ\x04\b\v\x10\f\"\x9b\x02\n" +
 	"\rCommandPrefix\x126\n" +
 	"\aio_nice\x18\x01 \x01(\x0e2\x1d.v1.CommandPrefix.IONiceLevelR\x06ioNice\x129\n" +
 	"\bcpu_nice\x18\x02 \x01(\x0e2\x1e.v1.CommandPrefix.CPUNiceLevelR\acpuNice\"[\n" +

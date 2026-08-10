@@ -117,6 +117,10 @@ func (t *testTaskRunner) ScheduleTask(task Task, priority int64) error {
 	return nil
 }
 
+func (t *testTaskRunner) ReleaseUploadAllocation(context.Context, *v1.Plan) error {
+	return nil
+}
+
 func (t *testTaskRunner) Config() *v1.Config {
 	return t.config
 }

@@ -5,13 +5,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/garethgeorge/backrest/internal/env"
+	"github.com/garethgeorge/backrest/internal/openlistclient"
 )
-
-const openListUsagePath = "/restic/_usage"
 
 type openListUsageHandler struct {
 	client *http.Client
@@ -43,7 +41,7 @@ func (h *openListUsageHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 		http.Error(w, "invalid OpenList URL", http.StatusInternalServerError)
 		return
 	}
-	request, err := http.NewRequestWithContext(r.Context(), http.MethodGet, strings.TrimRight(baseURL, "/")+openListUsagePath, nil)
+	request, err := http.NewRequestWithContext(r.Context(), http.MethodGet, openlistclient.UsageURL(), nil)
 	if err != nil {
 		http.Error(w, "OpenList request failed", http.StatusBadGateway)
 		return

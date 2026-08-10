@@ -53,6 +53,7 @@ type Orchestrator struct {
 	// user-initiated cancel). It distinguishes deliberate cancellation from
 	// instance-shutdown context teardown when the task's error is recorded.
 	taskCancelStatus map[int64]v1.OperationStatus
+	resumeMu         sync.Mutex
 
 	// now for the purpose of testing; used by Run() to get the current time.
 	now func() time.Time
@@ -289,7 +290,7 @@ func (o *Orchestrator) ScheduleDefaultTasks(config *v1.Config) error {
 		}
 
 		t := tasks.NewScheduledBackupTask(repo, plan)
-		if _, err := o.ScheduleTask(t, tasks.PlanTaskPriority(plan.GetPriority())); err != nil {
+		if _, err := o.ScheduleTask(t, tasks.TaskPriorityDefault); err != nil {
 			return fmt.Errorf("schedule backup task for plan %q: %w", plan.Id, err)
 		}
 	}
@@ -421,6 +422,8 @@ func (o *Orchestrator) CancelOperation(operationId int64, status v1.OperationSta
 // Run is the main orchestration loop. Cancel the context to stop the loop.
 func (o *Orchestrator) Run(ctx context.Context) {
 	zap.L().Info("starting orchestrator loop")
+	var running sync.WaitGroup
+	defer running.Wait()
 
 	// Setup config watching
 	configCh := o.configMgr.OnChange.Subscribe()
@@ -444,74 +447,23 @@ func (o *Orchestrator) Run(ctx context.Context) {
 			continue
 		}
 
-		// Clone the operation in case we need to reset changes and reschedule the task for a retry
-		originalOp := proto.Clone(t.Op).(*v1.Operation)
-		o.prepareOperationForRetry(&t)
-
-		// A scheduled backup remains serial like every other task, but watches
-		// for a higher-weight backup becoming due. If that happens it yields
-		// cleanly so the higher-priority plan can use the repository and upload
-		// allowance.
-		preemptionDone := make(chan struct{})
-		go o.watchForBackupPreemption(ctx, t, preemptionDone)
-
-		// Execute the task
-		err := o.RunTask(ctx, t.ScheduledTask)
-		close(preemptionDone)
-
-		// Handle task completion, including potential retry
-		if o.handleTaskCompletion(&t, err, originalOp) {
-			continue // Skip callbacks for retried tasks
-		}
-
-		// Execute callbacks
-		for _, cb := range t.callbacks {
-			go cb(err)
-		}
+		running.Add(1)
+		go func(task stContainer) {
+			defer running.Done()
+			o.runScheduledTask(ctx, task)
+		}(t)
 	}
 }
 
-func (o *Orchestrator) watchForBackupPreemption(ctx context.Context, current stContainer, done <-chan struct{}) {
-	if current.Op == nil || current.Task == nil || current.Task.Type() != "backup" ||
-		!tasks.IsPlanTaskPriority(current.priority) {
+func (o *Orchestrator) runScheduledTask(ctx context.Context, task stContainer) {
+	originalOp := proto.Clone(task.Op).(*v1.Operation)
+	o.prepareOperationForRetry(&task)
+	err := o.RunTask(ctx, task.ScheduledTask)
+	if o.handleTaskCompletion(ctx, &task, err, originalOp) {
 		return
 	}
-
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
-
-	for {
-		for _, queued := range o.taskQueue.GetAll() {
-			if queued.RunAt.After(o.curTime()) || queued.Task == nil || queued.Task.Type() != "backup" {
-				continue
-			}
-			if queued.priority <= current.priority {
-				continue
-			}
-
-			o.taskCancelMu.Lock()
-			cancel, running := o.taskCancel[current.Op.Id]
-			if running {
-				cancel(tasks.ErrPriorityPreempted)
-			}
-			o.taskCancelMu.Unlock()
-
-			if running {
-				zap.L().Info("preempting scheduled backup for due higher-priority backup",
-					zap.String("yieldingTask", current.Task.Name()),
-					zap.String("dueTask", queued.Task.Name()),
-					zap.Time("dueAt", queued.RunAt))
-			}
-			return
-		}
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-done:
-			return
-		case <-ticker.C:
-		}
+	for _, callback := range task.callbacks {
+		go callback(err)
 	}
 }
 
@@ -596,7 +548,10 @@ func (o *Orchestrator) prepareOperationForRetry(t *stContainer) {
 
 // handleTaskCompletion processes task completion, handling retry logic or rescheduling as needed.
 // Returns true if the task was requeued for retry.
-func (o *Orchestrator) handleTaskCompletion(t *stContainer, err error, originalOp *v1.Operation) bool {
+func (o *Orchestrator) handleTaskCompletion(ctx context.Context, t *stContainer, err error, originalOp *v1.Operation) bool {
+	if ctx.Err() != nil {
+		return false
+	}
 	// Check if config has changed since the task was scheduled
 	o.mu.Lock()
 	lastQueueResetTime := o.lastQueueResetTime
@@ -845,4 +800,45 @@ func (o *Orchestrator) Config() *v1.Config {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	return proto.Clone(o.config).(*v1.Config)
+}
+
+func (o *Orchestrator) resumeWaitingBackups(repoID, completedPlanID string) error {
+	o.resumeMu.Lock()
+	defer o.resumeMu.Unlock()
+
+	cfg := o.Config()
+	repoConfig := config.FindRepo(cfg, repoID)
+	if repoConfig == nil {
+		return ErrRepoNotFound
+	}
+	latest := make(map[string]*v1.Operation)
+	if err := o.OpLog.Query(oplog.Query{}.
+		SetInstanceID(cfg.Instance).
+		SetRepoGUID(repoConfig.GetGuid()).
+		SetReversed(true), func(op *v1.Operation) error {
+		if _, seen := latest[op.GetPlanId()]; seen || op.GetPlanId() == "" {
+			return nil
+		}
+		if _, ok := op.Op.(*v1.Operation_OperationBackup); ok {
+			latest[op.GetPlanId()] = op
+		}
+		return nil
+	}); err != nil {
+		return fmt.Errorf("query waiting backups: %w", err)
+	}
+
+	for _, plan := range cfg.GetPlans() {
+		if plan.GetRepo() != repoID || plan.GetId() == completedPlanID {
+			continue
+		}
+		op := latest[plan.GetId()]
+		if op == nil || op.GetOperationBackup() == nil || !op.GetOperationBackup().GetWaitingForResume() {
+			continue
+		}
+		task := tasks.NewOneoffBackupTask(repoConfig, plan, o.curTime(), false)
+		if _, err := o.ScheduleTask(task, tasks.TaskPriorityDefault); err != nil {
+			return fmt.Errorf("resume waiting plan %q: %w", plan.GetId(), err)
+		}
+	}
+	return nil
 }

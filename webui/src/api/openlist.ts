@@ -12,6 +12,16 @@ export interface OpenListRepositoryUsage {
   stored_objects: number;
   storage_initialized: boolean;
   storage_updated_at?: string;
+  tasks?: OpenListTaskUsage[];
+}
+
+export interface OpenListTaskUsage {
+  id: string;
+  day_bytes: number;
+  day_limit: number;
+  weight: number;
+  released: boolean;
+  released_at_bytes: number;
 }
 
 export interface OpenListUsage {
