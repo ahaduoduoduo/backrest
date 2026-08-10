@@ -4,6 +4,9 @@ Updated: 2026-08-11
 
 ## Completed
 
+- [x] 2026-08-11: Prefer an in-progress backup in dashboard task cards when a
+  cancelled future schedule marker sorts ahead of it, keeping the main status,
+  progress, and stop control attached to the live Restic operation.
 - [x] 2026-08-11: Apply each plan's configured weight to both scheduled and
   manually requested backups; “backup now” changes due time without bypassing
   higher-weight plans.

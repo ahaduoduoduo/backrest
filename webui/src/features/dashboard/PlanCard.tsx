@@ -103,6 +103,13 @@ function planState(status: OperationStatus | undefined): PlanState {
   return "idle";
 }
 
+function displayBackupIndex(statuses: readonly OperationStatus[]): number {
+  const runningIndex = statuses.findIndex(
+    (status) => status === OperationStatus.STATUS_INPROGRESS,
+  );
+  return runningIndex >= 0 ? runningIndex : 0;
+}
+
 interface LiveProgress {
   pct: number;
   done: number;
@@ -251,9 +258,13 @@ export const PlanCard = ({
   const [config] = useConfig();
   const [manualRunning, setManualRunning] = useState(false);
   const [actionPending, setActionPending] = useState(false);
-  const latestStatus = summary.recentBackups?.status[0];
-  const latestTimestamp = Number(summary.recentBackups?.timestampMs[0] ?? 0);
-  const waitingForResume = summary.recentBackups?.waitingForResume[0] === true;
+  const backupIndex = displayBackupIndex(summary.recentBackups?.status ?? []);
+  const latestStatus = summary.recentBackups?.status[backupIndex];
+  const latestTimestamp = Number(
+    summary.recentBackups?.timestampMs[backupIndex] ?? 0,
+  );
+  const waitingForResume =
+    summary.recentBackups?.waitingForResume[backupIndex] === true;
   const reportedState = planState(latestStatus);
   const running = reportedState === "run" || manualRunning;
   const state: PlanState = running ? "run" : reportedState;
@@ -278,7 +289,9 @@ export const PlanCard = ({
       : undefined,
   );
   const nextBackup = Number(summary.nextBackupTimeMs ?? 0);
-  const lastUpload = Number(summary.recentBackups?.bytesAdded[0] ?? 0);
+  const lastUpload = Number(
+    summary.recentBackups?.bytesAdded[backupIndex] ?? 0,
+  );
 
   const startBackup = async () => {
     setActionPending(true);
