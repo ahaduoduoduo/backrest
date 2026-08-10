@@ -529,7 +529,10 @@ func (s *BackrestHandler) Backup(ctx context.Context, req *connect.Request[v1.Ba
 	if err != nil {
 		return nil, withLookupCode(err)
 	}
-	if err := s.scheduleTaskAndWait(tasks.NewOneoffBackupTask(repo, plan, time.Now(), req.Msg.DryRun), tasks.TaskPriorityInteractive); err != nil {
+	if err := s.scheduleTaskAndWait(
+		tasks.NewOneoffBackupTask(repo, plan, time.Now(), req.Msg.DryRun),
+		tasks.PlanTaskPriority(plan.GetPriority()),
+	); err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil

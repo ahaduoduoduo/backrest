@@ -73,7 +73,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   `internal/orchestrator/orchestrator.go`: persist signed per-plan priority
   weights and order scheduled backups without allowing those weights to cross
   internal maintenance or interactive task classes. Lower-priority backups
-  yield cleanly when a higher-priority plan becomes due.
+  yield cleanly when a higher-priority plan becomes due; manual “backup now”
+  operations enter the same weighted backup queue.
 - `docs/plan-priority.md`: priority semantics, equal-weight ordering,
   preemption behavior, and configuration examples.
 - `webui/src/features/plans/PlanSnapshotExplorer.tsx` and

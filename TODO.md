@@ -4,6 +4,9 @@ Updated: 2026-08-11
 
 ## Completed
 
+- [x] 2026-08-11: Apply each plan's configured weight to both scheduled and
+  manually requested backups; “backup now” changes due time without bypassing
+  higher-weight plans.
 - [x] 2026-08-11: Replace the two-level background-plan environment variable
   with a signed priority weight stored on every backup plan; higher weights run
   first and can cleanly interrupt a lower-priority scheduled backup.

@@ -27,5 +27,6 @@ priority-yield reason, its snapshot-end hook runs, and the operation is shown
 as waiting for resume rather than failed. Already uploaded Restic packs remain
 in the repository and are reused by the next run.
 
-Manual backups keep the interactive task priority and are not reduced to the
-plan's scheduled weight.
+“Backup now” makes the selected plan due immediately, but keeps the plan's
+configured weight. It does not overtake a running or due backup with a higher
+weight.
