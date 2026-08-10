@@ -107,6 +107,9 @@ func (r *RepoOrchestrator) Init(ctx context.Context) error {
 }
 
 func (r *RepoOrchestrator) Snapshots(ctx context.Context) ([]*restic.Snapshot, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -119,6 +122,15 @@ func (r *RepoOrchestrator) Snapshots(ctx context.Context) ([]*restic.Snapshot, e
 }
 
 func (r *RepoOrchestrator) SnapshotsForPlan(ctx context.Context, plan *v1.Plan) ([]*restic.Snapshot, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.snapshotsForPlan(ctx, plan)
+}
+
+// snapshotsForPlan is called by Backup while its shared repository lock is
+// already held. Keeping the unlocked helper separate avoids recursive RLock
+// acquisition while an exclusive maintenance operation is waiting.
+func (r *RepoOrchestrator) snapshotsForPlan(ctx context.Context, plan *v1.Plan) ([]*restic.Snapshot, error) {
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -142,7 +154,7 @@ func (r *RepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun boo
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	snapshots, err := r.SnapshotsForPlan(ctx, plan)
+	snapshots, err := r.snapshotsForPlan(ctx, plan)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get snapshots for plan: %w", err)
 	}
