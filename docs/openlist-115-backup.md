@@ -164,6 +164,13 @@ rapid-upload match consumes zero WAN quota; retries consume their retransmitted
 bytes. At the calendar limit, the current Restic command exits and the next
 scheduled run continues from the repository state already written.
 
+The dashboard's “Remote backup” metric is different from transfer traffic and
+per-snapshot “data added”. It reads OpenList's persistent Restic object
+inventory and shows the current sum of files stored in the remote repository.
+Plans sharing that repository are counted once. Existing repositories require
+one explicit OpenList inventory reconciliation after deployment; later uploads
+and deletions update the value incrementally.
+
 Completed packs do not expire when source files change. Restic creates new
 encrypted objects for changed content and reuses indexed objects that already
 exist. An interrupted run can leave unreferenced packs; scheduled maintenance

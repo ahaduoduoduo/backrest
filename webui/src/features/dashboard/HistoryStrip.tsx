@@ -18,6 +18,7 @@ type CellKind =
   | "recovered"
   | "warn"
   | "err"
+  | "stopped"
   | "other";
 
 interface DayCell {
@@ -47,11 +48,12 @@ const CELL_STYLE: Record<CellKind, { bg: string; dim: boolean }> = {
   recovered: { bg: "#397da4", dim: false },
   warn: { bg: "orange.400", dim: false },
   err: { bg: "red.500", dim: false },
+  stopped: { bg: "bg.muted", dim: false },
   other: { bg: "bg.muted", dim: false },
 };
 
 // Status categories used both for ranking a day and for the tooltip breakdown.
-type StatusCat = "inprogress" | "err" | "warn" | "ok";
+type StatusCat = "inprogress" | "err" | "warn" | "ok" | "stopped";
 
 // Single source of truth mapping each backup status to a category. The total
 // Record makes this exhaustive: adding a status to operations.proto won't compile
@@ -64,8 +66,8 @@ const STATUS_CAT: Record<OperationStatus, StatusCat | null> = {
   [OperationStatus.STATUS_SYSTEM_CANCELLED]: "err",
   // A backup running for the day when no usable result has completed yet.
   [OperationStatus.STATUS_INPROGRESS]: "inprogress",
-  // A user-initiated cancellation is an incomplete backup, not a hard failure.
-  [OperationStatus.STATUS_USER_CANCELLED]: "warn",
+  // A user-initiated stop is neutral and remains visible only as history.
+  [OperationStatus.STATUS_USER_CANCELLED]: "stopped",
   // An unrecognized status shouldn't be silently dropped — flag it for attention.
   [OperationStatus.STATUS_UNKNOWN]: "warn",
   // Scheduled but not yet started: no outcome to summarize.
@@ -85,6 +87,7 @@ function cellKind(
     warn: 0,
     err: 0,
     inprogress: 0,
+    stopped: 0,
   };
   for (const { status } of statusCounts) {
     const cat = STATUS_CAT[status];
@@ -107,6 +110,7 @@ function cellKind(
     case "error":
       return "err";
     default:
+      if (categoryCounts.stopped > 0) return "stopped";
       // A day with operations but no outcome yet (e.g. only pending).
       return "other";
   }
@@ -157,6 +161,7 @@ const CAT_COLOR: Record<StatusCat, string> = {
   err: "red.400",
   warn: "orange.400",
   ok: "#63b9e8",
+  stopped: "whiteAlpha.450",
 };
 
 const CAT_LABEL: Record<StatusCat, (p: { count: number }) => string> = {
@@ -164,11 +169,12 @@ const CAT_LABEL: Record<StatusCat, (p: { count: number }) => string> = {
   err: m.dashboard_repo_failed,
   warn: m.dashboard_history_tooltip_status_warn,
   ok: m.dashboard_history_tooltip_status_ok,
+  stopped: () => m.op_status_cancelled(),
 };
 
 // Detail order remains urgency-first even though the cell reflects whether the
 // day ultimately obtained a usable backup.
-const CAT_ORDER: StatusCat[] = ["inprogress", "err", "warn", "ok"];
+const CAT_ORDER: StatusCat[] = ["inprogress", "err", "warn", "ok", "stopped"];
 
 const DayTooltip = ({ cell }: { cell: DayCell }) => {
   const counts = new Map<StatusCat, number>();

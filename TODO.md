@@ -4,6 +4,12 @@ Updated: 2026-08-10
 
 ## Completed
 
+- [x] 2026-08-10: Present explicit user cancellation as a neutral stopped
+  backup in task cards, 30-day history, and yearly activity instead of an
+  abnormal or recovered failure; the running control remains a stop action.
+- [x] 2026-08-10: Define “remote backup” as current Restic object occupancy on
+  115, consume OpenList's persistent inventory, and count a repository shared
+  by multiple backup plans only once.
 - [x] 2026-08-10: Sum protected and newly added data across backup plans,
   simplify yearly-calendar details to “added today”, and resolve each day's
   fill or outline from every plan's final status while retaining an orange

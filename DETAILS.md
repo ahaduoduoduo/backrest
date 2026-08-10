@@ -27,19 +27,22 @@ configuration model, operation log, snapshot browser, and restore operations.
   environment variables.
 - `cmd/backrest/backrest.go`: registers the proxy inside Backrest's existing
   authenticated route set.
-- `webui/src/api/openlist.ts`: typed client for the compact usage response.
+- `webui/src/api/openlist.ts`: typed client for the compact usage response,
+  OpenList repository-name parsing, and deduplicated repository occupancy.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
   backup activity wall combining Backrest operation metrics with current 115
-  day and month upload traffic. The metric strip labels accumulated Restic
-  additions as remote backup data, while each day exposes its uncompressed
-  addition and final per-plan status through a hover/tap detail panel.
+  day and month upload traffic. The metric strip reports current remote Restic
+  object occupancy once per repository, while each day exposes its
+  uncompressed addition and final per-plan status through a hover/tap detail
+  panel.
 - `webui/src/features/dashboard/backupActivitySummary.ts`: groups operations by
   local day and plan, sums additions from all plans, resolves each plan from its
   last started operation, and derives solid or outlined calendar states for
-  failure, progress, queued work, and successful recovery.
+  failure, progress, queued work, successful recovery, and neutral user stops.
 - `webui/src/features/dashboard/SummaryDashboard.tsx`: composes live Backrest
   activity data and the backup-task grid; protected bytes are the sum of every
-  plan's latest usable snapshot rather than the latest plan in each repository.
+  plan's latest usable snapshot, while remote occupancy is deduplicated by the
+  OpenList repository referenced by those plans.
 - `webui/src/features/dashboard/PlanCard.tsx`: renders the calendar-aligned task
   summary, start/stop control, next-run treatment, repository addition, and
   direct navigation to historical files.

@@ -1,13 +1,12 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
-import { getOpenListUsage, type OpenListUsage } from "../../api/openlist";
+import {
+  getOpenListUsage,
+  openListRepositoryName,
+  type OpenListUsage,
+} from "../../api/openlist";
 import { formatBytes } from "../../lib/formatting";
 import * as m from "../../paraglide/messages";
-
-const openListRepositoryName = (uri: string): string | null => {
-  const match = uri.match(/\/(?:api\/)?restic\/([^/?#]+)/i);
-  return match?.[1] ? decodeURIComponent(match[1]) : null;
-};
 
 export const OpenListRepositoryRate = ({ uri }: { uri?: string }) => {
   const repositoryName = useMemo(
