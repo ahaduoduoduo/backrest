@@ -32,6 +32,8 @@ are not part of this path.
 When OpenList closes the daily upload window, the operation is recorded as a
 blue “waiting to resume” result instead of a failed backup. Packs accepted
 before the limit remain in the Restic repository and are reused by the next run.
+An explicit user stop is shown as a neutral stopped operation rather than a
+backup failure; starting the plan again creates a new incremental Restic run.
 
 The console reads 115 upload usage through the Backrest backend, so OpenList
 credentials are never sent to the browser. Source selection, excludes,
@@ -40,8 +42,9 @@ and prune continue to use Backrest's existing plan and repository model.
 
 The dashboard uses a contribution-style yearly backup activity wall and a
 root-level neutral glass navigation panel. Backed-up bytes are summed from the
-latest usable snapshot of every plan; remote backup additions, current day and
-month OpenList traffic, and backup days share the same metric strip. Each
+latest usable snapshot of every plan; current remote Restic repository
+occupancy, current day and month OpenList traffic, and backup days share the
+same metric strip. A repository shared by multiple plans is counted once. Each
 calendar cell reveals that day's uncompressed repository addition and the
 final state of every plan on hover or tap. The effective OpenList upload rate
 is shown in the matching repository editor.

@@ -67,6 +67,7 @@ function day(overrides: Partial<ActivityDay>): ActivityDay {
     failed: 0,
     running: 0,
     pending: 0,
+    stopped: 0,
     recovered: 0,
     ...overrides,
   };
@@ -135,6 +136,27 @@ describe("summarizeBackupActivity", () => {
       pending: 0,
     });
   });
+
+  it("treats a user-stopped backup as neutral rather than failed", () => {
+    const summary = summarizeBackupActivity(
+      [
+        backupOperation({
+          id: 1,
+          planId: "time-machine",
+          hour: 7,
+          status: OperationStatus.STATUS_USER_CANCELLED,
+        }),
+      ],
+      now,
+    );
+
+    expect(summary.days.get(activityDateKey(now))).toMatchObject({
+      failed: 0,
+      warning: 0,
+      stopped: 1,
+      recovered: 0,
+    });
+  });
 });
 
 describe("backupActivityDayAppearance", () => {
@@ -159,5 +181,9 @@ describe("backupActivityDayAppearance", () => {
     expect(backupActivityDayAppearance(day({ success: 2, recovered: 1 }))).toBe(
       "recovered",
     );
+  });
+
+  it("uses a neutral stopped state for a user cancellation", () => {
+    expect(backupActivityDayAppearance(day({ stopped: 1 }))).toBe("stopped");
   });
 });

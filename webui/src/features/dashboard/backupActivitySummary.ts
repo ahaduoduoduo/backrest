@@ -8,6 +8,7 @@ export interface ActivityDay {
   failed: number;
   running: number;
   pending: number;
+  stopped: number;
   recovered: number;
 }
 
@@ -27,6 +28,7 @@ export type BackupActivityDayAppearance =
   | "error"
   | "partial-error"
   | "pending"
+  | "stopped"
   | "empty";
 
 interface PlanDayState {
@@ -63,8 +65,7 @@ export function activityDateKey(date: Date): string {
 function isFailure(status: OperationStatus): boolean {
   return (
     status === OperationStatus.STATUS_ERROR ||
-    status === OperationStatus.STATUS_SYSTEM_CANCELLED ||
-    status === OperationStatus.STATUS_USER_CANCELLED
+    status === OperationStatus.STATUS_SYSTEM_CANCELLED
   );
 }
 
@@ -105,6 +106,7 @@ function emptyActivityDay(): ActivityDay {
     failed: 0,
     running: 0,
     pending: 0,
+    stopped: 0,
     recovered: 0,
   };
 }
@@ -129,8 +131,10 @@ function finalizeDay(accumulator: ActivityDayAccumulator): ActivityDay {
         break;
       case OperationStatus.STATUS_ERROR:
       case OperationStatus.STATUS_SYSTEM_CANCELLED:
-      case OperationStatus.STATUS_USER_CANCELLED:
         day.failed++;
+        break;
+      case OperationStatus.STATUS_USER_CANCELLED:
+        day.stopped++;
         break;
       default:
         if (plan.pending) day.pending++;
@@ -227,5 +231,6 @@ export function backupActivityDayAppearance(
     return "success";
   }
   if (day.pending > 0) return "pending";
+  if (day.stopped > 0) return "stopped";
   return "empty";
 }

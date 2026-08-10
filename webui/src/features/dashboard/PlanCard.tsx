@@ -66,13 +66,14 @@ function scheduleText(maxFrequencyHours?: number): string | null {
   return m.dashboard_schedule_every_hours({ count: maxFrequencyHours });
 }
 
-type PlanState = "ok" | "warn" | "err" | "run" | "idle";
+type PlanState = "ok" | "warn" | "err" | "run" | "stopped" | "idle";
 
 const STATE_COLORS: Record<PlanState, string> = {
   ok: "#63b9e8",
   warn: "#f3a35c",
   err: "#f26060",
   run: "#37d785",
+  stopped: "rgba(241,243,247,0.4)",
   idle: "rgba(241,243,247,0.4)",
 };
 
@@ -81,6 +82,7 @@ const STATE_LABEL: Record<PlanState, () => string> = {
   warn: m.dashboard_hero_warn,
   err: m.dashboard_state_label_err,
   run: m.dashboard_state_label_run,
+  stopped: m.op_status_cancelled,
   idle: m.dashboard_state_label_idle,
 };
 
@@ -92,6 +94,7 @@ function planState(status: OperationStatus | undefined): PlanState {
     return "run";
   if (status === OperationStatus.STATUS_SUCCESS) return "ok";
   if (status === OperationStatus.STATUS_WARNING) return "warn";
+  if (status === OperationStatus.STATUS_USER_CANCELLED) return "stopped";
   if (
     status === OperationStatus.STATUS_ERROR ||
     status === OperationStatus.STATUS_SYSTEM_CANCELLED

@@ -16,7 +16,11 @@ import { Multihost } from "../../../gen/ts/v1/config_pb";
 import { SummaryDashboardResponse } from "../../../gen/ts/v1/service_pb";
 import { PeerState } from "../../../gen/ts/v1sync/syncservice_pb";
 import { backrestService } from "../../api/client";
-import { getOpenListUsage } from "../../api/openlist";
+import {
+  getOpenListStoredBytes,
+  getOpenListUsage,
+  openListRepositoryName,
+} from "../../api/openlist";
 import type { OpenListUsage } from "../../api/openlist";
 import { alerts } from "../../components/common/Alerts";
 import { PeerStateConnectionStatusIcon } from "../../components/common/SyncStateIcon";
@@ -79,6 +83,20 @@ export const SummaryDashboard = () => {
     }
   }, [config, navigate]);
 
+  const openListRepositoryNames = useMemo(() => {
+    const repositoryIds = new Set(
+      (config?.plans ?? []).map((plan) => plan.repo),
+    );
+    return (config?.repos ?? [])
+      .filter((repository) => repositoryIds.has(repository.id))
+      .map((repository) => openListRepositoryName(repository.uri))
+      .filter((name): name is string => name !== null);
+  }, [config]);
+  const remoteStoredBytes = useMemo(
+    () => getOpenListStoredBytes(openListUsage, openListRepositoryNames),
+    [openListRepositoryNames, openListUsage],
+  );
+
   if (!summaryData) {
     return (
       <Center h="200px">
@@ -104,6 +122,7 @@ export const SummaryDashboard = () => {
         protectedBytes={protectedBytes}
         planIds={plans.map((plan) => plan.id)}
         openListUsage={openListUsage}
+        remoteStoredBytes={remoteStoredBytes}
       />
 
       <MultihostSummary multihostConfig={config?.multihost ?? null} />

@@ -49,6 +49,7 @@ const activityCopy = () => {
     failed: zh ? "异常" : "failed",
     running: zh ? "进行中" : "running",
     pending: zh ? "等待开始" : "waiting to start",
+    stopped: zh ? "已停止" : "stopped",
     dayUpload: zh ? "今日新增" : "Added today",
     weekdays: zh
       ? ["", "一", "", "三", "", "五", ""]
@@ -261,6 +262,7 @@ const ActivityDayTooltip = ({
         day.failed > 0 ? `${day.failed} ${copy.failed}` : "",
         day.running > 0 ? `${day.running} ${copy.running}` : "",
         day.pending > 0 ? `${day.pending} ${copy.pending}` : "",
+        day.stopped > 0 ? `${day.stopped} ${copy.stopped}` : "",
       ]
         .filter(Boolean)
         .join(" · ")
@@ -298,10 +300,12 @@ export const BackupActivityOverview = ({
   protectedBytes,
   planIds,
   openListUsage,
+  remoteStoredBytes,
 }: {
   protectedBytes: number;
   planIds: string[];
   openListUsage: OpenListUsage | null;
+  remoteStoredBytes: number | null;
 }) => {
   const copy = activityCopy();
   const { operations, loaded } = useBackupOperations(planIds);
@@ -349,11 +353,7 @@ export const BackupActivityOverview = ({
     },
     {
       label: copy.added,
-      value: !loaded
-        ? "—"
-        : summary.bytesAdded > 0
-          ? formatBytes(summary.bytesAdded)
-          : "0 B",
+      value: remoteStoredBytes === null ? "—" : formatBytes(remoteStoredBytes),
     },
     {
       label: copy.todayUpload,
