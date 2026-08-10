@@ -263,7 +263,6 @@ Download the Windows installer for your architecture from the [releases page](ht
 | `BACKREST_CONFIG`         | Path to config file         | `%appdata%\backrest\config.json`                                                           |
 | `BACKREST_DATA`           | Path to the data directory  | `%appdata%\backrest\data`                                                                  |
 | `BACKREST_RESTIC_COMMAND` | Path to restic binary       | Defaults to a Backrest managed version of restic in `C:\Program Files\restic\restic-x.x.x` |
-| `BACKREST_BACKGROUND_PLANS` | Comma-separated backup plan IDs that yield when another backup becomes due | Empty |
 | `XDG_CACHE_HOME`          | Path to the cache directory |                                                                                            |
 
 

@@ -70,7 +70,7 @@ func (t *TimePriorityQueue[T]) Remove(v T) {
 	}
 }
 
-func (t *TimePriorityQueue[T]) Enqueue(at time.Time, priority int, v T) {
+func (t *TimePriorityQueue[T]) Enqueue(at time.Time, priority int64, v T) {
 	t.tqueue.Enqueue(at, priorityEntry[T]{at, priority, v})
 }
 
@@ -100,11 +100,14 @@ func (t *TimePriorityQueue[T]) Dequeue(ctx context.Context) T {
 
 type priorityEntry[T equals[T]] struct {
 	at       time.Time
-	priority int
+	priority int64
 	v        T
 }
 
 func (t priorityEntry[T]) Less(other priorityEntry[T]) bool {
+	if t.priority == other.priority {
+		return t.at.Before(other.at)
+	}
 	return t.priority > other.priority
 }
 

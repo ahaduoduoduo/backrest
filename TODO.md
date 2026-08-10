@@ -1,9 +1,12 @@
 # Custom Backrest development status
 
-Updated: 2026-08-10
+Updated: 2026-08-11
 
 ## Completed
 
+- [x] 2026-08-11: Replace the two-level background-plan environment variable
+  with a signed priority weight stored on every backup plan; higher weights run
+  first and can cleanly interrupt a lower-priority scheduled backup.
 - [x] 2026-08-10: Present explicit user cancellation as a neutral stopped
   backup in task cards, 30-day history, and yearly activity instead of an
   abnormal or recovered failure; the running control remains a stop action.

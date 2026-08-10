@@ -10,10 +10,11 @@ import (
 )
 
 // ErrPriorityPreempted is used as a context cancellation cause when a
-// background backup yields to a due normal-priority backup. It is deliberately
-// separate from user cancellation: uploaded restic packs remain useful and the
-// run should be displayed as waiting for resume rather than as a failure.
-var ErrPriorityPreempted = errors.New("background backup yielded to a higher-priority backup")
+// scheduled backup yields to a due backup with a higher configured plan
+// priority. It is deliberately separate from user cancellation: uploaded
+// restic packs remain useful and the run should be displayed as waiting for
+// resume rather than as a failure.
+var ErrPriorityPreempted = errors.New("scheduled backup yielded to a higher-priority backup")
 
 // TaskCancelledError is returned when a task is cancelled.
 type TaskCancelledError struct {

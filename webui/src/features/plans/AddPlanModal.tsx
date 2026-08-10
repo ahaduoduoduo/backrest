@@ -63,6 +63,7 @@ import { DEFAULT_PLAN_EXCLUDES, scopeText } from "./backupScopeCatalog";
 
 // Default Plan
 const planDefaults = create(PlanSchema, {
+  priority: 0,
   excludes: DEFAULT_PLAN_EXCLUDES,
   schedule: {
     schedule: {
@@ -179,6 +180,13 @@ export const AddPlanModal = ({
       }
       if (!formData.repo) {
         throw new Error(m.add_plan_modal_validation_repository_required());
+      }
+      if (
+        !Number.isInteger(formData.priority) ||
+        formData.priority < -2147483648 ||
+        formData.priority > 2147483647
+      ) {
+        throw new Error(m.add_plan_modal_validation_priority_integer());
       }
       if (
         formData.backup_flags &&
@@ -457,6 +465,25 @@ export const AddPlanModal = ({
             onChange={(v: any) => updateField(["schedule"], v)}
             defaults={ScheduleDefaultsDaily}
           />
+          <Field
+            label={m.add_plan_modal_field_priority()}
+            helperText={m.add_plan_modal_field_priority_tooltip()}
+          >
+            <Input
+              type="number"
+              inputMode="numeric"
+              step={1}
+              min={-2147483648}
+              max={2147483647}
+              value={getField(["priority"]) ?? 0}
+              onChange={(e) =>
+                updateField(
+                  ["priority"],
+                  e.target.value === "" ? 0 : Number(e.target.value),
+                )
+              }
+            />
+          </Field>
         </SectionCard>
       </TwoPaneSection>
 

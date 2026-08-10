@@ -1,6 +1,6 @@
 # Custom Backrest module map
 
-Updated: 2026-08-10
+Updated: 2026-08-11
 
 The fork retains upstream Backrest's Go orchestrator, Restic process runner,
 configuration model, operation log, snapshot browser, and restore operations.
@@ -69,6 +69,13 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `webui/src/features/plans/BackupScopeEditor.tsx`: direct root-directory list
   and readable exclusion controls backed by the unchanged `Plan.paths`,
   `Plan.excludes`, and `Plan.iexcludes` fields.
+- `proto/v1/config.proto`, `internal/orchestrator/tasks/task.go`, and
+  `internal/orchestrator/orchestrator.go`: persist signed per-plan priority
+  weights and order scheduled backups without allowing those weights to cross
+  internal maintenance or interactive task classes. Lower-priority backups
+  yield cleanly when a higher-priority plan becomes due.
+- `docs/plan-priority.md`: priority semantics, equal-weight ordering,
+  preemption behavior, and configuration examples.
 - `webui/src/features/plans/PlanSnapshotExplorer.tsx` and
   `SnapshotExplorerHeader.tsx`: present successful Restic snapshots as a
   Time Machine-inspired directory-window stack with persistent paths, a

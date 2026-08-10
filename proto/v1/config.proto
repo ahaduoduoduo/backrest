@@ -127,6 +127,7 @@ message Plan {
   repeated Hook hooks = 8 [json_name="hooks"]; // hooks to run on events for this plan.
   repeated string backup_flags = 10 [json_name="backup_flags"]; // extra flags to set when running a backup command.
   bool skip_if_unchanged = 13 [json_name="skipIfUnchanged"]; // skip the backup if no changes are detected.
+  int32 priority = 14 [json_name="priority"]; // ordering weight for scheduled backups; larger values run first.
   reserved 3, 6, 11; // deprecated
 }
 

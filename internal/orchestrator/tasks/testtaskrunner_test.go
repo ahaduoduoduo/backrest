@@ -30,7 +30,7 @@ type hookCall struct {
 
 type scheduledTaskCall struct {
 	Task     Task
-	Priority int
+	Priority int64
 }
 
 var _ TaskRunner = &testTaskRunner{}
@@ -112,7 +112,7 @@ func (t *testTaskRunner) GetRepoOrchestrator(repoID string) (RepoOrchestrator, e
 	return t.orchestrator, nil
 }
 
-func (t *testTaskRunner) ScheduleTask(task Task, priority int) error {
+func (t *testTaskRunner) ScheduleTask(task Task, priority int64) error {
 	t.scheduledTasks = append(t.scheduledTasks, scheduledTaskCall{Task: task, Priority: priority})
 	return nil
 }
