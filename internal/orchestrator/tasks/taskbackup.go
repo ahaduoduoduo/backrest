@@ -135,12 +135,24 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 		return NotifyError(ctx, runner, t.Name(), err, v1.Hook_CONDITION_SNAPSHOT_ERROR)
 	}
 
-	repo, err := runner.GetRepoOrchestrator(t.RepoID())
+	plan, err := runner.GetPlan(t.PlanID())
 	if err != nil {
 		return notifyError(err)
 	}
+	if !t.dryRun {
+		available, capacityErr := runner.UploadCapacityAvailable(ctx, plan)
+		if capacityErr != nil {
+			l.Warn("failed to read local OpenList upload capacity; continuing with server-side enforcement", zap.Error(capacityErr))
+		} else if !available {
+			backupOp.OperationBackup.WaitingForResume = true
+			op.Status = v1.OperationStatus_STATUS_SUCCESS
+			op.DisplayMessage = "Daily upload quota reached. Waiting to resume in the next upload window."
+			l.Info("backup waiting for the next upload window without reading the remote repository", zap.String("plan", plan.Id))
+			return nil
+		}
+	}
 
-	plan, err := runner.GetPlan(t.PlanID())
+	repo, err := runner.GetRepoOrchestrator(t.RepoID())
 	if err != nil {
 		return notifyError(err)
 	}

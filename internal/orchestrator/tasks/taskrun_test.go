@@ -415,6 +415,26 @@ func TestBackupTaskRun(t *testing.T) {
 	}
 }
 
+func TestBackupTaskSkipsRemoteSetupWhenUploadQuotaIsExhausted(t *testing.T) {
+	plan := &v1.Plan{Id: "time-machine", Repo: "repo1"}
+	repo := &v1.Repo{Id: "repo1", Guid: "guid1"}
+	fake := &fakeRepoOrchestrator{
+		backupFunc: func(context.Context) (*restic.BackupProgressEntry, error) {
+			t.Fatal("backup must not start when local OpenList counters show no capacity")
+			return nil, nil
+		},
+	}
+	runner := setupTestRunner(t, newTestConfig(repo, plan), fake)
+	runner.uploadCapacityAvailable = false
+	task := NewOneoffBackupTask(repo, plan, time.Now(), false)
+	st := nextAndCreate(t, task, runner)
+
+	require.NoError(t, task.Run(context.Background(), st, runner))
+	assert.Equal(t, v1.OperationStatus_STATUS_SUCCESS, st.Op.Status)
+	assert.True(t, st.Op.GetOperationBackup().GetWaitingForResume())
+	assert.Empty(t, runner.hookCalls)
+}
+
 // --- ForgetSnapshot task tests ---
 
 func TestForgetSnapshotTaskRun(t *testing.T) {

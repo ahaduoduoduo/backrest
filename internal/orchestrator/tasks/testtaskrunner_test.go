@@ -21,6 +21,8 @@ type testTaskRunner struct {
 	hookCalls      []hookCall
 	scheduledTasks []scheduledTaskCall
 	onExecuteHooks func(ctx context.Context, events []v1.Hook_Condition, vars HookVars) error
+	uploadCapacityAvailable bool
+	uploadCapacityErr       error
 }
 
 type hookCall struct {
@@ -37,8 +39,9 @@ var _ TaskRunner = &testTaskRunner{}
 
 func newTestTaskRunner(_ testing.TB, config *v1.Config, oplog *oplog.OpLog) *testTaskRunner {
 	return &testTaskRunner{
-		config: config,
-		oplog:  oplog,
+		config:                  config,
+		oplog:                   oplog,
+		uploadCapacityAvailable: true,
 	}
 }
 
@@ -119,6 +122,10 @@ func (t *testTaskRunner) ScheduleTask(task Task, priority int64) error {
 
 func (t *testTaskRunner) ReleaseUploadAllocation(context.Context, *v1.Plan) error {
 	return nil
+}
+
+func (t *testTaskRunner) UploadCapacityAvailable(context.Context, *v1.Plan) (bool, error) {
+	return t.uploadCapacityAvailable, t.uploadCapacityErr
 }
 
 func (t *testTaskRunner) Config() *v1.Config {

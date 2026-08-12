@@ -32,6 +32,9 @@ are not part of this path.
 When OpenList closes the daily upload window, the operation is recorded as a
 blue “waiting to resume” result instead of a failed backup. Packs accepted
 before the limit remain in the Restic repository and are reused by the next run.
+Before hooks, snapshots, or Restic repository reads begin, Backrest checks
+OpenList's local global, repository, and plan counters. A plan with no remaining
+allocation enters the same waiting state without reading any 115 objects.
 An explicit user stop is shown as a neutral stopped operation rather than a
 backup failure; starting the plan again creates a new incremental Restic run.
 

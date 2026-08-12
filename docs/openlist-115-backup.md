@@ -1,6 +1,6 @@
 # Backrest with the OpenList 115 gateway
 
-Updated: 2026-08-09
+Updated: 2026-08-12
 
 The fork image is published by `.github/workflows/custom-image.yml` after every
 non-documentation push to `main`; the same workflow can also be started
@@ -163,6 +163,14 @@ OpenList counts only bytes actually read by the 115 OSS uploader. A 115
 rapid-upload match consumes zero WAN quota; retries consume their retransmitted
 bytes. At the calendar limit, the current Restic command exits and the next
 scheduled run continues from the repository state already written.
+
+Before a new non-dry-run backup executes hooks, creates its source snapshot, or
+opens the Restic repository, Backrest reads `/restic/_usage`. This endpoint uses
+OpenList's local database and memory counters only. If the global, repository,
+or current plan allowance is exhausted, the operation enters “waiting to
+resume” without listing snapshots, indexes, locks, or any other 115 object.
+OpenList independently reserves each complete data pack before provider access,
+so a concurrent race at the allowance boundary also fails locally.
 
 The dashboard's “Remote backup” metric is different from transfer traffic and
 per-snapshot “data added”. It reads OpenList's persistent Restic object
