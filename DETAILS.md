@@ -32,6 +32,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   command hooks with task cancellation and terminate Unix shell child groups.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response,
   OpenList repository-name parsing, and deduplicated repository occupancy.
+- `webui/src/api/transientAction.ts`: bounded one-retry wrapper for Safari and
+  fetch transport failures on user-triggered dashboard actions.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
   backup activity wall combining Backrest operation metrics with current 115
   day and month upload traffic. The metric strip reports current remote Restic
@@ -50,7 +52,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   summary, start/stop control, next-run treatment, repository addition, and
   direct navigation to historical files. A live backup takes display priority
   over cancelled future schedule markers without removing those markers from
-  operation history.
+  operation history; start and stop retry one browser transport failure after
+  a suspended tab resumes.
 - `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
   status strips in chronological order, from the oldest date on the left to
   today on the right, with per-day backup-size and mixed-outcome details; a

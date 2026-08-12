@@ -85,6 +85,25 @@ describe("SummaryDashboard PlanCard", () => {
     );
   });
 
+  it("retries a browser connection failure when scheduling a backup", async () => {
+    vi.mocked(backrestService.backup)
+      .mockRejectedValueOnce(new Error("[unknown] Load failed"))
+      .mockResolvedValueOnce({} as never);
+    const successSpy = vi.spyOn(alerts, "success");
+    const { user } = renderWithProviders(<PlanCard summary={summary} />, {
+      config,
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: m.plan_button_backup() }),
+    );
+
+    await waitFor(() =>
+      expect(backrestService.backup).toHaveBeenCalledTimes(2),
+    );
+    expect(successSpy).toHaveBeenCalledWith(m.plan_backup_scheduled());
+  });
+
   it("uses the running control to cancel the active backup", async () => {
     const activeOperation = create(OperationSchema, {
       id: 42n,

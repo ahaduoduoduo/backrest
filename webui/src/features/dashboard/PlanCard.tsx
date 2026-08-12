@@ -15,6 +15,7 @@ import {
 import { backrestService } from "../../api/client";
 import { getOperations, operationsStream } from "../../api/oplog";
 import { matchSelector } from "../../api/logState";
+import { retryTransientBrowserAction } from "../../api/transientAction";
 import { alerts } from "../../components/common/Alerts";
 import { Tooltip } from "../../components/ui/tooltip";
 import { formatBytes, formatTime } from "../../lib/formatting";
@@ -315,8 +316,10 @@ export const PlanCard = ({
     setActionPending(true);
     setManualRunning(true);
     try {
-      await backrestService.backup(
-        create(BackupRequestSchema, { value: summary.id }),
+      await retryTransientBrowserAction(() =>
+        backrestService.backup(
+          create(BackupRequestSchema, { value: summary.id }),
+        ),
       );
       alerts.success(m.plan_backup_scheduled());
       await onRefresh?.();
@@ -335,10 +338,12 @@ export const PlanCard = ({
     if (!live.operationId) return;
     setActionPending(true);
     try {
-      await backrestService.cancel(
-        create(CancelOperationRequestSchema, {
-          operationId: live.operationId,
-        }),
+      await retryTransientBrowserAction(() =>
+        backrestService.cancel(
+          create(CancelOperationRequestSchema, {
+            operationId: live.operationId!,
+          }),
+        ),
       );
       alerts.success(m.op_row_cancel_success());
       setManualRunning(false);

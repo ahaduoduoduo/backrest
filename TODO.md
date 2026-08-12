@@ -4,6 +4,9 @@ Updated: 2026-08-13
 
 ## Completed
 
+- [x] 2026-08-13: Retry one Safari/fetch transport failure for dashboard
+  start and stop actions so returning to a suspended tab does not require a
+  page reload; application errors still fail immediately.
 - [x] 2026-08-13: Remove unconditional auto-unlock from the backup path,
   recover stale Restic locks only after exit code 11, make repository-lock
   waits cancellation-aware, and discard duplicate triggers for a plan that is
