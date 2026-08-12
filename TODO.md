@@ -1,9 +1,13 @@
 # Custom Backrest development status
 
-Updated: 2026-08-12
+Updated: 2026-08-13
 
 ## Completed
 
+- [x] 2026-08-13: Remove unconditional auto-unlock from the backup path,
+  recover stale Restic locks only after exit code 11, make repository-lock
+  waits cancellation-aware, and discard duplicate triggers for a plan that is
+  already running while preserving cross-plan concurrency.
 - [x] 2026-08-12: Check OpenList's local global, repository, and task upload
   counters before backup hooks or Restic repository access; exhausted plans
   enter the normal waiting-to-resume state without generating 115 reads.

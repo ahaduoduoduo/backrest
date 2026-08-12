@@ -247,6 +247,7 @@ func TestBackupTaskRun(t *testing.T) {
 		wantScheduled []string // expected scheduled task types
 		wantStatus    v1.OperationStatus
 		wantWaiting   bool
+		wantUnlocks   int
 	}{
 		{
 			name: "successful backup with retention",
@@ -339,10 +340,31 @@ func TestBackupTaskRun(t *testing.T) {
 			},
 		},
 		{
-			name:    "unlock error",
-			fake:    &fakeRepoOrchestrator{unlockErr: fmt.Errorf("unlock failed")},
-			plan:    &v1.Plan{Id: "plan1", Repo: "repo1"},
-			wantErr: true,
+			name: "stale repository lock is recovered once",
+			fake: &fakeRepoOrchestrator{
+				backupFunc: func() func(context.Context) (*restic.BackupProgressEntry, error) {
+					calls := 0
+					return func(context.Context) (*restic.BackupProgressEntry, error) {
+						calls++
+						if calls == 1 {
+							return nil, restic.ErrRepoLocked
+						}
+						return &restic.BackupProgressEntry{MessageType: "summary", SnapshotId: testSnapshotID}, nil
+					}
+				}(),
+			},
+			repo:          &v1.Repo{Id: "repo1", Guid: "guid1", AutoUnlock: true},
+			plan:          &v1.Plan{Id: "plan1", Repo: "repo1"},
+			wantUnlocks:   1,
+			wantScheduled: []string{"index_snapshots"},
+		},
+		{
+			name:        "stale repository lock recovery error",
+			fake:        &fakeRepoOrchestrator{backupErr: restic.ErrRepoLocked, unlockErr: fmt.Errorf("unlock failed")},
+			repo:        &v1.Repo{Id: "repo1", Guid: "guid1", AutoUnlock: true},
+			plan:        &v1.Plan{Id: "plan1", Repo: "repo1"},
+			wantErr:     true,
+			wantUnlocks: 1,
 			wantHooks: []v1.Hook_Condition{
 				v1.Hook_CONDITION_SNAPSHOT_ERROR,
 				v1.Hook_CONDITION_ANY_ERROR,
@@ -375,7 +397,7 @@ func TestBackupTaskRun(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+			t.Run(tc.name, func(t *testing.T) {
 			repo := tc.repo
 			if repo == nil {
 				repo = &v1.Repo{Id: "repo1", Guid: "guid1"}
@@ -396,6 +418,7 @@ func TestBackupTaskRun(t *testing.T) {
 				assert.Equal(t, tc.wantStatus, st.Op.Status)
 			}
 			assert.Equal(t, tc.wantWaiting, st.Op.GetOperationBackup().GetWaitingForResume())
+			assert.Equal(t, tc.wantUnlocks, tc.fake.unlockCalls)
 
 			for _, cond := range tc.wantHooks {
 				assert.True(t, hookContains(runner.hookCalls, cond), "expected hook %v", cond)

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -26,6 +27,21 @@ func TestIsUploadQuotaExceeded(t *testing.T) {
 	}
 	if isUploadQuotaExceeded(errors.New("unexpected HTTP response (429): too many requests")) {
 		t.Fatal("generic HTTP throttling must remain a backup error")
+	}
+}
+
+func TestHandleResticExitErrorDetectsRepositoryLock(t *testing.T) {
+	t.Parallel()
+
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", "exit", "11")
+	} else {
+		cmd = exec.Command("sh", "-c", "exit 11")
+	}
+	err := cmd.Run()
+	if !errors.Is(handleResticExitError(err, ErrBackupFailed), ErrRepoLocked) {
+		t.Fatalf("exit code 11 error = %v, want ErrRepoLocked", err)
 	}
 }
 

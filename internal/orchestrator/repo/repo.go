@@ -10,7 +10,6 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	v1 "github.com/garethgeorge/backrest/gen/go/v1"
@@ -26,7 +25,7 @@ import (
 // RepoOrchestrator implements higher level repository operations on top of
 // the restic package. It can be thought of as a controller for a repo.
 type RepoOrchestrator struct {
-	mu sync.RWMutex
+	mu *repositoryLock
 
 	config     *v1.Config
 	repoConfig *v1.Repo
@@ -85,6 +84,7 @@ func NewRepoOrchestrator(config *v1.Config, repoConfig *v1.Repo, resticPath stri
 	repo := restic.NewRepo(resticPath, ExpandEnv(repoConfig.GetUri()), opts...)
 
 	return &RepoOrchestrator{
+		mu:         newRepositoryLock(),
 		config:     config,
 		repoConfig: repoConfig,
 		repo:       repo,
@@ -107,8 +107,11 @@ func (r *RepoOrchestrator) Init(ctx context.Context) error {
 }
 
 func (r *RepoOrchestrator) Snapshots(ctx context.Context) ([]*restic.Snapshot, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+	release, err := r.mu.acquireShared(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("wait for shared repository access: %w", err)
+	}
+	defer release()
 
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
@@ -122,8 +125,11 @@ func (r *RepoOrchestrator) Snapshots(ctx context.Context) ([]*restic.Snapshot, e
 }
 
 func (r *RepoOrchestrator) SnapshotsForPlan(ctx context.Context, plan *v1.Plan) ([]*restic.Snapshot, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+	release, err := r.mu.acquireShared(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("wait for shared repository access: %w", err)
+	}
+	defer release()
 	return r.snapshotsForPlan(ctx, plan)
 }
 
@@ -151,8 +157,11 @@ func (r *RepoOrchestrator) Backup(ctx context.Context, plan *v1.Plan, dryRun boo
 	l := r.logger(ctx)
 	l.Debug("repo orchestrator starting backup", zap.String("repo", r.repoConfig.Id))
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+	release, err := r.mu.acquireShared(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("wait for shared repository access: %w", err)
+	}
+	defer release()
 
 	snapshots, err := r.snapshotsForPlan(ctx, plan)
 	if err != nil {
@@ -244,8 +253,11 @@ func (r *RepoOrchestrator) ListSnapshotFiles(ctx context.Context, snapshotId str
 }
 
 func (r *RepoOrchestrator) Forget(ctx context.Context, policy *v1.RetentionPolicy, opts ...restic.GenericOption) ([]*v1.ResticSnapshot, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -276,8 +288,11 @@ func (r *RepoOrchestrator) Forget(ctx context.Context, policy *v1.RetentionPolic
 }
 
 func (r *RepoOrchestrator) ForgetSnapshot(ctx context.Context, snapshotId string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -286,8 +301,11 @@ func (r *RepoOrchestrator) ForgetSnapshot(ctx context.Context, snapshotId string
 }
 
 func (r *RepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -306,7 +324,7 @@ func (r *RepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {
 	}
 
 	r.logger(ctx).Debug("prune snapshots")
-	err := r.repo.Prune(ctx, output, opts...)
+	err = r.repo.Prune(ctx, output, opts...)
 	if err != nil {
 		return fmt.Errorf("prune snapshots for repo %v: %w", r.repoConfig.Id, err)
 	}
@@ -314,8 +332,11 @@ func (r *RepoOrchestrator) Prune(ctx context.Context, output io.Writer) error {
 }
 
 func (r *RepoOrchestrator) Check(ctx context.Context, output io.Writer) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -332,7 +353,7 @@ func (r *RepoOrchestrator) Check(ctx context.Context, output io.Writer) error {
 	}
 
 	r.logger(ctx).Debug("checking repo")
-	err := r.repo.Check(ctx, output, opts...)
+	err = r.repo.Check(ctx, output, opts...)
 	if err != nil {
 		return fmt.Errorf("check repo %v: %w", r.repoConfig.Id, err)
 	}
@@ -340,8 +361,11 @@ func (r *RepoOrchestrator) Check(ctx context.Context, output io.Writer) error {
 }
 
 func (r *RepoOrchestrator) Restore(ctx context.Context, snapshotId string, snapshotPath string, target string, progressCallback func(event *v1.RestoreProgressEntry)) (*v1.RestoreProgressEntry, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -388,8 +412,11 @@ func (r *RepoOrchestrator) UnlockIfAutoEnabled(ctx context.Context) error {
 	if !r.repoConfig.AutoUnlock {
 		return nil
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -399,8 +426,11 @@ func (r *RepoOrchestrator) UnlockIfAutoEnabled(ctx context.Context) error {
 }
 
 func (r *RepoOrchestrator) Unlock(ctx context.Context) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 
 	r.logger(ctx).Debug("unlocking repo", zap.String("repo", r.repoConfig.Id))
 	r.repo.Unlock(ctx)
@@ -409,8 +439,11 @@ func (r *RepoOrchestrator) Unlock(ctx context.Context) error {
 }
 
 func (r *RepoOrchestrator) Stats(ctx context.Context) (*v1.RepoStats, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -424,8 +457,11 @@ func (r *RepoOrchestrator) Stats(ctx context.Context) (*v1.RepoStats, error) {
 }
 
 func (r *RepoOrchestrator) AddTags(ctx context.Context, snapshotIDs []string, tags []string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(ctx)
+	if err != nil {
+		return fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
@@ -463,8 +499,11 @@ func (r *RepoOrchestrator) Config() *v1.Repo {
 }
 
 func (r *RepoOrchestrator) RepoGUID() (string, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	release, err := r.mu.acquireExclusive(context.Background())
+	if err != nil {
+		return "", fmt.Errorf("wait for exclusive repository access: %w", err)
+	}
+	defer release()
 	cfg, err := r.repo.Config(context.Background())
 	return cryptoutil.TruncateID(cfg.Id, cryptoutil.DefaultIDBits), err
 }

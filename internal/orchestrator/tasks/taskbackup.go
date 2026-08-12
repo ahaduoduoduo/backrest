@@ -163,57 +163,73 @@ func (t *BackupTask) Run(ctx context.Context, st ScheduledTask, runner TaskRunne
 		return notifyError(fmt.Errorf("snapshot start hook: %w", err))
 	}
 
-	if err := repo.UnlockIfAutoEnabled(ctx); err != nil {
-		return notifyError(fmt.Errorf("auto unlock repo %q: %w", t.RepoID(), err))
-	}
-
 	var sendWg sync.WaitGroup
 	lastSent := time.Now() // debounce progress updates, these can endup being very frequent.
 	var lastFiles []string
 	fileErrorCount := 0
-	summary, err := repo.Backup(ctx, plan, t.dryRun, func(entry *restic.BackupProgressEntry) {
-		sendWg.Wait()
-		if entry.MessageType == "status" {
-			// prevents flickering output when a status entry omits the CurrentFiles property. Largely cosmetic.
-			if len(entry.CurrentFiles) == 0 {
-				entry.CurrentFiles = lastFiles
-			} else {
-				lastFiles = entry.CurrentFiles
+	backup := func() (*restic.BackupProgressEntry, error) {
+		return repo.Backup(ctx, plan, t.dryRun, func(entry *restic.BackupProgressEntry) {
+			sendWg.Wait()
+			if entry.MessageType == "status" {
+				// prevents flickering output when a status entry omits the CurrentFiles property. Largely cosmetic.
+				if len(entry.CurrentFiles) == 0 {
+					entry.CurrentFiles = lastFiles
+				} else {
+					lastFiles = entry.CurrentFiles
+				}
+
+				backupOp.OperationBackup.LastStatus = protoutil.BackupProgressEntryToProto(entry)
+			} else if entry.MessageType == "error" {
+				l.Warn("error processing item", zap.String("item", entry.Item), zap.Any("error", entry.Error))
+				fileErrorCount++
+				backupError, err := protoutil.BackupProgressEntryToBackupError(entry)
+				if err != nil {
+					l.Error("failed to convert backup progress entry to backup error", zap.Error(err))
+					return
+				}
+				if len(backupOp.OperationBackup.Errors) > maxBackupErrorHistoryLength ||
+					slices.ContainsFunc(backupOp.OperationBackup.Errors, func(i *v1.BackupProgressError) bool {
+						return i.Item == backupError.Item
+					}) {
+					return
+				}
+				backupOp.OperationBackup.Errors = append(backupOp.OperationBackup.Errors, backupError)
+			} else if entry.MessageType != "summary" && entry.MessageType != "verbose_status" {
+				zap.S().Warnf("unexpected message type %q in backup progress entry", entry.MessageType)
 			}
 
-			backupOp.OperationBackup.LastStatus = protoutil.BackupProgressEntryToProto(entry)
-		} else if entry.MessageType == "error" {
-			l.Warn("error processing item", zap.String("item", entry.Item), zap.Any("error", entry.Error))
-			fileErrorCount++
-			backupError, err := protoutil.BackupProgressEntryToBackupError(entry)
-			if err != nil {
-				l.Error("failed to convert backup progress entry to backup error", zap.Error(err))
+			if time.Since(lastSent) <= 1000*time.Millisecond {
 				return
 			}
-			if len(backupOp.OperationBackup.Errors) > maxBackupErrorHistoryLength ||
-				slices.ContainsFunc(backupOp.OperationBackup.Errors, func(i *v1.BackupProgressError) bool {
-					return i.Item == backupError.Item
-				}) {
-				return
-			}
-			backupOp.OperationBackup.Errors = append(backupOp.OperationBackup.Errors, backupError)
-		} else if entry.MessageType != "summary" && entry.MessageType != "verbose_status" {
-			zap.S().Warnf("unexpected message type %q in backup progress entry", entry.MessageType)
-		}
+			lastSent = time.Now()
 
-		if time.Since(lastSent) <= 1000*time.Millisecond {
-			return
-		}
-		lastSent = time.Now()
+			sendWg.Add(1)
+			go func() {
+				if err := runner.UpdateOperation(op); err != nil {
+					l.Sugar().Errorf("failed to update oplog with progress for backup: %v", err)
+				}
+				sendWg.Done()
+			}()
+		})
+	}
 
-		sendWg.Add(1)
-		go func() {
-			if err := runner.UpdateOperation(op); err != nil {
-				l.Sugar().Errorf("failed to update oplog with progress for backup: %v", err)
+	summary, err := backup()
+	if errors.Is(err, restic.ErrRepoLocked) {
+		repoConfig, repoErr := runner.GetRepo(t.RepoID())
+		if repoErr != nil {
+			return notifyError(repoErr)
+		}
+		if repoConfig.GetAutoUnlock() {
+			l.Info("repository reported a lock; checking stale locks before one retry", zap.String("repo", t.RepoID()))
+			if unlockErr := repo.UnlockIfAutoEnabled(ctx); unlockErr != nil {
+				return notifyError(fmt.Errorf("recover stale lock for repo %q: %w", t.RepoID(), unlockErr))
 			}
-			sendWg.Done()
-		}()
-	})
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			summary, err = backup()
+		}
+	}
 	sendWg.Wait()
 
 	if summary == nil {

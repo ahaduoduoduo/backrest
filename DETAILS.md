@@ -1,6 +1,6 @@
 # Custom Backrest module map
 
-Updated: 2026-08-11
+Updated: 2026-08-13
 
 The fork retains upstream Backrest's Go orchestrator, Restic process runner,
 configuration model, operation log, snapshot browser, and restore operations.
@@ -77,7 +77,17 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `proto/v1/config.proto`, `internal/orchestrator/repo/repo.go`, and
   `internal/orchestrator/orchestrator.go`: persist per-plan upload allocations
   and weights, allow backup readers to run concurrently, and keep repository
-  maintenance exclusive.
+  maintenance exclusive. Repository access is context-aware so a cancelled
+  operation does not remain blocked behind maintenance; the orchestrator also
+  suppresses a second active execution of the same plan.
+- `internal/orchestrator/repo/repositorylock.go`: context-aware shared/exclusive
+  repository coordination. Backup plans share access, while unlock, restore,
+  forget, check, prune, statistics, and tag maintenance remain exclusive.
+- `internal/orchestrator/activebackup.go`: per-repository, per-plan execution
+  guard that discards duplicate triggers without serializing different plans.
+- `pkg/restic/restic.go` and `internal/orchestrator/tasks/taskbackup.go`: map
+  Restic exit code 11 to a repository-lock error and invoke configured
+  auto-unlock only for that error before one retry.
 - `internal/openlistclient/client.go`: encodes a plan identity, allocation, and
   weight into the authenticated Restic request, evaluates global, repository,
   and task capacity from OpenList's local usage response, and releases unused

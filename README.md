@@ -43,6 +43,10 @@ plan has a daily upload allocation and a positive upload weight. OpenList keeps
 the provider-wide upload concurrency fixed and distributes newly available
 upload slots by weight. A completed plan releases its unused daily allocation
 to waiting plans without increasing the global calendar limit.
+Normal backups take shared, cancellation-aware repository access and do not run
+an exclusive unlock first. Auto-unlock is attempted only after Restic reports a
+repository-lock error, then the backup is retried once. A second trigger for an
+already-running plan is discarded while different plans remain concurrent.
 
 The console reads 115 upload usage through the Backrest backend, so OpenList
 credentials are never sent to the browser. Source selection, excludes,

@@ -61,6 +61,26 @@ func newTestOrchestrator(t *testing.T) *Orchestrator {
 	return orch
 }
 
+func TestActiveBackupGuardIsScopedPerPlan(t *testing.T) {
+	t.Parallel()
+	orch := newTestOrchestrator(t)
+
+	if !orch.beginBackup("repo\x00plan-a", 1) {
+		t.Fatal("first backup should acquire the plan guard")
+	}
+	if orch.beginBackup("repo\x00plan-a", 2) {
+		t.Fatal("a second backup for the same plan should be rejected")
+	}
+	if !orch.beginBackup("repo\x00plan-b", 3) {
+		t.Fatal("a different plan should be allowed to run concurrently")
+	}
+
+	orch.endBackup("repo\x00plan-a", 1)
+	if !orch.beginBackup("repo\x00plan-a", 4) {
+		t.Fatal("the plan guard should be released after completion")
+	}
+}
+
 func TestTaskScheduling(t *testing.T) {
 	t.Parallel()
 
