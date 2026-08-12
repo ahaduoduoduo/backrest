@@ -1,9 +1,12 @@
 # Custom Backrest development status
 
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 ## Completed
 
+- [x] 2026-08-12: Bind command hooks to task cancellation and terminate their
+  Unix process group so a stopped backup does not wait for a snapshot helper's
+  full timeout.
 - [x] 2026-08-11: Allow backup plans to run concurrently, configure a daily
   upload allocation and positive upload weight per plan, and release unused
   allocation to waiting plans after a successful run.

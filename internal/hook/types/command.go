@@ -59,8 +59,9 @@ func (commandHandler) Execute(ctx context.Context, h *v1.Hook, vars interface{},
 	defer outputWriter.Close()
 
 	// Run the command in the specified shell
-	execCmd := exec.Command(shell[0], shell[1:]...)
+	execCmd := exec.CommandContext(ctx, shell[0], shell[1:]...)
 	platformutil.SetPlatformOptions(execCmd)
+	platformutil.SetProcessGroupCancellation(execCmd)
 	execCmd.Stdin = strings.NewReader(command)
 
 	stdout := &ioutil.SynchronizedWriter{W: outputWriter}

@@ -28,6 +28,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   environment variables.
 - `cmd/backrest/backrest.go`: registers the proxy inside Backrest's existing
   authenticated route set.
+- `internal/hook/types/command.go` and `internal/platformutil/cmdopts_*`: run
+  command hooks with task cancellation and terminate Unix shell child groups.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response,
   OpenList repository-name parsing, and deduplicated repository occupancy.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly

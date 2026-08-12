@@ -14,3 +14,8 @@ func SetPlatformOptions(cmd *exec.Cmd) {
 	}
 	cmd.SysProcAttr.HideWindow = true
 }
+
+// SetProcessGroupCancellation uses exec.CommandContext's default process
+// cancellation on Windows. Unix command hooks additionally need process-group
+// termination because they normally run through a shell.
+func SetProcessGroupCancellation(cmd *exec.Cmd) {}
