@@ -79,8 +79,9 @@ configuration model, operation log, snapshot browser, and restore operations.
   and weights, allow backup readers to run concurrently, and keep repository
   maintenance exclusive.
 - `internal/openlistclient/client.go`: encodes a plan identity, allocation, and
-  weight into the authenticated Restic request and releases unused allocation
-  after a completed backup.
+  weight into the authenticated Restic request, evaluates global, repository,
+  and task capacity from OpenList's local usage response, and releases unused
+  allocation after a completed backup.
 - `docs/parallel-upload-scheduling.md`: task allocations, weighted provider
   concurrency, waiting state, and unused-allocation sharing.
 - `webui/src/features/plans/PlanSnapshotExplorer.tsx` and

@@ -74,6 +74,8 @@ type TaskRunner interface {
 	ScheduleTask(task Task, priority int64) error
 	// ReleaseUploadAllocation makes this plan's unused daily OpenList allocation available to other plans.
 	ReleaseUploadAllocation(ctx context.Context, plan *v1.Plan) error
+	// UploadCapacityAvailable checks OpenList's local counters without reading the remote repository.
+	UploadCapacityAvailable(ctx context.Context, plan *v1.Plan) (bool, error)
 	// Config returns the current config.
 	Config() *v1.Config
 	// Logger returns the logger.

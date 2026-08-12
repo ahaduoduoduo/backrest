@@ -4,6 +4,9 @@ Updated: 2026-08-12
 
 ## Completed
 
+- [x] 2026-08-12: Check OpenList's local global, repository, and task upload
+  counters before backup hooks or Restic repository access; exhausted plans
+  enter the normal waiting-to-resume state without generating 115 reads.
 - [x] 2026-08-12: Bind command hooks to task cancellation and terminate their
   Unix process group so a stopped backup does not wait for a snapshot helper's
   full timeout.

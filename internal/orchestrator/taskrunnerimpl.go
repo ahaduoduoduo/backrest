@@ -184,6 +184,26 @@ func (t *taskRunnerImpl) ReleaseUploadAllocation(ctx context.Context, plan *v1.P
 	return t.orchestrator.resumeWaitingBackups(plan.GetRepo(), plan.GetId())
 }
 
+func (t *taskRunnerImpl) UploadCapacityAvailable(ctx context.Context, plan *v1.Plan) (bool, error) {
+	if !openlistclient.Configured() {
+		return true, nil
+	}
+	repoConfig, err := t.GetRepo(plan.GetRepo())
+	if err != nil {
+		return true, err
+	}
+	repository := openlistclient.RepositoryName(repoConfig.GetUri())
+	if repository == "" {
+		return true, nil
+	}
+	return openlistclient.UploadCapacityAvailable(
+		ctx,
+		repository,
+		plan.GetId(),
+		openlistclient.DailyLimitBytes(plan.GetDailyUploadGib()),
+	)
+}
+
 func (t *taskRunnerImpl) Config() *v1.Config {
 	if t.config != nil {
 		return t.config
