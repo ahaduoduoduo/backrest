@@ -4,6 +4,8 @@ Updated: 2026-08-13
 
 ## Completed
 
+- [x] 2026-08-13: Recognize Restic's HTTP 507 error when the REST backend drops
+  the response body, and record exhausted upload capacity as waiting to resume.
 - [x] 2026-08-13: Retry one Safari/fetch transport failure for dashboard
   start and stop actions so returning to a suspended tab does not require a
   page reload; application errors still fail immediately.

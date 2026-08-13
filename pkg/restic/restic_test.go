@@ -25,8 +25,14 @@ func TestIsUploadQuotaExceeded(t *testing.T) {
 	if !isUploadQuotaExceeded(errors.New("unexpected HTTP response (429): restic upload quota reached")) {
 		t.Fatal("expected the OpenList quota marker to be detected")
 	}
+	if !isUploadQuotaExceeded(errors.New("Fatal: unable to save snapshot: unexpected HTTP response (507): 507 Insufficient Storage")) {
+		t.Fatal("expected Restic's HTTP 507 error to be detected")
+	}
 	if isUploadQuotaExceeded(errors.New("unexpected HTTP response (429): too many requests")) {
 		t.Fatal("generic HTTP throttling must remain a backup error")
+	}
+	if isUploadQuotaExceeded(errors.New("unexpected HTTP response (500): internal server error")) {
+		t.Fatal("generic server failures must remain backup errors")
 	}
 }
 

@@ -31,9 +31,15 @@ var ErrRestoreFailed = errors.New("restore failed")
 var ErrRepoNotFound = errors.New("repo does not exist")
 
 const uploadQuotaExceededMarker = "restic upload quota reached"
+const uploadQuotaExceededHTTPStatus = "unexpected http response (507)"
 
 func isUploadQuotaExceeded(err error) bool {
-	return err != nil && strings.Contains(strings.ToLower(err.Error()), uploadQuotaExceededMarker)
+	if err == nil {
+		return false
+	}
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, uploadQuotaExceededMarker) ||
+		strings.Contains(message, uploadQuotaExceededHTTPStatus)
 }
 
 type Repo struct {
