@@ -1,9 +1,12 @@
 # Custom Backrest development status
 
-Updated: 2026-08-13
+Updated: 2026-08-16
 
 ## Completed
 
+- [x] 2026-08-16: Reuse the persistent Restic cache for repository checks so
+  scheduled structural validation only downloads index data that is not
+  already cached.
 - [x] 2026-08-13: Recognize Restic's HTTP 507 error when the REST backend drops
   the response body, and record exhausted upload capacity as waiting to resume.
 - [x] 2026-08-13: Retry one Safari/fetch transport failure for dashboard

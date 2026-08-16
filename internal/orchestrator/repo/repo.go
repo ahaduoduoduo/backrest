@@ -340,7 +340,10 @@ func (r *RepoOrchestrator) Check(ctx context.Context, output io.Writer) error {
 	ctx, flush := forwardResticLogs(ctx)
 	defer flush()
 
-	var opts []restic.GenericOption
+	// Repository checks normally create a temporary cache and download every
+	// index again. Reuse the configured persistent cache so remote backends with
+	// strict request controls only fetch index files that are not cached yet.
+	opts := []restic.GenericOption{restic.WithFlags("--with-cache")}
 	if r.repoConfig.CheckPolicy != nil {
 		switch m := r.repoConfig.CheckPolicy.Mode.(type) {
 		case *v1.CheckPolicy_ReadDataSubsetPercent:

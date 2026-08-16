@@ -86,6 +86,9 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `internal/orchestrator/repo/repositorylock.go`: context-aware shared/exclusive
   repository coordination. Backup plans share access, while unlock, restore,
   forget, check, prune, statistics, and tag maintenance remain exclusive.
+- `internal/orchestrator/repo/repo.go`: repository checks pass
+  `--with-cache`, retaining structural validation while avoiding a complete
+  remote index download on every scheduled check.
 - `internal/orchestrator/activebackup.go`: per-repository, per-plan execution
   guard that discards duplicate triggers without serializing different plans.
 - `pkg/restic/restic.go` and `internal/orchestrator/tasks/taskbackup.go`: map
