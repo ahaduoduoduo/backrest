@@ -26,13 +26,20 @@ var errAlreadyInitialized = errors.New("repo already initialized")
 var ErrPartialBackup = errors.New("incomplete backup")
 var ErrBackupFailed = errors.New("backup failed")
 var ErrUploadQuotaExceeded = errors.New("upload quota exceeded")
+var ErrRepoLocked = errors.New("repository is locked")
 var ErrRestoreFailed = errors.New("restore failed")
 var ErrRepoNotFound = errors.New("repo does not exist")
 
 const uploadQuotaExceededMarker = "restic upload quota reached"
+const uploadQuotaExceededHTTPStatus = "unexpected http response (507)"
 
 func isUploadQuotaExceeded(err error) bool {
-	return err != nil && strings.Contains(strings.ToLower(err.Error()), uploadQuotaExceededMarker)
+	if err == nil {
+		return false
+	}
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, uploadQuotaExceededMarker) ||
+		strings.Contains(message, uploadQuotaExceededHTTPStatus)
 }
 
 type Repo struct {
@@ -180,6 +187,7 @@ func (r *Repo) executeWithJSONOutput(ctx context.Context, args []string, result 
 	cmd := r.commandWithContext(ctx, args, opts...)
 	r.handleOutput(cmd, withAllTo(&errorCollector), withStdOutTo(stdoutOutput), withLogWriterFromContext(ctx))
 	if err := cmd.Run(); err != nil {
+		err = handleResticExitError(err, nil)
 		return errorCollector.AddCmdOutputToError(cmd, err)
 	}
 
@@ -286,10 +294,17 @@ func (r *Repo) Config(ctx context.Context, opts ...GenericOption) (RepoConfig, e
 func handleResticExitError(err error, failureErr error) error {
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {
-		if exitErr.ExitCode() == 3 {
-			return ErrPartialBackup
+		switch exitErr.ExitCode() {
+		case 3:
+			if failureErr != nil {
+				return ErrPartialBackup
+			}
+		case 11:
+			return ErrRepoLocked
 		}
-		return fmt.Errorf("exit code %d: %w", exitErr.ExitCode(), failureErr)
+		if failureErr != nil {
+			return fmt.Errorf("exit code %d: %w", exitErr.ExitCode(), failureErr)
+		}
 	}
 	return err
 }

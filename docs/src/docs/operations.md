@@ -135,7 +135,10 @@ Removes unreferenced data using `restic prune`. Like Backup, Prune operations tr
 ### 🔍 Check
 [Restic Documentation](https://restic.readthedocs.io/en/latest/080_check.html)
 
-Verifies repository integrity using `restic check`.
+Verifies repository integrity using `restic check --with-cache`. Repository
+checks reuse Backrest's persistent Restic cache and only fetch uncached index
+data from the repository. This avoids a full metadata download for every
+scheduled check while preserving Restic's structural validation.
 
 **Configuration:**
 - Scheduled in repo settings

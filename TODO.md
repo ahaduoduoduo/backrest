@@ -1,9 +1,21 @@
 # Custom Backrest development status
 
-Updated: 2026-08-12
+Updated: 2026-08-16
 
 ## Completed
 
+- [x] 2026-08-16: Reuse the persistent Restic cache for repository checks so
+  scheduled structural validation only downloads index data that is not
+  already cached.
+- [x] 2026-08-13: Recognize Restic's HTTP 507 error when the REST backend drops
+  the response body, and record exhausted upload capacity as waiting to resume.
+- [x] 2026-08-13: Retry one Safari/fetch transport failure for dashboard
+  start and stop actions so returning to a suspended tab does not require a
+  page reload; application errors still fail immediately.
+- [x] 2026-08-13: Remove unconditional auto-unlock from the backup path,
+  recover stale Restic locks only after exit code 11, make repository-lock
+  waits cancellation-aware, and discard duplicate triggers for a plan that is
+  already running while preserving cross-plan concurrency.
 - [x] 2026-08-12: Check OpenList's local global, repository, and task upload
   counters before backup hooks or Restic repository access; exhausted plans
   enter the normal waiting-to-resume state without generating 115 reads.

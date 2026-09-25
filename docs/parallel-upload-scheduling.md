@@ -10,6 +10,19 @@ same time. Backup operations use a shared repository read lock. Restore,
 forget, check, prune, and other repository maintenance retain the exclusive
 lock and therefore do not overlap repository mutations with backups.
 
+The repository coordinator accepts an operation context, so stopping a task
+also stops a shared or exclusive lock wait. A normal backup does not run
+`restic unlock`: it attempts auto-unlock only when Restic exits with code 11,
+which denotes a repository lock failure, and retries the backup once. This
+keeps an active Time Machine backup from blocking an unrelated NAS backup at
+startup merely because auto-unlock is enabled.
+
+Only one execution of a given repository-and-plan pair may run at once. A
+duplicate manual or scheduled trigger is removed without starting its hooks or
+Restic process, then the regular schedule advances. Different plans continue
+to run concurrently and compete for provider upload slots according to their
+weights.
+
 ## Provider concurrency
 
 Backrest passes the plan ID, daily byte allocation, and weight to OpenList in a

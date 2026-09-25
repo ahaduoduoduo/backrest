@@ -206,5 +206,7 @@ For full recovery:
 6. Restore the Time Machine repository only when the local Mac backup disk is
    unavailable.
 
-Run structure checks regularly. Full data checks and prune operations read many
-repository objects and belong in low-traffic maintenance windows.
+Run structure checks regularly. Backrest reuses its persistent Restic cache for
+checks, so cached indexes are not downloaded again. Full data checks and prune
+operations still read many repository objects and belong in low-traffic
+maintenance windows.

@@ -11,7 +11,8 @@ import (
 // fakeRepoOrchestrator is a test double for the RepoOrchestrator interface.
 // Each method returns the corresponding configured result/error fields.
 type fakeRepoOrchestrator struct {
-	unlockErr error
+	unlockErr   error
+	unlockCalls int
 
 	backupResult *restic.BackupProgressEntry
 	backupErr    error
@@ -42,6 +43,7 @@ type fakeRepoOrchestrator struct {
 var _ RepoOrchestrator = &fakeRepoOrchestrator{}
 
 func (f *fakeRepoOrchestrator) UnlockIfAutoEnabled(ctx context.Context) error {
+	f.unlockCalls++
 	return f.unlockErr
 }
 

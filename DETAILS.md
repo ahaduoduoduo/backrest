@@ -1,6 +1,6 @@
 # Custom Backrest module map
 
-Updated: 2026-08-11
+Updated: 2026-08-13
 
 The fork retains upstream Backrest's Go orchestrator, Restic process runner,
 configuration model, operation log, snapshot browser, and restore operations.
@@ -32,6 +32,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   command hooks with task cancellation and terminate Unix shell child groups.
 - `webui/src/api/openlist.ts`: typed client for the compact usage response,
   OpenList repository-name parsing, and deduplicated repository occupancy.
+- `webui/src/api/transientAction.ts`: bounded one-retry wrapper for Safari and
+  fetch transport failures on user-triggered dashboard actions.
 - `webui/src/features/dashboard/BackupActivityOverview.tsx`: responsive yearly
   backup activity wall combining Backrest operation metrics with current 115
   day and month upload traffic. The metric strip reports current remote Restic
@@ -50,7 +52,8 @@ configuration model, operation log, snapshot browser, and restore operations.
   summary, start/stop control, next-run treatment, repository addition, and
   direct navigation to historical files. A live backup takes display priority
   over cancelled future schedule markers without removing those markers from
-  operation history.
+  operation history; start and stop retry one browser transport failure after
+  a suspended tab resumes.
 - `webui/src/features/dashboard/HistoryStrip.tsx`: renders reusable 30-day
   status strips in chronological order, from the oldest date on the left to
   today on the right, with per-day backup-size and mixed-outcome details; a
@@ -77,7 +80,20 @@ configuration model, operation log, snapshot browser, and restore operations.
 - `proto/v1/config.proto`, `internal/orchestrator/repo/repo.go`, and
   `internal/orchestrator/orchestrator.go`: persist per-plan upload allocations
   and weights, allow backup readers to run concurrently, and keep repository
-  maintenance exclusive.
+  maintenance exclusive. Repository access is context-aware so a cancelled
+  operation does not remain blocked behind maintenance; the orchestrator also
+  suppresses a second active execution of the same plan.
+- `internal/orchestrator/repo/repositorylock.go`: context-aware shared/exclusive
+  repository coordination. Backup plans share access, while unlock, restore,
+  forget, check, prune, statistics, and tag maintenance remain exclusive.
+- `internal/orchestrator/repo/repo.go`: repository checks pass
+  `--with-cache`, retaining structural validation while avoiding a complete
+  remote index download on every scheduled check.
+- `internal/orchestrator/activebackup.go`: per-repository, per-plan execution
+  guard that discards duplicate triggers without serializing different plans.
+- `pkg/restic/restic.go` and `internal/orchestrator/tasks/taskbackup.go`: map
+  Restic exit code 11 to a repository-lock error and invoke configured
+  auto-unlock only for that error before one retry.
 - `internal/openlistclient/client.go`: encodes a plan identity, allocation, and
   weight into the authenticated Restic request, evaluates global, repository,
   and task capacity from OpenList's local usage response, and releases unused

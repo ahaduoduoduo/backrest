@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -24,8 +25,29 @@ func TestIsUploadQuotaExceeded(t *testing.T) {
 	if !isUploadQuotaExceeded(errors.New("unexpected HTTP response (429): restic upload quota reached")) {
 		t.Fatal("expected the OpenList quota marker to be detected")
 	}
+	if !isUploadQuotaExceeded(errors.New("Fatal: unable to save snapshot: unexpected HTTP response (507): 507 Insufficient Storage")) {
+		t.Fatal("expected Restic's HTTP 507 error to be detected")
+	}
 	if isUploadQuotaExceeded(errors.New("unexpected HTTP response (429): too many requests")) {
 		t.Fatal("generic HTTP throttling must remain a backup error")
+	}
+	if isUploadQuotaExceeded(errors.New("unexpected HTTP response (500): internal server error")) {
+		t.Fatal("generic server failures must remain backup errors")
+	}
+}
+
+func TestHandleResticExitErrorDetectsRepositoryLock(t *testing.T) {
+	t.Parallel()
+
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", "exit", "11")
+	} else {
+		cmd = exec.Command("sh", "-c", "exit 11")
+	}
+	err := cmd.Run()
+	if !errors.Is(handleResticExitError(err, ErrBackupFailed), ErrRepoLocked) {
+		t.Fatalf("exit code 11 error = %v, want ErrRepoLocked", err)
 	}
 }
 

@@ -54,6 +54,8 @@ type Orchestrator struct {
 	// instance-shutdown context teardown when the task's error is recorded.
 	taskCancelStatus map[int64]v1.OperationStatus
 	resumeMu         sync.Mutex
+	activeBackupMu   sync.Mutex
+	activeBackups    map[string]int64
 
 	// now for the purpose of testing; used by Run() to get the current time.
 	now func() time.Time
@@ -86,6 +88,7 @@ func NewOrchestrator(resticBin string, cfgMgr *config.ConfigManager, log *oplog.
 		logStore:         logStore,
 		taskCancel:       make(map[int64]context.CancelCauseFunc),
 		taskCancelStatus: make(map[int64]v1.OperationStatus),
+		activeBackups:    make(map[string]int64),
 		resticBin:        resticBin,
 	}
 
@@ -457,6 +460,27 @@ func (o *Orchestrator) Run(ctx context.Context) {
 
 func (o *Orchestrator) runScheduledTask(ctx context.Context, task stContainer) {
 	originalOp := proto.Clone(task.Op).(*v1.Operation)
+	backupKey := taskBackupKey(task.Task)
+	if backupKey != "" && !o.beginBackup(backupKey, task.Op.GetId()) {
+		zap.L().Info("skipping duplicate backup trigger because the plan is already running",
+			zap.String("repo", task.Task.RepoID()),
+			zap.String("plan", task.Task.PlanID()))
+		if task.Op != nil && o.OpLog != nil {
+			if err := o.OpLog.Delete(task.Op.Id); err != nil {
+				zap.L().Error("delete duplicate backup operation", zap.Int64("operation", task.Op.Id), zap.Error(err))
+			}
+		}
+		if o.handleTaskCompletion(ctx, &task, nil, originalOp) {
+			return
+		}
+		for _, callback := range task.callbacks {
+			go callback(nil)
+		}
+		return
+	}
+	if backupKey != "" {
+		defer o.endBackup(backupKey, task.Op.GetId())
+	}
 	o.prepareOperationForRetry(&task)
 	err := o.RunTask(ctx, task.ScheduledTask)
 	if o.handleTaskCompletion(ctx, &task, err, originalOp) {
